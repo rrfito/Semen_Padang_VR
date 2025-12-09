@@ -1,0 +1,161 @@
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents, Polyline, CircleMarker, LayersControl } from 'react-leaflet';
+import MapLayerControl from './MapLayerControl';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Icon Leaflet di React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Komponen Helper untuk FlyTo (Animasi Pindah)
+function MapUpdater({ center }) {
+    const map = useMap();
+    useEffect(() => {
+        if (center) map.flyTo(center, 18, { duration: 1.5 });
+    }, [center]);
+    return null;
+}
+
+// Helper untuk track zoom level
+function ZoomHandler({ setZoom }) {
+    const map = useMapEvents({
+        zoomend: () => {
+            setZoom(map.getZoom());
+        },
+    });
+    return null;
+}
+
+export default function Map({ markers, center, onMarkerClick, selectedArea, showPolyline, isSidebarOpen }) {
+    const [currentLayer, setCurrentLayer] = React.useState('satellite');
+    const [isMobile, setIsMobile] = React.useState(false);
+    const [zoomLevel, setZoomLevel] = React.useState(15); // Default zoom
+
+    // Detect Mobile
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    return (
+        <div className="relative w-full h-full">
+            <MapContainer center={center} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false} attributionControl={false}>
+                <ZoomHandler setZoom={setZoomLevel} />
+
+                {/* Mobile: Standard Leaflet Layer Control */}
+                {isMobile ? (
+                    <LayersControl position="topright">
+                        <LayersControl.BaseLayer checked={currentLayer === 'satellite'} name="Satelit">
+                             <TileLayer
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                                maxZoom={19}
+                            />
+                        </LayersControl.BaseLayer>
+                        <LayersControl.BaseLayer checked={currentLayer === 'clean'} name="Peta Bersih">
+                             <TileLayer 
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            />
+                        </LayersControl.BaseLayer>
+                    </LayersControl>
+                ) : (
+                    // Desktop: Logic managed by custom state 'currentLayer'
+                   <>
+                        {currentLayer === 'satellite' ? (
+                             <TileLayer
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                                maxZoom={19}
+                            />
+                        ) : (
+                            <TileLayer 
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            />
+                        )}
+                   </>
+                )}
+
+                <MapUpdater center={center} />
+
+                {/* 1. Render Path Nodes & Polyline jika aktif */}
+                {showPolyline && selectedArea && selectedArea.path_nodes && (
+                    <>
+                        {/* Garis Penghubung */}
+                        <Polyline 
+                            positions={selectedArea.path_nodes.map(p => [p.lat, p.lng])}
+                            pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.6, dashArray: '10, 10' }}
+                        />
+
+                        {/* Titik-titik Node */}
+                        {selectedArea.path_nodes.map(node => (
+                            <CircleMarker
+                                key={`node-${node.id}`}
+                                center={[node.lat, node.lng]}
+                                radius={6}
+                                pathOptions={{ color: '#fff', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }}
+                            >
+                                <Popup closeButton={false}>
+                                    <div className="text-center p-1">
+                                        <div className="font-bold text-xs mb-1">{node.name}</div>
+                                        <a 
+                                            href={route('tour.show', node.id)} 
+                                            className="inline-block bg-blue-600 !text-white text-[10px] px-2 py-1 rounded hover:bg-blue-700 transition"
+                                        >
+                                            Lihat
+                                        </a>
+                                    </div>
+                                </Popup>
+                            </CircleMarker>
+                        ))}
+                    </>
+                )}
+
+                {/* 2. Render Markers (Areas) */}
+                 {markers.map(marker => {
+                    // LOGIC: Sembunyikan marker utama jika ini adalah area yang dipilih DAN showPolyline aktif
+                    const isHidden = showPolyline && selectedArea && selectedArea.id === marker.id;
+
+                    if (isHidden) return null;
+
+                    return (
+                        <Marker 
+                            key={marker.id} 
+                            position={[marker.lat, marker.lng]}
+                            eventHandlers={{
+                                click: () => onMarkerClick(marker),
+                            }}
+                        >
+                             {/* Tampilkan label HANYA jika zoom level cukup dekat (>= 16) agar tidak berantakan */}
+                             {zoomLevel >= 16 && (
+                                <Tooltip 
+                                    permanent 
+                                    direction="right" 
+                                    offset={[10, 0]} 
+                                    className="map-label-transparent"
+                                >
+                                    {marker.name}
+                                </Tooltip>
+                            )}
+                        </Marker>
+                    );
+                })}
+            </MapContainer>
+            
+            {/* Control Desktop Only */}
+            {!isMobile && (
+                <MapLayerControl 
+                    currentLayer={currentLayer} 
+                    onChangeLayer={setCurrentLayer} 
+                    isSidebarOpen={isSidebarOpen}
+                />
+            )}
+        </div>
+    );
+}
