@@ -8,14 +8,20 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 let DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
+let RedIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41], className: 'marker-red' });
+
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Komponen Helper untuk FlyTo (Animasi Pindah)
-function MapUpdater({ center }) {
+function MapUpdater({ center, zoom }) {
     const map = useMap();
     useEffect(() => {
-        if (center) map.flyTo(center, 18, { duration: 1.5 });
-    }, [center]);
+        if (center) {
+            // Use provided zoom if available, otherwise default to current or 18
+            const targetZoom = zoom || 18; 
+            map.flyTo(center, targetZoom, { duration: 1.5 });
+        }
+    }, [center, zoom]);
     return null;
 }
 
@@ -29,7 +35,7 @@ function ZoomHandler({ setZoom }) {
     return null;
 }
 
-export default function Map({ markers, center, onMarkerClick, selectedArea, showPolyline, isSidebarOpen }) {
+export default function Map({ markers, center, zoom, markerColorOverride, onMarkerClick, selectedArea, showPolyline, isSidebarOpen }) {
     const [currentLayer, setCurrentLayer] = React.useState('satellite');
     const [isMobile, setIsMobile] = React.useState(false);
     const [zoomLevel, setZoomLevel] = React.useState(15); // Default zoom
@@ -82,7 +88,7 @@ export default function Map({ markers, center, onMarkerClick, selectedArea, show
                    </>
                 )}
 
-                <MapUpdater center={center} />
+                <MapUpdater center={center} zoom={zoom} />
 
                 {/* 1. Render Path Nodes & Polyline jika aktif */}
                 {showPolyline && selectedArea && selectedArea.path_nodes && (
@@ -121,13 +127,31 @@ export default function Map({ markers, center, onMarkerClick, selectedArea, show
                  {markers.map(marker => {
                     // LOGIC: Sembunyikan marker utama jika ini adalah area yang dipilih DAN showPolyline aktif
                     const isHidden = showPolyline && selectedArea && selectedArea.id === marker.id;
-
                     if (isHidden) return null;
+
+                    // Determine Icon
+                    let iconToUse = DefaultIcon;
+                    
+                    // Note: 'marker.color' comes from database/props (e.g. permanent color)
+                    // 'markerColorOverride' comes from transient user selection (Grandparent vs Parent)
+                    
+                    if (selectedArea && selectedArea.id === marker.id && markerColorOverride) {
+                        // If this is the selected area, respect the override (Red for GP, Blue for Parent)
+                        if (markerColorOverride === 'red') {
+                            iconToUse = RedIcon;
+                        } else {
+                            iconToUse = DefaultIcon; // Blue/Default
+                        }
+                    } else if (marker.color === 'red') {
+                         // Fallback to database color if defined
+                        iconToUse = RedIcon;
+                    }
 
                     return (
                         <Marker 
                             key={marker.id} 
                             position={[marker.lat, marker.lng]}
+                            icon={iconToUse}
                             eventHandlers={{
                                 click: () => onMarkerClick(marker),
                             }}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaChevronDown, FaChevronRight, FaChevronLeft, FaUserCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
-import { Link } from '@inertiajs/react';
+import { FaSearch, FaMapMarkerAlt, FaChevronDown, FaChevronRight, FaChevronLeft, FaUserCircle, FaSignOutAlt, FaSignInAlt, FaCamera } from 'react-icons/fa';
+import { Link, router } from '@inertiajs/react';
 
 export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onToggle }) {
     const [search, setSearch] = useState('');
@@ -19,6 +19,10 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
         }
     };
 
+    const handleSceneClick = (scene) => {
+        router.visit(route('tour.show', { scene: scene.id }));
+    };
+
     // --- LOGIKA FILTER SEARCH ---
     const safeMenuData = Array.isArray(menuData) ? menuData : [];
     const filteredData = safeMenuData.map(root => {
@@ -26,21 +30,61 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
             const validGrandChildren = (sub.children || []).filter(cucu => 
                 cucu.name.toLowerCase().includes(search.toLowerCase())
             );
-            const isSubMatch = sub.name.toLowerCase().includes(search.toLowerCase());
-            const hasScenes = sub.scenes?.length > 0;
+            
+            // Check scenes match
+            const matchingScenes = (sub.scenes || []).filter(s => 
+                s.name.toLowerCase().includes(search.toLowerCase())
+            );
 
-            if (isSubMatch || validGrandChildren.length > 0 || (hasScenes && isSubMatch)) {
-                return { ...sub, children: validGrandChildren };
+            const isSubMatch = sub.name.toLowerCase().includes(search.toLowerCase());
+            
+            // Should show SUB if: Name matches, OR has valid children, OR has matching scenes
+            // If search is empty, show everything.
+            
+            if (search && !isSubMatch && validGrandChildren.length === 0 && matchingScenes.length === 0) {
+                return null;
             }
-            return null;
+
+            return { ...sub, children: validGrandChildren, scenes: sub.scenes }; // Keep all scenes if parent matches? Or Filter?
         }).filter(Boolean);
 
         const isRootMatch = root.name.toLowerCase().includes(search.toLowerCase());
-        if (isRootMatch || validChildren.length > 0) {
-            return { ...root, children: validChildren };
+        
+        if (search && !isRootMatch && validChildren.length === 0) {
+            return null;
         }
-        return null;
+        
+        return { ...root, children: validChildren };
     }).filter(Boolean);
+
+    const renderScenes = (scenes, level = 2) => {
+        if (!scenes || scenes.length === 0) return null;
+        
+        // Group by Name
+        const groups = {};
+        scenes.forEach(s => {
+            const label = s.name || `Scene #${s.id}`;
+            if (!groups[label]) groups[label] = [];
+            groups[label].push(s);
+        });
+
+        return Object.keys(groups).map(groupName => {
+            const representative = groups[groupName][0];
+            return (
+                <div 
+                    key={'scene-' + representative.id}
+                    onClick={(e) => { e.stopPropagation(); handleSceneClick(representative); }}
+                    className="flex items-center gap-2 py-2 pl-8 pr-3 cursor-pointer hover:bg-blue-50 group relative rounded-r-lg"
+                >
+                    <div className="absolute left-[18px] top-1/2 w-2 h-px bg-gray-300"></div>
+                    <FaCamera className="text-gray-400 group-hover:text-blue-500 transition-colors" size={12} />
+                    <span className="text-xs font-medium text-gray-600 group-hover:text-blue-500 transition-colors">
+                        {groupName}
+                    </span>
+                </div>
+            );
+        });
+    };
 
     return (
         <aside className={`
@@ -52,7 +96,7 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
             }
         `}>
             
-            {/* TOGGLE BUTTON (CHEVRON) - Visible only on Desktop */}
+            {/* TOGGLE BUTTON */}
             <button 
                 onClick={onToggle}
                 className={`
@@ -64,7 +108,7 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
                 {isOpen ? <FaChevronLeft size={14} /> : <FaChevronRight size={14} />}
             </button>
 
-            {/* CONTENT WRAPPER - Hidden when collapsed */}
+            {/* CONTENT WRAPPER */}
             <div className={`
                 flex flex-col h-full overflow-hidden transition-opacity duration-200 bg-white md:rounded-xl shadow-2xl border border-gray-100 relative z-[20]
                 ${isOpen ? 'opacity-100' : 'opacity-0 invisible'}
@@ -73,7 +117,6 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
                 {/* BRANDING */}
                 <div className="p-6 border-b border-gray-100 bg-white shrink-0">
                     <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                        {/* Logo Semen Padang */}
                         <img 
                             src="/image/LOGO PT SEMEN PADANG.png" 
                             alt="Semen Padang Logo" 
@@ -106,14 +149,21 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
                         <div key={root.id} className="mb-1">
                             {/* LEVEL 1: ROOT */}
                             {(() => {
-                                const isFolder = root.is_parent || (root.children && root.children.length > 0);
+                                const hasChildren = root.children && root.children.length > 0;
+                                const hasScenes = root.scenes && root.scenes.length > 0;
+                                const isFolder = root.is_parent || hasChildren || hasScenes;
+                                
                                 return (
                                     <div 
                                         className={`
                                             flex items-center justify-between px-3 py-3 cursor-pointer rounded-lg transition-all duration-200
                                             ${expanded[root.id] ? 'bg-gray-50' : 'hover:bg-gray-50'}
                                         `}
-                                        onClick={() => isFolder ? toggleExpand(root.id) : handleItemClick(root)}
+                                        onClick={() => {
+                                            if (isFolder) toggleExpand(root.id);
+                                            // LOGIC FIX: If Folder -> Grandparent. If Leaf -> Child.
+                                            onSelectLocation(root, isFolder ? 'grandparent' : 'child'); 
+                                        }}
                                     >
                                         <div className="flex items-center gap-3 font-bold text-sm text-gray-800 uppercase tracking-wide">
                                             {!isFolder && <FaMapMarkerAlt className="text-[#D32F2F]" />}
@@ -131,60 +181,47 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
                             {/* CHILDREN */}
                             {(expanded[root.id] || search) && (
                                 <div className="mt-1 space-y-0.5">
+                                    {/* Sub Areas (LEVEL 2) */}
                                     {root.children?.map(sub => {
-                                        const isFolder = sub.is_parent || (sub.children && sub.children.length > 0);
+                                        const hasSubChildren = sub.children && sub.children.length > 0;
+                                        const subHasScenes = sub.scenes && sub.scenes.length > 0;
+                                        const isFolder = sub.is_parent || hasSubChildren || subHasScenes;
+
                                         return (
                                             <div key={sub.id} className="relative">
-                                                {/* Vertical Line for Tree Structure */}
                                                 <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gray-200"></div>
 
-                                                {isFolder ? (
-                                                    // LEVEL 2: PARENT
-                                                    <>
-                                                        <div 
-                                                            className="flex items-center justify-between py-2 pl-8 pr-3 cursor-pointer hover:bg-gray-50 rounded-r-lg relative"
-                                                            onClick={() => toggleExpand(sub.id)}
-                                                        >
-                                                            <span className="text-sm font-semibold text-gray-700">{sub.name}</span>
-                                                            <FaChevronDown size={10} className={`text-gray-300 transform transition ${expanded[sub.id] ? 'rotate-180' : ''}`}/>
-                                                        </div>
-                                                        
-                                                        {/* LEVEL 3: CHILDREN */}
-                                                        {expanded[sub.id] && (
-                                                            <div className="ml-4">
-                                                                {sub.children && sub.children.length > 0 ? (
-                                                                    sub.children.map(cucu => (
-                                                                        <div 
-                                                                            key={cucu.id}
-                                                                            onClick={() => handleItemClick(cucu)}
-                                                                            className="flex items-center gap-2 py-2 pl-8 pr-3 cursor-pointer hover:bg-red-50 group relative rounded-r-lg"
-                                                                        >
-                                                                            <div className="absolute left-[18px] top-1/2 w-2 h-px bg-gray-300"></div>
-                                                                            <FaMapMarkerAlt className="text-gray-400 group-hover:text-[#D32F2F] transition-colors" size={12} />
-                                                                            <span className="text-xs font-medium text-gray-600 group-hover:text-[#D32F2F] transition-colors">
-                                                                                {cucu.name}
-                                                                            </span>
-                                                                        </div>
-                                                                    ))
-                                                                ) : (
-                                                                    <div className="py-2 pl-8 text-xs text-gray-400 italic">
-                                                                        Belum ada sub-area
-                                                                    </div>
-                                                                )}
+                                                <div 
+                                                    className="flex items-center justify-between py-2 pl-8 pr-3 cursor-pointer hover:bg-gray-50 rounded-r-lg relative"
+                                                    onClick={() => {
+                                                        if (isFolder) toggleExpand(sub.id);
+                                                        // LOGIC FIX: If Folder -> Parent (Container). If Leaf -> Child.
+                                                        onSelectLocation(sub, isFolder ? 'parent' : 'child');
+                                                    }}
+                                                >
+                                                    <span className="text-sm font-semibold text-gray-700">{sub.name}</span>
+                                                    {isFolder && (
+                                                        <FaChevronDown size={10} className={`text-gray-300 transform transition ${expanded[sub.id] ? 'rotate-180' : ''}`}/>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Expanded Content (Sub-Children + Scenes) */}
+                                                {expanded[sub.id] && (
+                                                    <div className="ml-4">
+                                                        {/* Level 3 Areas (CHILD) */}
+                                                        {sub.children?.map(cucu => (
+                                                            <div 
+                                                                key={cucu.id}
+                                                                onClick={() => onSelectLocation(cucu, 'child')}
+                                                                className="flex items-center gap-2 py-2 pl-8 pr-3 cursor-pointer hover:bg-red-50 group relative rounded-r-lg"
+                                                            >
+                                                                <div className="absolute left-[18px] top-1/2 w-2 h-px bg-gray-300"></div>
+                                                                <FaMapMarkerAlt className="text-gray-400 group-hover:text-[#D32F2F] transition-colors" size={12} />
+                                                                <span className="text-xs font-medium text-gray-600 group-hover:text-[#D32F2F] transition-colors">
+                                                                    {cucu.name}
+                                                                </span>
                                                             </div>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    // LEVEL 2: LEAF
-                                                    <div 
-                                                        onClick={() => handleItemClick(sub)}
-                                                        className="flex items-center gap-2 py-2 pl-8 pr-3 cursor-pointer hover:bg-red-50 group relative rounded-r-lg"
-                                                    >
-                                                        <div className="absolute left-[18px] top-1/2 w-2 h-px bg-gray-300"></div>
-                                                        <FaMapMarkerAlt className="text-gray-400 group-hover:text-[#D32F2F] transition-colors" size={12} />
-                                                        <span className="text-sm font-medium text-gray-600 group-hover:text-[#D32F2F] transition-colors">
-                                                            {sub.name}
-                                                        </span>
+                                                        ))}
                                                     </div>
                                                 )}
                                             </div>
@@ -196,7 +233,7 @@ export default function Sidebar({ menuData, onSelectLocation, user, isOpen, onTo
                     ))}
                 </div>
 
-                {/* USER SECTION (LOGIN/LOGOUT) */}
+                {/* USER SECTION */}
                 <div className="p-4 border-t border-gray-100 bg-gray-50 shrink-0">
                     {user ? (
                         <div className="flex items-center justify-between">

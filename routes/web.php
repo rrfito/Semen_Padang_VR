@@ -32,4 +32,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// 5. ADMIN EDITOR (VISUAL TOOL)
+Route::middleware(['auth'])->prefix('admin/editor')->name('admin.editor.')->group(function() {
+    Route::get('/{area}', [App\Http\Controllers\EditorController::class, 'edit'])->name('visual');
+    Route::post('/link', [App\Http\Controllers\EditorController::class, 'saveLink'])->name('link.save');
+    Route::delete('/link/{link}', [App\Http\Controllers\EditorController::class, 'deleteLink'])->name('link.delete');
+    Route::post('/location', [App\Http\Controllers\EditorController::class, 'updateLocation'])->name('location.update');
+    Route::post('/{area}/autolink', [App\Http\Controllers\EditorController::class, 'autoLink'])->name('autolink');
+    Route::post('/upload-temp', [App\Http\Controllers\EditorController::class, 'uploadTemp'])->name('upload.temp');
+    Route::post('/{area}/save-batch', [App\Http\Controllers\EditorController::class, 'sync'])->name('save.batch');
+    Route::post('/{area}/create-sub-area', [App\Http\Controllers\EditorController::class, 'createSubArea'])->name('subarea.create');
+    Route::post('/scene/update', [App\Http\Controllers\EditorController::class, 'updateScene'])->name('scene.update');
+    Route::delete('/scene/{scene}', [App\Http\Controllers\EditorController::class, 'deleteScene'])->name('scene.delete');
+});
+
 require __DIR__.'/auth.php';

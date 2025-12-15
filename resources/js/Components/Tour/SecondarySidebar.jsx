@@ -41,13 +41,23 @@ export default function SecondarySidebar({ selectedArea, onClose, onTogglePolyli
 
                 {/* Actions */}
                 <div className="space-y-3">
-                    <Link 
-                        href={route('tour.show', selectedArea.first_scene_id)}
-                        className="flex items-center justify-center gap-2 w-full bg-[#D32F2F] hover:bg-[#b71c1c] text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg shadow-red-200 group"
-                    >
-                        <FaVrCardboard size={18} className="group-hover:scale-110 transition-transform" />
-                        <span>Masuk Virtual Tour</span>
-                    </Link>
+                    {selectedArea.first_scene_id ? (
+                        <Link 
+                            href={route('tour.show', selectedArea.first_scene_id)}
+                            className="flex items-center justify-center gap-2 w-full bg-[#D32F2F] hover:bg-[#b71c1c] text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg shadow-red-200 group"
+                        >
+                            <FaVrCardboard size={18} className="group-hover:scale-110 transition-transform" />
+                            <span>Masuk Virtual Tour</span>
+                        </Link>
+                    ) : (
+                        <button 
+                            disabled
+                            className="flex items-center justify-center gap-2 w-full bg-gray-300 text-gray-500 font-bold py-3 px-4 rounded-lg cursor-not-allowed"
+                        >
+                            <FaVrCardboard size={18} />
+                            <span>Virtual Tour Belum Tersedia</span>
+                        </button>
+                    )}
 
                     <button 
                         onClick={onTogglePolyline}

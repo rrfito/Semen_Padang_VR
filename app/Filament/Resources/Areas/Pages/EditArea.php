@@ -11,10 +11,26 @@ class EditArea extends EditRecord
 {
     protected static string $resource = AreaResource::class;
 
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+        
+        if ($this->record->type === 'default') {
+            redirect()->route('admin.editor.visual', ['area' => $this->record->id]);
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make(),
+            \Filament\Actions\Action::make('visual_editor')
+                ->label('Buka Visual Editor')
+                ->icon('heroicon-m-pencil-square')
+                ->url(fn ($record) => route('admin.editor.visual', ['area' => $record->id]))
+                ->openUrlInNewTab()
+                ->color('primary')
+                ->visible(fn ($record) => !$record->is_parent),
         ];
     }
     protected function getRedirectUrl(): string
@@ -25,6 +41,16 @@ class EditArea extends EditRecord
     protected function afterSave(): void
     {
         $area = $this->record;
+
+        // SAFEGUARD: Jika Mode Manual aktif, JANGAN hapus/regenerate link
+        if ($area->use_manual_linking) {
+             Notification::make()
+                ->title('Perubahan Disimpan (Mode Manual)')
+                ->body('Link tidak diubah otomatis. Gunakan Visual Editor untuk mengatur navigasi.')
+                ->info()
+                ->send();
+            return;
+        }
 
         // 1. RESET: Hapus semua link internal di area ini
         //    Agar jika ada scene baru di tengah, link lama yang "melompati" scene baru tersebut hilang.

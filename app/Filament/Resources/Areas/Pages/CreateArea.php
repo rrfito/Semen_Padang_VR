@@ -18,6 +18,16 @@ class CreateArea extends CreateRecord
     {
         $area = $this->record;
 
+        // SAFEGUARD: Jika Mode Manual aktif, JANGAN jalankan auto-linking
+        if ($area->use_manual_linking) {
+            Notification::make()
+                ->title('Area Dibuat (Mode Manual)')
+                ->body('Sistem TIDAK membuat link otomatis. Silakan gunakan Visual Editor.')
+                ->info()
+                ->send();
+            return;
+        }
+
         // Query PostGIS Canggih: 8 Sektor Mata Angin
         // PERBAIKAN: Simpan TRUE BEARING (Azimuth Global), bukan Relative Yaw.
         $sql = "

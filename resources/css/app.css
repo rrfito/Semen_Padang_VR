@@ -27,3 +27,7 @@
 .map-label-transparent::before {
     display: none !important;
 }
+
+.marker-red {
+    filter: hue-rotate(150deg) brightness(0.9) saturate(1.5);
+}

@@ -11,18 +11,44 @@ export default function Dashboard({ menuData, markers, user }) {
     const [selectedArea, setSelectedArea] = useState(null);
     const [showPolyline, setShowPolyline] = useState(false);
     
+    // UI State for Map
+    const [mapZoom, setMapZoom] = useState(15);
+    const [markerColor, setMarkerColor] = useState(null); // 'red' | 'blue' | null (default)
+
     // Sidebar State
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
 
     // Saat user klik lokasi di sidebar utama, peta terbang ke sana
-    const handleSelectLocation = (item) => {
+    // Type: 'grandparent' | 'parent' | 'child' | undefined
+    const handleSelectLocation = (item, type) => {
+        // Fallback for direct map clicks or legacy calls
+        const targetType = type || 'child'; 
+        
         const target = markers.find(m => m.id === item.id);
+        
         if (target) {
             setMapCenter([target.lat, target.lng]);
             setSelectedArea(target);
             setShowPolyline(false); // Reset polyline saat ganti area
             setIsMobileSidebarOpen(false); // Tutup sidebar di mobile setelah pilih
+
+            // Sequential Logic
+            if (targetType === 'grandparent') {
+                setMapZoom(16);
+                setMarkerColor('red');
+            } else if (targetType === 'parent') {
+                setMapZoom(18);
+                setMarkerColor('blue');
+            } else {
+                // Child or other
+                setMapZoom(19); 
+                setMarkerColor('blue'); // Default to blue/standard for specific locations
+            }
+        } else {
+            // Handle case where item might not be in markers (e.g. just a container without coords)
+            // But usually areas have coords. If not, we can't fly there.
+             console.warn("Location not found on map:", item.name);
         }
     };
 
@@ -30,11 +56,13 @@ export default function Dashboard({ menuData, markers, user }) {
         setSelectedArea(marker);
         setShowPolyline(false); 
         setMapCenter([marker.lat, marker.lng]);
+        setMarkerColor('blue'); // Clicking marker directly usually implies drilling down effectively
     };
 
     const handleCloseSecondary = () => {
         setSelectedArea(null);
         setShowPolyline(false);
+        setMarkerColor(null); // Reset color
     };
 
     return (
@@ -91,6 +119,8 @@ export default function Dashboard({ menuData, markers, user }) {
                 <Map 
                     markers={markers} 
                     center={mapCenter} 
+                    zoom={mapZoom}
+                    markerColorOverride={markerColor}
                     onMarkerClick={handleMarkerClick}
                     selectedArea={selectedArea}
                     showPolyline={showPolyline}

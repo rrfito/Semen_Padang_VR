@@ -7,7 +7,20 @@ use Illuminate\Support\Facades\DB;
 
 class Scene extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'area_id',
+        'name',
+        'image_path',
+        'type',
+        'heading',
+        'pitch',
+        'roll',
+        'hfov',
+        'sort_order',
+        'is_restricted',
+        'location', // PostGIS column
+    ];
+    // protected $guarded = [];
     protected $hidden = ['location']; // Sembunyikan Alien
     protected $appends = ['location_array']; // Tampilkan Manusia
 

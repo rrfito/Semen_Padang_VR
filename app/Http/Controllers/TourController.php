@@ -26,26 +26,23 @@ class TourController extends Controller
                     if (!$isPegawai) $q->where('is_restricted', false);
                     
                     $q->with([
-                        // PERBAIKAN 1: Hapus 'name' disini
                         'scenes' => function($q) {
-                            $q->select('id', 'area_id')->orderBy('sort_order');
+                            $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
                         }, 
                         
                         // LEVEL 3 (Cucu: Ruang Unit MR)
                         'children' => function($q2) use ($isPegawai) {
                             if (!$isPegawai) $q2->where('is_restricted', false);
                             
-                            // PERBAIKAN 2: Hapus 'name' disini juga (INI YANG SERING LUPA)
                             $q2->with(['scenes' => function($q) {
-                                $q->select('id', 'area_id')->orderBy('sort_order');
+                                $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
                             }]); 
                         }
                     ]);
                 },
                 // LEVEL 1 (Root)
-                // PERBAIKAN 3: Hapus 'name' disini
                 'scenes' => function($q) {
-                    $q->select('id', 'area_id')->orderBy('sort_order');
+                    $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
                 } 
             ]);
 
@@ -54,12 +51,16 @@ class TourController extends Controller
         }
 
         // 2. Data Marker Peta (Leaf Areas Only)
+        // 2. Data Marker Peta (Modified: All Areas that have valid locations)
+        // Logic: Tampilkan marker untuk Area yang memiliki lat/lng (Parent/Grandparent/Logic updated)
         $areaQuery = Area::query()
-            ->doesntHave('children') // Hanya area yang tidak punya anak (Leaf)
-            ->whereHas('scenes')     // Hanya area yang punya scene
+            ->whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->orderBy('priority')
+            ->orderBy('name')
             ->with(['scenes' => function($q) {
-                // FIXED: Removed 'name' from select as it does not exist in scenes table
-                $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'location', 'image_path');
+                 // Ambil first scene untuk thumbnail
+                 $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'image_path');
             }]);
 
         if (!$isPegawai) {
@@ -81,15 +82,16 @@ class TourController extends Controller
             })->filter()->values();
 
             return [
-                'id' => $area->id, // Use Area ID for marker
+                'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
-                'lat' => $firstScene->location_array['lat'],
-                'lng' => $firstScene->location_array['lng'],
-                'thumbnail' => asset('storage/' . $firstScene->image_path),
-                'first_scene_id' => $firstScene->id,
-                'path_nodes' => $pathNodes,
-                'type' => 'area', // Marker type
+                'lat' => (float)$area->lat, // Use Area Lat
+                'lng' => (float)$area->lng, // Use Area Lng
+                'color' => $area->marker_color, // Use Accessor
+                'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
+                'first_scene_id' => $firstScene ? $firstScene->id : null,
+                'path_nodes' => [], // Disable path nodes for cleaner map
+                'type' => 'area',
             ];
         });
 
@@ -135,11 +137,14 @@ class TourController extends Controller
         }
 
         // 2. Data Marker Peta (Leaf Areas Only) - COPIED FROM INDEX
+        // 2. Data Marker Peta (Modified: All Areas that have valid locations)
         $areaQuery = Area::query()
-            ->doesntHave('children')
-            ->whereHas('scenes')
+            ->whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->orderBy('priority')
+            ->orderBy('name')
             ->with(['scenes' => function($q) {
-                $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'location', 'image_path');
+                 $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'image_path');
             }]);
 
         if (!$isPegawai) {
@@ -162,11 +167,12 @@ class TourController extends Controller
                 'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
-                'lat' => $firstScene->location_array['lat'],
-                'lng' => $firstScene->location_array['lng'],
-                'thumbnail' => asset('storage/' . $firstScene->image_path),
-                'first_scene_id' => $firstScene->id,
-                'path_nodes' => $pathNodes,
+                'lat' => (float)$area->lat,
+                'lng' => (float)$area->lng,
+                'color' => $area->marker_color,
+                'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
+                'first_scene_id' => $firstScene ? $firstScene->id : null,
+                'path_nodes' => [],
                 'type' => 'area',
             ];
         });

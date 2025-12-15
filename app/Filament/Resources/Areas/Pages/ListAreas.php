@@ -14,7 +14,25 @@ class ListAreas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            \Filament\Actions\Action::make('create_group')
+                ->label('Buat Area Grup')
+                ->icon('heroicon-o-folder')
+                ->color('danger')
+                ->url(fn () => CreateArea::getUrl(['type' => 'group'])),
+
+            \Filament\Actions\Action::make('create_scene')
+                ->label('Buat Area Scene')
+                ->icon('heroicon-o-photo')
+                ->color('primary')
+                ->action(function () {
+                    $area = \App\Models\Area::create([
+                        'name' => 'New Scene Area ' . date('His'),
+                        'type' => 'default',
+                        'is_restricted' => 0,
+                        'priority' => 10,
+                    ]);
+                    return redirect()->route('admin.editor.visual', ['area' => $area->id]);
+                }),
         ];
     }
     public function getTabs(): array
