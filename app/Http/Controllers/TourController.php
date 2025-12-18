@@ -17,33 +17,43 @@ class TourController extends Controller
         $isPegawai = $user && ($user->role === 'pegawai' || $user->role === 'admin');
 
         // 1. Data Menu Sidebar (Hierarki 3 Level)
-        $menuQuery = Area::whereNull('parent_id')
+        $menuQuery = Area::where('is_published', true)
+            ->whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
             ->with([
                 // LEVEL 2 (Anak: Bagonjong 1)
-                'children' => function($q) use ($isPegawai) {
-                    if (!$isPegawai) $q->where('is_restricted', false);
-                    
+                'children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
+
                     $q->with([
-                        'scenes' => function($q) {
-                            $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
-                        }, 
-                        
+                        'scenes' => function ($q) {
+                            $q->where('is_published', true)
+                                ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                        },
+
                         // LEVEL 3 (Cucu: Ruang Unit MR)
-                        'children' => function($q2) use ($isPegawai) {
-                            if (!$isPegawai) $q2->where('is_restricted', false);
-                            
-                            $q2->with(['scenes' => function($q) {
-                                $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
-                            }]); 
+                        'children' => function ($q2) use ($isPegawai) {
+                            $q2->where('is_published', true);
+                            if (!$isPegawai)
+                                $q2->where('is_restricted', false);
+
+                            $q2->with([
+                                'scenes' => function ($q) {
+                                    $q->where('is_published', true)
+                                        ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                                }
+                            ]);
                         }
                     ]);
                 },
                 // LEVEL 1 (Root)
-                'scenes' => function($q) {
-                    $q->select('id', 'area_id', 'name', 'image_path')->orderBy('sort_order');
-                } 
+                'scenes' => function ($q) {
+                    $q->where('is_published', true)
+                        ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                }
             ]);
 
         if (!$isPegawai) {
@@ -58,10 +68,14 @@ class TourController extends Controller
             ->whereNotNull('lng')
             ->orderBy('priority')
             ->orderBy('name')
-            ->with(['scenes' => function($q) {
-                 // Ambil first scene untuk thumbnail
-                 $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'image_path');
-            }]);
+            ->where('is_published', true)
+            ->with([
+                'scenes' => function ($q) {
+                    // Ambil first scene untuk thumbnail
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')->orderBy('id')->select('id', 'area_id', 'image_path');
+                }
+            ]);
 
         if (!$isPegawai) {
             $areaQuery->where('is_restricted', false);
@@ -69,10 +83,11 @@ class TourController extends Controller
 
         $markers = $areaQuery->get()->map(function ($area) {
             $firstScene = $area->scenes->first();
-            
+
             // Collect all scene locations for path nodes
-            $pathNodes = $area->scenes->map(function($scene) use ($area) {
-                if (!$scene->location_array) return null;
+            $pathNodes = $area->scenes->map(function ($scene) use ($area) {
+                if (!$scene->location_array)
+                    return null;
                 return [
                     'id' => $scene->id,
                     'name' => $area->name, // FIXED: Use Area Name as scene has no name
@@ -85,8 +100,8 @@ class TourController extends Controller
                 'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
-                'lat' => (float)$area->lat, // Use Area Lat
-                'lng' => (float)$area->lng, // Use Area Lng
+                'lat' => (float) $area->lat, // Use Area Lat
+                'lng' => (float) $area->lng, // Use Area Lng
                 'color' => $area->marker_color, // Use Accessor
                 'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
                 'first_scene_id' => $firstScene ? $firstScene->id : null,
@@ -109,27 +124,37 @@ class TourController extends Controller
         $isPegawai = $user && ($user->role === 'pegawai' || $user->role === 'admin');
 
         // 1. Data Menu Sidebar (Hierarki 3 Level) - COPIED FROM INDEX
-        $menuQuery = Area::whereNull('parent_id')
+        $menuQuery = Area::where('is_published', true)
+            ->whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
             ->with([
-                'children' => function($q) use ($isPegawai) {
-                    if (!$isPegawai) $q->where('is_restricted', false);
+                'children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
                     $q->with([
-                        'scenes' => function($q) {
-                            $q->select('id', 'area_id')->orderBy('sort_order');
-                        }, 
-                        'children' => function($q2) use ($isPegawai) {
-                            if (!$isPegawai) $q2->where('is_restricted', false);
-                            $q2->with(['scenes' => function($q) {
-                                $q->select('id', 'area_id')->orderBy('sort_order');
-                            }]); 
+                        'scenes' => function ($q) {
+                            $q->where('is_published', true)
+                                ->select('id', 'area_id')->orderBy('created_at')->orderBy('id');
+                        },
+                        'children' => function ($q2) use ($isPegawai) {
+                            $q2->where('is_published', true);
+                            if (!$isPegawai)
+                                $q2->where('is_restricted', false);
+                            $q2->with([
+                                'scenes' => function ($q) {
+                                    $q->where('is_published', true)
+                                        ->select('id', 'area_id')->orderBy('created_at')->orderBy('id');
+                                }
+                            ]);
                         }
                     ]);
                 },
-                'scenes' => function($q) {
-                    $q->select('id', 'area_id')->orderBy('sort_order');
-                } 
+                'scenes' => function ($q) {
+                    $q->where('is_published', true)
+                        ->select('id', 'area_id')->orderBy('created_at')->orderBy('id');
+                }
             ]);
 
         if (!$isPegawai) {
@@ -143,9 +168,13 @@ class TourController extends Controller
             ->whereNotNull('lng')
             ->orderBy('priority')
             ->orderBy('name')
-            ->with(['scenes' => function($q) {
-                 $q->orderBy('sort_order')->orderBy('id')->select('id', 'area_id', 'image_path');
-            }]);
+            ->where('is_published', true)
+            ->with([
+                'scenes' => function ($q) {
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')->orderBy('id')->select('id', 'area_id', 'image_path');
+                }
+            ]);
 
         if (!$isPegawai) {
             $areaQuery->where('is_restricted', false);
@@ -153,8 +182,9 @@ class TourController extends Controller
 
         $markers = $areaQuery->get()->map(function ($area) {
             $firstScene = $area->scenes->first();
-            $pathNodes = $area->scenes->map(function($scene) use ($area) {
-                if (!$scene->location_array) return null;
+            $pathNodes = $area->scenes->map(function ($scene) use ($area) {
+                if (!$scene->location_array)
+                    return null;
                 return [
                     'id' => $scene->id,
                     'name' => $area->name,
@@ -167,8 +197,8 @@ class TourController extends Controller
                 'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
-                'lat' => (float)$area->lat,
-                'lng' => (float)$area->lng,
+                'lat' => (float) $area->lat,
+                'lng' => (float) $area->lng,
                 'color' => $area->marker_color,
                 'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
                 'first_scene_id' => $firstScene ? $firstScene->id : null,
@@ -192,21 +222,21 @@ class TourController extends Controller
             'id' => $scene->id,
             'hierarchy' => $hierarchy, // Array of area names
             'created_at' => $scene->created_at->format('d M Y'), // Format Date
-            
+
             'image_url' => asset('storage/' . $scene->image_path),
             'initial_yaw' => (float) $scene->initial_yaw,
-            'heading' => (float) $scene->heading, 
+            'heading' => (float) $scene->heading,
             'lat' => $scene->location_array['lat'],
             'lng' => $scene->location_array['lng'],
-            
+
             'hotspots' => $scene->outgoingLinks->map(function ($link) {
                 return [
                     'id' => $link->id,
                     'target_id' => $link->target_scene_id,
                     'type' => $link->type,
                     'yaw' => (float) $link->yaw,
-                    'text' => $link->type === 'portal' 
-                        ? 'Masuk: ' . ($link->targetScene->area->name ?? '-') 
+                    'text' => $link->type === 'portal'
+                        ? 'Masuk: ' . ($link->targetScene->area->name ?? '-')
                         : ($link->targetScene->name ?? 'Maju'),
                 ];
             }),

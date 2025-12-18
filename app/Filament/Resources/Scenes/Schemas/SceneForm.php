@@ -31,21 +31,11 @@ class SceneForm
                     ->required()
                     ->directory('panoramas')
                     ->maxSize(30720), // 30MB
-                    
+
                 TextInput::make('heading')
                     ->numeric()
                     ->label('Initial Heading (0-360)')
                     ->default(0),
-
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0)
-                    ->label('Urutan Tampil'),
-
-                Toggle::make('is_restricted')
-                    ->label('Scene Terbatas')
-                    ->helperText('Hanya bisa diakses oleh pegawai.')
-                    ->default(false),
             ]);
     }
 }
