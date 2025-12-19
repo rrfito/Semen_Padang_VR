@@ -71,9 +71,32 @@ class TourController extends Controller
             ->where('is_published', true)
             ->with([
                 'scenes' => function ($q) {
-                    // Ambil first scene untuk thumbnail
+                    // Ambil scene dengan location data untuk path
                     $q->where('is_published', true)
-                        ->orderBy('created_at')->orderBy('id')->orderBy('id')->select('id', 'area_id', 'image_path');
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
+                },
+                // Eager load children hierarchy (CRITICAL for $collectChildScenes)
+                'children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
+                },
+                'children.scenes' => function ($q) {
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
+                },
+                'children.children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
+                },
+                'children.children.scenes' => function ($q) {
+                    // For 3 levels deep
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
                 }
             ]);
 
@@ -81,32 +104,97 @@ class TourController extends Controller
             $areaQuery->where('is_restricted', false);
         }
 
-        $markers = $areaQuery->get()->map(function ($area) {
+        // Helper function to collect all scenes recursively from children
+        $collectChildScenes = function ($area) use (&$collectChildScenes) {
+            $scenes = [];
+
+            // Add direct scenes
+            foreach ($area->scenes as $scene) {
+                // FIX: location_array returns ['lat' => 0, 'lng' => 0] when null,
+                // so we need to check if coordinates are VALID (not 0,0)
+                $locationData = $scene->location_array;
+
+                \Log::info('[COLLECT] Scene: ' . $scene->name .
+                    ', is_published: ' . ($scene->is_published ? 'YES' : 'NO') .
+                    ', locationData: ' . json_encode($locationData) .
+                    ', lat!=0 || lng!=0: ' . (($locationData['lat'] != 0 || $locationData['lng'] != 0) ? 'YES' : 'NO'));
+
+                if (
+                    $scene->is_published && $locationData &&
+                    ($locationData['lat'] != 0 || $locationData['lng'] != 0)
+                ) {
+                    $scenes[] = [
+                        'id' => $scene->id,
+                        'name' => $scene->name ?? $area->name,
+                        'image_path' => $scene->image_path,
+                        'lat' => $locationData['lat'],
+                        'lng' => $locationData['lng'],
+                    ];
+                    \Log::info('[COLLECT] ✓ ADDED to polyline');
+                } else {
+                    \Log::info('[COLLECT] ✗ SKIPPED');
+                }
+            }
+
+            // Recursively add children's scenes
+            if ($area->children) {
+                foreach ($area->children as $child) {
+                    $scenes = array_merge($scenes, $collectChildScenes($child));
+                }
+            }
+
+            return $scenes;
+        };
+
+        $markers = $areaQuery->get()->map(function ($area) use ($collectChildScenes) {
             $firstScene = $area->scenes->first();
 
-            // Collect all scene locations for path nodes
-            $pathNodes = $area->scenes->map(function ($scene) use ($area) {
-                if (!$scene->location_array)
-                    return null;
-                return [
-                    'id' => $scene->id,
-                    'name' => $area->name, // FIXED: Use Area Name as scene has no name
-                    'lat' => $scene->location_array['lat'],
-                    'lng' => $scene->location_array['lng'],
-                ];
-            })->filter()->values();
+            // DEBUG: Check if Bagonjong I
+            if ($area->name === 'Bagonjong I') {
+                \Log::info('=== BAGONJONG I DEBUG ===');
+                \Log::info('Area ID: ' . $area->id);
+                \Log::info('Is Container: ' . $area->is_container);
+                \Log::info('Has children loaded: ' . ($area->children ? count($area->children) : 'NULL'));
+                if ($area->children) {
+                    foreach ($area->children as $child) {
+                        \Log::info('  Child: ' . $child->name . ' (scenes: ' . count($child->scenes) . ')');
+                    }
+                }
+                $childScenes = $collectChildScenes($area);
+                \Log::info('Collected child scenes: ' . count($childScenes));
+                foreach ($childScenes as $s) {
+                    \Log::info('  - ' . $s['name']);
+                }
+            }
 
             return [
                 'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
-                'lat' => (float) $area->lat, // Use Area Lat
-                'lng' => (float) $area->lng, // Use Area Lng
-                'color' => $area->marker_color, // Use Accessor
+                'level' => $area->level,
+                'is_container' => $area->is_container,
+                'lat' => (float) $area->lat,
+                'lng' => (float) $area->lng,
+                'color' => $area->marker_color,
                 'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
                 'first_scene_id' => $firstScene ? $firstScene->id : null,
-                'path_nodes' => [], // Disable path nodes for cleaner map
                 'type' => 'area',
+
+                // For container areas: collect all child scenes for path display
+                'all_child_scenes' => $area->is_container ? $collectChildScenes($area) : [],
+
+                // For leaf areas: direct scenes list WITH GPS coordinates
+                'scenes' => !$area->is_container || $area->level === 3 ? $area->scenes->map(function ($scene) use ($area) {
+                    $locationData = $scene->location_array;
+                    return [
+                        'id' => $scene->id,
+                        'name' => $scene->name ?? $area->name,
+                        'image_path' => asset('storage/' . $scene->image_path),
+                        // Include GPS coordinates for polyline rendering
+                        'lat' => ($locationData && ($locationData['lat'] != 0 || $locationData['lng'] != 0)) ? $locationData['lat'] : null,
+                        'lng' => ($locationData && ($locationData['lat'] != 0 || $locationData['lng'] != 0)) ? $locationData['lng'] : null,
+                    ];
+                })->toArray() : [],
             ];
         });
 
@@ -172,7 +260,30 @@ class TourController extends Controller
             ->with([
                 'scenes' => function ($q) {
                     $q->where('is_published', true)
-                        ->orderBy('created_at')->orderBy('id')->orderBy('id')->select('id', 'area_id', 'image_path');
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
+                },
+                // Eager load children hierarchy (CRITICAL for $collectChildScenes)
+                'children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
+                },
+                'children.scenes' => function ($q) {
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
+                },
+                'children.children' => function ($q) use ($isPegawai) {
+                    $q->where('is_published', true);
+                    if (!$isPegawai)
+                        $q->where('is_restricted', false);
+                },
+                'children.children.scenes' => function ($q) {
+                    // For 3 levels deep
+                    $q->where('is_published', true)
+                        ->orderBy('created_at')->orderBy('id')
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
                 }
             ]);
 
@@ -180,30 +291,66 @@ class TourController extends Controller
             $areaQuery->where('is_restricted', false);
         }
 
-        $markers = $areaQuery->get()->map(function ($area) {
+        // Helper function to collect all scenes recursively from children
+        $collectChildScenes = function ($area) use (&$collectChildScenes) {
+            $scenes = [];
+
+            // Add direct scenes
+            foreach ($area->scenes as $scene) {
+                // FIX: location_array returns ['lat' => 0, 'lng' => 0] when null,
+                // so we need to check if coordinates are VALID (not 0,0)
+                $locationData = $scene->location_array;
+                if (
+                    $scene->is_published && $locationData &&
+                    ($locationData['lat'] != 0 || $locationData['lng'] != 0)
+                ) {
+                    $scenes[] = [
+                        'id' => $scene->id,
+                        'name' => $scene->name ?? $area->name,
+                        'image_path' => $scene->image_path,
+                        'lat' => $locationData['lat'],
+                        'lng' => $locationData['lng'],
+                    ];
+                }
+            }
+
+            // Recursively add children's scenes
+            if ($area->children) {
+                foreach ($area->children as $child) {
+                    $scenes = array_merge($scenes, $collectChildScenes($child));
+                }
+            }
+
+            return $scenes;
+        };
+
+        $markers = $areaQuery->get()->map(function ($area) use ($collectChildScenes) {
             $firstScene = $area->scenes->first();
-            $pathNodes = $area->scenes->map(function ($scene) use ($area) {
-                if (!$scene->location_array)
-                    return null;
-                return [
-                    'id' => $scene->id,
-                    'name' => $area->name,
-                    'lat' => $scene->location_array['lat'],
-                    'lng' => $scene->location_array['lng'],
-                ];
-            })->filter()->values();
 
             return [
                 'id' => $area->id,
                 'name' => $area->name,
                 'description' => $area->description,
+                'level' => $area->level,
+                'is_container' => $area->is_container,
                 'lat' => (float) $area->lat,
                 'lng' => (float) $area->lng,
                 'color' => $area->marker_color,
                 'thumbnail' => $firstScene ? asset('storage/' . $firstScene->image_path) : null,
                 'first_scene_id' => $firstScene ? $firstScene->id : null,
-                'path_nodes' => [],
                 'type' => 'area',
+
+                // For container areas: collect all child scenes for path display
+                'all_child_scenes' => $area->is_container ? $collectChildScenes($area) : [],
+
+                // For leaf areas: direct scenes list
+                'scenes' => !$area->is_container || $area->level === 3 ? $area->scenes->map(function ($scene) use ($area) {
+                    return [
+                        'id' => $scene->id,
+                        'name' => $scene->name ?? $area->name,
+                        'image_path' => asset('storage/' . $scene->image_path),
+                    ];
+                })->toArray() : [],
             ];
         });
 

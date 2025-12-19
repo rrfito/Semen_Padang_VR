@@ -19,18 +19,33 @@ export default function Viewer({ scene, initial_heading }) {
         const source = Marzipano.ImageUrlSource.fromString(scene.image_url);
         const geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
 
-        // --- LOGIKA HEADING PRESERVATION ---
+        // === HEADING PRESERVATION LOGIC ===
+        // Ada 2 heading:
+        // 1. scene.heading = Orientasi gambar 360° terhadap kompas (North = 0°)
+        // 2. initial_heading = Arah pandang user yang ingin dipertahankan
+        //
+        // Rumus: initialYaw = (User Heading - Scene Heading)
+        // Ini membuat view rotate untuk kompensasi orientasi gambar,
+        // sehingga user tetap menghadap arah yang sama
+
         let initialYaw = 0;
+
         if (initial_heading !== null && initial_heading !== undefined) {
-            // Rumus: Yaw = (Target Heading - Scene Heading)
-            // Konversi ke Radian
-            initialYaw = ((parseFloat(initial_heading) - scene.heading) * Math.PI) / 180;
+            // User datang dari scene lain dengan heading tertentu
+            // Pertahankan arah pandang user
+            const userHeading = parseFloat(initial_heading);
+            initialYaw = ((userHeading - scene.heading) * Math.PI) / 180;
         } else {
-            initialYaw = (scene.initial_yaw * Math.PI) / 180; // Fallback ke default
+            // First load atau refresh - gunakan scene heading sebagai default
+            initialYaw = (scene.heading * Math.PI) / 180;
         }
 
         const view = new Marzipano.RectilinearView(
-            { yaw: initialYaw }, 
+            {
+                yaw: initialYaw,
+                pitch: 0,
+                fov: Math.PI / 4,
+            },
             Marzipano.RectilinearView.limit.traditional(
                 1024,
                 (100 * Math.PI) / 180
@@ -40,12 +55,12 @@ export default function Viewer({ scene, initial_heading }) {
         const marzipanoScene = viewer.createScene({ source, geometry, view });
 
         // 3. Render Hotspots
-        scene.hotspots.forEach((hotspot) => {
+        scene.hotspots.forEach((hotspot, index) => {
             const el = document.createElement("div");
             const isPortal = hotspot.type === "portal";
 
             el.className = isPortal ? "hotspot-portal" : "hotspot-nav";
-            
+
             // Floating Marker: Simple Icon
             el.innerHTML = isPortal
                 ? `🚪<div class="label">${hotspot.text}</div>`
@@ -61,30 +76,34 @@ export default function Viewer({ scene, initial_heading }) {
                 // Rumus: Heading = (Link Yaw + Scene Heading)
                 // FIX: Gunakan VIEW.yaw() (Arah mata user saat ini) bukan hotspot.yaw
                 // Agar transisi seamless, kita kirim arah pandang user saat ini
-                
+
                 const currentYawRad = view.yaw();
                 const currentYawDeg = (currentYawRad * 180) / Math.PI;
-                
+
                 // Scene Heading kita asumsikan 0 (North) karena sudah dipaksa di backend
                 // Jadi Heading = View Yaw
-                const targetHeading = (currentYawDeg + scene.heading + 360) % 360;
+                const targetHeading =
+                    (currentYawDeg + scene.heading + 360) % 360;
 
-                router.visit(route("tour.show", {
-                    scene: hotspot.target_id,
-                    heading: targetHeading // Kirim arah pandang user saat ini
-                }), {
-                    preserveScroll: true,
-                });
+                router.visit(
+                    route("tour.show", {
+                        scene: hotspot.target_id,
+                        heading: targetHeading, // Kirim arah pandang user saat ini
+                    }),
+                    {
+                        preserveScroll: true,
+                    }
+                );
             });
 
             // Hitung Posisi
-            // Pitch 0 atau -0.1 agar sejajar mata (Eye Level)
-            const pitch = isPortal ? 0 : -0.1; 
-            
-            // FIX: Hotspot Yaw (Global) harus dikurangi Scene Heading (Image Orientation)
-            // Agar posisinya sesuai dengan arah mata angin di dalam gambar
-            const relativeYaw = hotspot.yaw - scene.heading;
-            const yaw = (relativeYaw * Math.PI) / 180; 
+            // Pitch 0 agar sejajar mata (Eye Level), sama seperti di Editor
+            const pitch = 0;
+
+            // PENTING: Gunakan hotspot.yaw LANGSUNG tanpa konversi!
+            // Database sudah menyimpan nilai dalam format yang diexpect Marzipano
+            // Konversi radian sudah dilakukan saat save, jangan convert lagi!
+            const yaw = hotspot.yaw; // ✅ Langsung, sama seperti Editor!
 
             marzipanoScene.hotspotContainer().createHotspot(el, { yaw, pitch });
         });
@@ -195,8 +214,6 @@ export default function Viewer({ scene, initial_heading }) {
                 {/* MINIMAP */}
                 <Minimap lat={scene.lat} lng={scene.lng} />
 
-               
-
                 {/* HEADER OVERLAY */}
                 <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 pointer-events-none">
                     <Link
@@ -218,9 +235,10 @@ export default function Viewer({ scene, initial_heading }) {
                                 {/* SUB-LEVELS (Breadcrumbs) */}
                                 {scene.hierarchy.length > 1 && (
                                     <div className="flex items-center justify-end gap-2 mt-1">
-                                        
                                         <p className="text-sm text-gray-200 font-medium uppercase tracking-wide">
-                                            {scene.hierarchy.slice(1).join(' > ')}
+                                            {scene.hierarchy
+                                                .slice(1)
+                                                .join(" > ")}
                                         </p>
                                     </div>
                                 )}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaNetworkWired, FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import axios from "axios";
+import NotificationModal from "@/Components/Editor/NotificationModal";
+import ConfirmModal from "@/Components/Editor/ConfirmModal";
 
 export default function AutoLinkModal({ isOpen, onClose, area }) {
     const [preview, setPreview] = useState(null);
@@ -9,7 +11,20 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
     const [replaceMode, setReplaceMode] = useState(false);
     const [linkAllAreas, setLinkAllAreas] = useState(false);
     const [radius, setRadius] = useState(100); // Default 100 meters
-    const [notification, setNotification] = useState(null); // {type: 'success'|'error'|'confirm', title, message, onConfirm}
+
+    // Notification modals
+    const [showNotification, setShowNotification] = useState(false);
+    const [notificationConfig, setNotificationConfig] = useState({
+        variant: "success",
+        title: "",
+        message: "",
+    });
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState({
+        title: "",
+        message: "",
+        onConfirm: () => {},
+    });
 
     useEffect(() => {
         if (isOpen) {
@@ -32,11 +47,12 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
             setPreview(response.data);
         } catch (error) {
             console.error("Preview failed:", error);
-            setNotification({
-                type: "error",
+            setNotificationConfig({
+                variant: "error",
                 title: "Preview Failed",
                 message: error.message,
             });
+            setShowNotification(true);
         } finally {
             setLoading(false);
         }
@@ -44,15 +60,12 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
 
     const handleConfirm = async () => {
         if (replaceMode && preview?.existing_links > 0) {
-            setNotification({
-                type: "confirm",
+            setConfirmConfig({
                 title: "Delete Existing Links?",
                 message: `This will DELETE ${preview.existing_links} existing links and recreate them. Continue?`,
-                onConfirm: () => {
-                    setNotification(null);
-                    executeAutoLink();
-                },
+                onConfirm: executeAutoLink,
             });
+            setShowConfirm(true);
             return;
         }
         executeAutoLink();
@@ -72,11 +85,12 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
             );
 
             if (response.data.async) {
-                setNotification({
-                    type: "success",
+                setNotificationConfig({
+                    variant: "success",
                     title: "Processing",
                     message: "Auto-link processing in background...",
                 });
+                setShowNotification(true);
             } else {
                 const title = replaceMode
                     ? "Links Replaced!"
@@ -84,28 +98,25 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                 const message = replaceMode
                     ? `Deleted ${response.data.deleted_links} old links and created ${response.data.total_created} new links!\n\n🧭 Navigation: ${response.data.navigation_links}\n🚪 Gateway: ${response.data.gateway_links}`
                     : `Created ${response.data.total_created} new links!\n\n🧭 Navigation: ${response.data.navigation_links}\n🚪 Gateway: ${response.data.gateway_links}`;
-                setNotification({
-                    type: "success",
-                    title,
-                    message,
-                    onClose: () => {
-                        setNotification(null);
-                        onClose();
-                        window.location.reload();
-                    },
-                });
-                return; // Don't auto-close, wait for user to dismiss notification
+                setNotificationConfig({ variant: "success", title, message });
+                setShowNotification(true);
+                setTimeout(() => {
+                    onClose();
+                    window.location.reload();
+                }, 2500);
+                return;
             }
 
             onClose();
             window.location.reload();
         } catch (error) {
             console.error("Auto-link failed:", error);
-            setNotification({
-                type: "error",
+            setNotificationConfig({
+                variant: "error",
                 title: "Auto-Link Failed",
                 message: error.response?.data?.error || error.message,
             });
+            setShowNotification(true);
         } finally {
             setExecuting(false);
         }
@@ -394,79 +405,26 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                 </div>
             </div>
 
-            {/* Custom Notification Modal */}
-            {notification && (
-                <div
-                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"
-                    onClick={() =>
-                        notification.type !== "confirm" && setNotification(null)
-                    }
-                >
-                    <div
-                        className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-700"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div
-                            className={`px-6 py-4 border-b flex items-center gap-3 ${
-                                notification.type === "error"
-                                    ? "border-red-500/30 bg-red-500/10"
-                                    : notification.type === "confirm"
-                                    ? "border-orange-500/30 bg-orange-500/10"
-                                    : "border-green-500/30 bg-green-500/10"
-                            }`}
-                        >
-                            <div className="text-3xl">
-                                {notification.type === "error" && "❌"}
-                                {notification.type === "confirm" && "⚠️"}
-                                {notification.type === "success" && "✅"}
-                            </div>
-                            <h3 className="text-lg font-bold text-white">
-                                {notification.title}
-                            </h3>
-                        </div>
-                        <div className="px-6 py-4">
-                            <p className="text-gray-300 whitespace-pre-line">
-                                {notification.message}
-                            </p>
-                        </div>
-                        <div className="px-6 py-4 border-t border-gray-700 flex gap-3 justify-end">
-                            {notification.type === "confirm" ? (
-                                <>
-                                    <button
-                                        onClick={() => setNotification(null)}
-                                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={notification.onConfirm}
-                                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition"
-                                    >
-                                        Continue
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={() => {
-                                        if (notification.onClose) {
-                                            notification.onClose();
-                                        } else {
-                                            setNotification(null);
-                                        }
-                                    }}
-                                    className={`px-4 py-2 rounded-lg font-medium transition ${
-                                        notification.type === "error"
-                                            ? "bg-red-500 hover:bg-red-600"
-                                            : "bg-green-500 hover:bg-green-600"
-                                    } text-white`}
-                                >
-                                    OK
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Reusable Modals */}
+            <NotificationModal
+                isOpen={showNotification}
+                onClose={() => setShowNotification(false)}
+                title={notificationConfig.title}
+                message={notificationConfig.message}
+                variant={notificationConfig.variant}
+                autoClose={2500}
+            />
+
+            <ConfirmModal
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={confirmConfig.onConfirm}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                variant="danger"
+                confirmText="Continue"
+                cancelText="Cancel"
+            />
         </div>
     );
 }

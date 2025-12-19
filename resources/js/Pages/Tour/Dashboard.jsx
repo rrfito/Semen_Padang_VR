@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import Sidebar from '@/Components/Tour/Sidebar';
-import SecondarySidebar from '@/Components/Tour/SecondarySidebar';
-import Map from '@/Components/Tour/Map';
-import { FaBars } from 'react-icons/fa';
+import React, { useState } from "react";
+import { Head } from "@inertiajs/react";
+import Sidebar from "@/Components/Tour/Sidebar";
+import SecondarySidebar from "@/Components/Tour/SecondarySidebar";
+import Map from "@/Components/Tour/Map";
+import { FaBars } from "react-icons/fa";
 
 export default function Dashboard({ menuData, markers, user }) {
     // Default Center: Pabrik Indarung
-    const [mapCenter, setMapCenter] = useState([-0.9532459140793406, 100.46803723241885]);
+    const [mapCenter, setMapCenter] = useState([
+        -0.9532459140793406, 100.46803723241885,
+    ]);
     const [selectedArea, setSelectedArea] = useState(null);
     const [showPolyline, setShowPolyline] = useState(false);
-    
+
     // UI State for Map
     const [mapZoom, setMapZoom] = useState(15);
     const [markerColor, setMarkerColor] = useState(null); // 'red' | 'blue' | null (default)
@@ -23,40 +25,51 @@ export default function Dashboard({ menuData, markers, user }) {
     // Type: 'grandparent' | 'parent' | 'child' | undefined
     const handleSelectLocation = (item, type) => {
         // Fallback for direct map clicks or legacy calls
-        const targetType = type || 'child'; 
-        
-        const target = markers.find(m => m.id === item.id);
-        
+        const targetType = type || "child";
+
+        console.log("[SIDEBAR CLICK] item:", item);
+        console.log("[SIDEBAR CLICK] Looking for marker with id:", item.id);
+        console.log("[SIDEBAR CLICK] markers array:", markers);
+
+        const target = markers.find((m) => m.id === item.id);
+
+        console.log("[SIDEBAR CLICK] Found target:", target);
+
         if (target) {
+            // Area has coordinates - fly to it on map
             setMapCenter([target.lat, target.lng]);
             setSelectedArea(target);
             setShowPolyline(false); // Reset polyline saat ganti area
             setIsMobileSidebarOpen(false); // Tutup sidebar di mobile setelah pilih
 
             // Sequential Logic
-            if (targetType === 'grandparent') {
+            if (targetType === "grandparent") {
                 setMapZoom(16);
-                setMarkerColor('red');
-            } else if (targetType === 'parent') {
+                setMarkerColor("red");
+            } else if (targetType === "parent") {
                 setMapZoom(18);
-                setMarkerColor('blue');
+                setMarkerColor("blue");
             } else {
                 // Child or other
-                setMapZoom(19); 
-                setMarkerColor('blue'); // Default to blue/standard for specific locations
+                setMapZoom(19);
+                setMarkerColor("blue"); // Default to blue/standard for specific locations
             }
         } else {
-            // Handle case where item might not be in markers (e.g. just a container without coords)
-            // But usually areas have coords. If not, we can't fly there.
-             console.warn("Location not found on map:", item.name);
+            // Area doesn't have coordinates (e.g. container areas)
+            // Still show SecondarySidebar, but don't fly map
+            console.log("[SIDEBAR CLICK] No marker found, using menuData item");
+            setSelectedArea(item); // Use original item
+            setShowPolyline(false);
+            setIsMobileSidebarOpen(false);
+            console.log("Area selected (no map coordinates):", item.name);
         }
     };
 
     const handleMarkerClick = (marker) => {
         setSelectedArea(marker);
-        setShowPolyline(false); 
+        setShowPolyline(false);
         setMapCenter([marker.lat, marker.lng]);
-        setMarkerColor('blue'); // Clicking marker directly usually implies drilling down effectively
+        setMarkerColor("blue"); // Clicking marker directly usually implies drilling down effectively
     };
 
     const handleCloseSecondary = () => {
@@ -70,7 +83,7 @@ export default function Dashboard({ menuData, markers, user }) {
             <Head title="Peta Lokasi" />
 
             {/* Mobile Toggle Button (Only visible on mobile) */}
-            <button 
+            <button
                 onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
                 className="absolute top-4 left-4 z-[1100] p-3 bg-white text-gray-800 rounded-full shadow-lg md:hidden hover:bg-gray-50 transition-colors"
             >
@@ -80,34 +93,48 @@ export default function Dashboard({ menuData, markers, user }) {
             {/* Sidebar Container */}
             {/* Mobile: Fixed overlay. Desktop: Relative/Static but collapsible */}
             {/* Sidebar Container - FIXED OVERLAY FOR ALL DEVICES */}
-            <div className={`
+            <div
+                className={`
                 fixed inset-y-0 left-0 z-[1000] transform transition-transform duration-300 ease-in-out
-                ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                ${isDesktopSidebarOpen ? 'md:translate-x-0' : 'md:-translate-x-full'}
+                ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+                ${
+                    isDesktopSidebarOpen
+                        ? "md:translate-x-0"
+                        : "md:-translate-x-full"
+                }
                 w-80 h-full
-            `}>
+            `}
+            >
                 {/* Shadow Wrapper: Only visible when sidebar is open */}
-                 <div className={`w-full h-full bg-transparent ${isDesktopSidebarOpen || isMobileSidebarOpen ? 'shadow-2xl' : ''}`}>
-                    <Sidebar 
-                        menuData={menuData} 
-                        onSelectLocation={handleSelectLocation} 
+                <div
+                    className={`w-full h-full bg-transparent ${
+                        isDesktopSidebarOpen || isMobileSidebarOpen
+                            ? "shadow-2xl"
+                            : ""
+                    }`}
+                >
+                    <Sidebar
+                        menuData={menuData}
+                        onSelectLocation={handleSelectLocation}
                         user={user}
                         isOpen={isDesktopSidebarOpen}
-                        onToggle={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
+                        onToggle={() =>
+                            setIsDesktopSidebarOpen(!isDesktopSidebarOpen)
+                        }
                     />
-                 </div>
+                </div>
             </div>
 
             {/* Overlay untuk menutup sidebar di mobile (sama seperti sebelumnya) */}
             {isMobileSidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-[900] md:hidden"
                     onClick={() => setIsMobileSidebarOpen(false)}
                 />
             )}
 
             {/* Secondary Sidebar (Right Overlay) */}
-            <SecondarySidebar 
+            <SecondarySidebar
                 selectedArea={selectedArea}
                 onClose={handleCloseSecondary}
                 showPolyline={showPolyline}
@@ -116,9 +143,9 @@ export default function Dashboard({ menuData, markers, user }) {
 
             {/* Main Content: Map Always Full Screen */}
             <main className="absolute inset-0 w-full h-full z-0">
-                <Map 
-                    markers={markers} 
-                    center={mapCenter} 
+                <Map
+                    markers={markers}
+                    center={mapCenter}
                     zoom={mapZoom}
                     markerColorOverride={markerColor}
                     onMarkerClick={handleMarkerClick}
