@@ -16,6 +16,7 @@ import SceneView from "./Views/SceneView";
 // Modals
 import AutoLinkModal from "./Modals/AutoLinkModal";
 import CreateAreaModal from "./Modals/CreateAreaModal";
+import LinkTargetModal from "./Modals/LinkTargetModal";
 
 export default function VisualEditor({ hierarchy: initialHierarchy }) {
     // --- STATE ---
@@ -57,6 +58,11 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
     const [createAreaModal, setCreateAreaModal] = useState({
         isOpen: false,
         parentArea: null,
+    });
+    // Link Target Modal State
+    const [linkTargetModal, setLinkTargetModal] = useState({
+        isOpen: false,
+        data: null,
     });
 
     // --- INITIALIZATION ---
@@ -661,10 +667,70 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     onUpdateScene={(update) =>
                         handleUpdateNode(selection.id, "scene", update)
                     }
-                    onAddLink={() => {}} // TODO
+                    onAddLink={(data) => {
+                        setLinkTargetModal({
+                            isOpen: true,
+                            data: data,
+                        });
+                    }}
                     onDeleteLink={handleDeleteLink}
                 />
             );
+        }
+    };
+
+    // --- LINK CREATION HANDLER ---
+    const handleConfirmLink = async (targetId) => {
+        if (!linkTargetModal.data || !selection) return;
+
+        const { yaw, pitch, type } = linkTargetModal.data;
+        const currentSceneId = selection.id;
+
+        const payload = {
+            target_id: targetId,
+            yaw: yaw,
+            pitch: pitch || 0,
+            type: type,
+        };
+
+        console.log("Creating link with payload:", payload);
+        console.log(
+            "POST URL:",
+            `/admin/visual-editor/api/scene/${currentSceneId}/link`
+        );
+
+        try {
+            const response = await axios.post(
+                `/admin/visual-editor/api/scene/${currentSceneId}/link`,
+                payload
+            );
+
+            if (response.data.success) {
+                // Update scene cache with new data
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                handleSelect(selection.type, selection.id);
+                alert("Link created successfully!");
+            } else {
+                alert("Failed to create link: " + response.data.message);
+            }
+        } catch (error) {
+            console.error("Error creating link:", error);
+            // Show validation errors if available
+            if (error.response?.data?.errors) {
+                const errorMessages = Object.values(error.response.data.errors)
+                    .flat()
+                    .join(", ");
+                alert("Validation error: " + errorMessages);
+            } else if (error.response?.data?.message) {
+                alert("Error: " + error.response.data.message);
+            } else {
+                alert("Error creating link: " + error.message);
+            }
+        } finally {
+            setLinkTargetModal({ isOpen: false, data: null });
         }
     };
 
@@ -761,6 +827,18 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         e.target.value = ""; // Reset input
                     }
                 }}
+            />
+            {/* Link Target Modal */}
+            <LinkTargetModal
+                isOpen={linkTargetModal.isOpen}
+                onClose={() =>
+                    setLinkTargetModal({ ...linkTargetModal, isOpen: false })
+                }
+                onConfirm={handleConfirmLink}
+                mode={linkTargetModal.data?.type || "navigasi"}
+                currentSceneId={selection?.id}
+                currentAreaId={selection?.parentId || null}
+                hierarchy={hierarchy}
             />
         </div>
     );

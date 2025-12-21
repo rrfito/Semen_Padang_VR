@@ -49,6 +49,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::delete('/area/{area}', [EditorController::class, 'destroyArea'])->name('area.destroy');
         Route::delete('/scene/{scene}', [EditorController::class, 'destroyScene'])->name('scene.destroy');
         Route::patch('/scene/{scene}', [EditorController::class, 'updateScene'])->name('scene.update');
+        Route::post('/scene/{scene}/link', [EditorController::class, 'createLink'])->name('scene.link.create');
 
         // Scene upload routes
         Route::post('/scenes/bulk-upload', [EditorController::class, 'bulkUploadScenes'])->name('scenes.bulk-upload');

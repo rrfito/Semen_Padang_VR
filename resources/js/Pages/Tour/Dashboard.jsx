@@ -44,7 +44,7 @@ export default function Dashboard({ menuData, markers, user }) {
 
             // Sequential Logic
             if (targetType === "grandparent") {
-                setMapZoom(16);
+                setMapZoom(19);
                 setMarkerColor("red");
             } else if (targetType === "parent") {
                 setMapZoom(18);

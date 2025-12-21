@@ -169,19 +169,49 @@ export default function Map({
                                 "[POLYLINE DEBUG] Leaf area scenes:",
                                 selectedArea.scenes
                             );
+
+                            // Helper to get GPS coordinates from either format
+                            const getSceneGPS = (s) => {
+                                // Format 1: Direct lat/lng (from markers)
+                                if (
+                                    s.lat !== undefined &&
+                                    s.lng !== undefined
+                                ) {
+                                    return {
+                                        lat: parseFloat(s.lat),
+                                        lng: parseFloat(s.lng),
+                                    };
+                                }
+                                // Format 2: location_array (from menuData/sidebar)
+                                if (
+                                    s.location_array &&
+                                    s.location_array.lat !== undefined
+                                ) {
+                                    return {
+                                        lat: parseFloat(s.location_array.lat),
+                                        lng: parseFloat(s.location_array.lng),
+                                    };
+                                }
+                                return null;
+                            };
+
                             polylineScenes = selectedArea.scenes
-                                .filter(
-                                    (s) =>
-                                        s.lat &&
-                                        s.lng &&
-                                        (s.lat !== 0 || s.lng !== 0)
-                                )
-                                .map((s) => ({
-                                    id: s.id,
-                                    name: s.name,
-                                    lat: parseFloat(s.lat),
-                                    lng: parseFloat(s.lng),
-                                }));
+                                .map((s) => {
+                                    const gps = getSceneGPS(s);
+                                    if (
+                                        !gps ||
+                                        (gps.lat === 0 && gps.lng === 0)
+                                    )
+                                        return null;
+                                    return {
+                                        id: s.id,
+                                        name: s.name,
+                                        lat: gps.lat,
+                                        lng: gps.lng,
+                                    };
+                                })
+                                .filter(Boolean);
+
                             console.log(
                                 "[POLYLINE DEBUG] Filtered polylineScenes:",
                                 polylineScenes

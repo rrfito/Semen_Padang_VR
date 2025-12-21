@@ -127,6 +127,73 @@ class EditorController extends Controller
         return response()->json($details);
     }
 
+    // 1b. CREATE LINK FOR SCENE
+    public function createLink(Request $request, Scene $scene)
+    {
+        $validated = $request->validate([
+            'target_id' => 'required|exists:scenes,id',
+            'yaw' => 'required|numeric',
+            'pitch' => 'nullable|numeric',
+            'type' => 'required|in:navigasi,portal',
+        ]);
+
+        // Check if link already exists
+        $existing = Link::where('source_scene_id', $scene->id)
+            ->where('target_scene_id', $validated['target_id'])
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A link to this target already exists.'
+            ], 422);
+        }
+
+        // Create the link
+        $link = Link::create([
+            'source_scene_id' => $scene->id,
+            'target_scene_id' => $validated['target_id'],
+            'yaw' => $validated['yaw'],
+            'pitch' => $validated['pitch'] ?? 0,
+            'type' => $validated['type'],
+        ]);
+
+        // Reload scene with links
+        $scene->load(['outgoingLinks.targetScene.area']);
+
+        return response()->json([
+            'success' => true,
+            'link' => [
+                'id' => $link->id,
+                'target_scene_id' => $link->target_scene_id,
+                'yaw' => (float) $link->yaw,
+                'type' => $link->type,
+            ],
+            'scene' => [
+                'id' => $scene->id,
+                'area_id' => $scene->area_id,
+                'name' => $scene->name,
+                'image_url' => asset('storage/' . $scene->image_path),
+                'heading' => (float) $scene->heading,
+                'lat' => $scene->location_array['lat'] ?? 0,
+                'lng' => $scene->location_array['lng'] ?? 0,
+                'can_be_gateway' => (bool) $scene->can_be_gateway,
+                'is_published' => (bool) $scene->is_published,
+                'links' => $scene->outgoingLinks->map(function ($l) {
+                    return [
+                        'id' => $l->id,
+                        'target_scene_id' => $l->target_scene_id,
+                        'yaw' => (float) $l->yaw,
+                        'type' => $l->type,
+                        'target_name' => $l->type === 'portal'
+                            ? ($l->targetScene->area->name ?? 'Unknown Area')
+                            : ($l->targetScene->name ?? 'Scene #' . $l->target_scene_id),
+                    ];
+                }),
+            ]
+        ]);
+    }
+
     // 2. CREATE SUB AREA (Global)
     public function createSubArea(Request $request)
     {

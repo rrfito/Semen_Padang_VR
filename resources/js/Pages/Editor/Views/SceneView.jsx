@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Marzipano from "marzipano"; // Changed to default import
-import { FaPlus, FaTrash } from "react-icons/fa";
+import Marzipano from "marzipano";
 import ToolbarButton from "@/Components/Editor/ToolbarButton";
 
 export default function SceneView({
@@ -14,6 +13,9 @@ export default function SceneView({
     const viewerRef = useRef(null);
     const currentSceneRef = useRef(null);
     const hotspotElementsRef = useRef([]);
+
+    // --- NEW STATE: Add Mode ---
+    const [isAdding, setIsAdding] = useState(false);
 
     useEffect(() => {
         if (!scene || !scene.image_url) {
@@ -186,6 +188,19 @@ export default function SceneView({
         }
     };
 
+    // --- HANDLER: Trigger Add ---
+    // --- HANDLER: Trigger Add ---
+    const handleTriggerAdd = (type) => {
+        if (!viewerRef.current) return;
+        const view = viewerRef.current.view();
+        const yaw = view.yaw();
+        const pitch = view.pitch();
+
+        // Pass 'type' (navigasi | portal) along with coords
+        onAddLink({ yaw, pitch, type });
+        setIsAdding(false); // Reset mode after adding
+    };
+
     return (
         <main className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden group/canvas items-center justify-center h-full w-full">
             <div
@@ -193,34 +208,91 @@ export default function SceneView({
                 className="absolute inset-0 z-0 cursor-move"
             ></div>
 
-            {/* Info Overlay */}
-            <div className="absolute top-4 left-4 z-10 pointer-events-none">
-                <div className="bg-black/50 backdrop-blur text-white px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono">
-                    Yaw: 0.00° | Pitch: 0.00°
+            {/* --- ADD HOTSPOT OVERLAY (RADIAL MENU - FIXED CENTER) --- */}
+            {isAdding && (
+                <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+                    {/* Darken overlay slightly to focus */}
+                    <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+
+                    {/* Radial Container */}
+                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200">
+                        {/* Center Icon (Chevron) - Visual Anchor */}
+                        <div className="relative z-20 flex items-center justify-center">
+                            <div className="size-16 rounded-full bg-slate-700/80 backdrop-blur-md border-[3px] border-white/40 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                                <span className="material-symbols-outlined text-4xl text-white font-bold drop-shadow-md">
+                                    expand_less
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Button: CANCEL / DELETE (Left) */}
+                        <button
+                            onClick={() => setIsAdding(false)}
+                            className="absolute bg-red-500 hover:bg-red-600 text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -left-[4.5rem] top-1/2 -translate-y-1/2 flex items-center justify-center group border-2 border-white/20"
+                            title="Cancel"
+                        >
+                            <span className="material-symbols-outlined text-2xl font-bold">
+                                delete
+                            </span>
+                        </button>
+
+                        {/* Button: GATEWAY FALSE (Top Right) - Regular Navigation */}
+                        <button
+                            onClick={() => handleTriggerAdd("navigasi")}
+                            className="absolute bg-[#1e293b] hover:bg-primary border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -top-[3rem] flex items-center justify-center group"
+                            title="Link to Scene in Same Area"
+                        >
+                            <span className="material-symbols-outlined text-2xl font-bold">
+                                arrow_circle_up
+                            </span>
+                        </button>
+
+                        {/* Button: GATEWAY TRUE (Bottom Right) - Portal */}
+                        <button
+                            onClick={() => handleTriggerAdd("portal")}
+                            className="absolute bg-[#1e293b] hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -bottom-[3rem] flex items-center justify-center group"
+                            title="Link to Different Area (Gateway)"
+                        >
+                            <span className="material-symbols-outlined text-2xl font-bold">
+                                door_open
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* Helper Text */}
+                    <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
+                        Align center to target, then choose type
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Floating Toolbar */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
                 <div className="flex items-center gap-1 p-1.5 bg-surface-dark/90 backdrop-blur-md border border-border-dark rounded-xl shadow-2xl">
-                    <ToolbarButton icon="near_me" title="Select tool" active />
+                    <ToolbarButton
+                        icon="near_me"
+                        title="Select tool"
+                        active={!isAdding}
+                        onClick={() => setIsAdding(false)}
+                    />
 
                     <div className="w-px h-6 bg-border-dark mx-1"></div>
 
-                    <ToolbarButton
-                        icon="add_link"
-                        onClick={onAddLink}
+                    {/* UPDATED ADD BUTTON */}
+                    <button
+                        onClick={() => setIsAdding(!isAdding)}
+                        className={`h-10 flex items-center gap-2 px-4 rounded-lg transition-all font-medium text-sm ${
+                            isAdding
+                                ? "bg-primary text-white shadow-sm"
+                                : "text-slate-300 hover:text-white hover:bg-white/10"
+                        }`}
                         title="Add Link / Hotspot"
-                    />
-                    <ToolbarButton icon="360" title="Set Initial View" />
-
-                    <div className="w-px h-6 bg-border-dark mx-1"></div>
-
-                    <ToolbarButton
-                        icon="delete"
-                        variant="danger"
-                        title="Delete Hotspot"
-                    />
+                    >
+                        <span className="material-symbols-outlined">
+                            arrow_circle_up
+                        </span>
+                        <span>Add Hotspot</span>
+                    </button>
                 </div>
             </div>
         </main>

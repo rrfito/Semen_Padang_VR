@@ -31,7 +31,7 @@ class TourController extends Controller
                     $q->with([
                         'scenes' => function ($q) {
                             $q->where('is_published', true)
-                                ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                                ->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id');
                         },
 
                         // LEVEL 3 (Cucu: Ruang Unit MR)
@@ -43,7 +43,7 @@ class TourController extends Controller
                             $q2->with([
                                 'scenes' => function ($q) {
                                     $q->where('is_published', true)
-                                        ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                                        ->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id');
                                 }
                             ]);
                         }
@@ -52,7 +52,7 @@ class TourController extends Controller
                 // LEVEL 1 (Root)
                 'scenes' => function ($q) {
                     $q->where('is_published', true)
-                        ->select('id', 'area_id', 'name', 'image_path')->orderBy('created_at')->orderBy('id');
+                        ->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id');
                 }
             ]);
 
