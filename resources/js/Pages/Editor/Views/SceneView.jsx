@@ -151,7 +151,7 @@ export default function SceneView({
         const icon = document.createElement("div");
         icon.classList.add("hotspot-icon");
         icon.innerHTML = `<span class="material-symbols-outlined text-3xl text-white drop-shadow-md cursor-pointer hover:scale-110 transition-transform">${
-            link.type === "portal" ? "door_open" : "arrow_circle_up"
+            link.type === "gateway" ? "door_open" : "arrow_circle_up"
         }</span>`;
         const tooltip = document.createElement("div");
         tooltip.innerText = link.target_name || "Unknown";
@@ -196,7 +196,7 @@ export default function SceneView({
         const yaw = view.yaw();
         const pitch = view.pitch();
 
-        // Pass 'type' (navigasi | portal) along with coords
+        // Pass 'type' (navigasi | gateway) along with coords
         onAddLink({ yaw, pitch, type });
         setIsAdding(false); // Reset mode after adding
     };
@@ -249,7 +249,7 @@ export default function SceneView({
 
                         {/* Button: GATEWAY TRUE (Bottom Right) - Portal */}
                         <button
-                            onClick={() => handleTriggerAdd("portal")}
+                            onClick={() => handleTriggerAdd("gateway")}
                             className="absolute bg-[#1e293b] hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -bottom-[3rem] flex items-center justify-center group"
                             title="Link to Different Area (Gateway)"
                         >

@@ -134,7 +134,7 @@ class EditorController extends Controller
             'target_id' => 'required|exists:scenes,id',
             'yaw' => 'required|numeric',
             'pitch' => 'nullable|numeric',
-            'type' => 'required|in:navigasi,portal',
+            'type' => 'required|in:navigasi,gateway',
         ]);
 
         // Check if link already exists

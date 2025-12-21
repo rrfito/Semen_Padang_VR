@@ -55,15 +55,26 @@ export default function Viewer({ scene, initial_heading }) {
         const marzipanoScene = viewer.createScene({ source, geometry, view });
 
         // 3. Render Hotspots
+        console.log("Viewer - Hotspots data from server:", scene.hotspots);
         scene.hotspots.forEach((hotspot, index) => {
+            console.log(
+                `Hotspot ${index}:`,
+                hotspot.type,
+                hotspot.text,
+                hotspot.yaw
+            );
             const el = document.createElement("div");
-            const isPortal = hotspot.type === "portal";
+            const isPortal = hotspot.type === "gateway";
 
             el.className = isPortal ? "hotspot-portal" : "hotspot-nav";
 
             // Floating Marker: Simple Icon
             el.innerHTML = isPortal
-                ? `🚪<div class="label">${hotspot.text}</div>`
+                ? `<div class="marker-container gateway-marker">
+                     <div class="marker-ring gateway-ring"></div>
+                     <div class="marker-icon">🚪</div>
+                   </div>
+                   <div class="label">${hotspot.text}</div>`
                 : `<div class="marker-container">
                      <div class="marker-ring"></div>
                      <div class="marker-dot"></div>
@@ -194,8 +205,42 @@ export default function Viewer({ scene, initial_heading }) {
                     border-color: #ffeb3b;
                 }
                 
-                /* PORTAL (PINTU MASUK) */
-                .hotspot-portal { font-size: 40px; cursor: pointer; animation: pulse 2s infinite; filter: drop-shadow(0 0 10px red); }
+                /* PORTAL (GATEWAY - PINTU MASUK) */
+                .hotspot-portal { 
+                    width: 50px;
+                    height: 50px;
+                    cursor: pointer; 
+                    transition: transform 0.2s ease-out;
+                    opacity: 0.9;
+                }
+                .gateway-marker {
+                    width: 100%;
+                    height: 100%;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .gateway-ring {
+                    border-color: rgba(255, 100, 100, 0.8) !important;
+                    animation: ripple-gateway 2s infinite !important;
+                }
+                .marker-icon {
+                    font-size: 28px;
+                    z-index: 2;
+                    filter: drop-shadow(0 0 4px rgba(255, 100, 100, 0.6));
+                }
+                .hotspot-portal:hover {
+                    transform: scale(1.2);
+                    opacity: 1;
+                }
+                .hotspot-portal:hover .gateway-ring {
+                    border-color: #ff6b6b !important;
+                }
+                @keyframes ripple-gateway {
+                    0% { transform: scale(0.8); opacity: 1; border-color: rgba(255, 100, 100, 0.8); }
+                    100% { transform: scale(1.5); opacity: 0; border-color: rgba(255, 100, 100, 0); }
+                }
                 
                 /* LABEL TEXT */
                 .label { display: none; position: absolute; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; white-space: nowrap; top: -35px; left: 50%; transform: translateX(-50%); pointer-events: none; }

@@ -46,7 +46,7 @@ export default function LinkTargetModal({
                     .filter((scene) => scene.id !== currentSceneId)
                     .map((s) => ({ id: s.id, name: s.name, type: "scene" }));
             }
-        } else if (mode === "portal") {
+        } else if (mode === "gateway") {
             // Portal: List SCENES from OTHER areas where can_be_gateway = true
             const collectGatewayScenes = (nodes, excludeAreaId) => {
                 let acc = [];
@@ -157,7 +157,7 @@ export default function LinkTargetModal({
                                     }`}
                                 >
                                     <span className="material-symbols-outlined text-xl opacity-70">
-                                        {mode === "portal"
+                                        {mode === "gateway"
                                             ? "door_open"
                                             : "image"}
                                     </span>

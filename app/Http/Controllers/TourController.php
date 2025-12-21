@@ -382,7 +382,7 @@ class TourController extends Controller
                     'target_id' => $link->target_scene_id,
                     'type' => $link->type,
                     'yaw' => (float) $link->yaw,
-                    'text' => $link->type === 'portal'
+                    'text' => $link->type === 'gateway'
                         ? 'Masuk: ' . ($link->targetScene->area->name ?? '-')
                         : ($link->targetScene->name ?? 'Maju'),
                 ];

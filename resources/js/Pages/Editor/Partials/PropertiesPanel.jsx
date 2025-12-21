@@ -337,7 +337,7 @@ export default function PropertiesPanel({
                                         <div
                                             key={link.id}
                                             className={`p-3 rounded-lg border ${
-                                                link.type === "portal"
+                                                link.type === "gateway"
                                                     ? "bg-purple-500/10 border-purple-500/30"
                                                     : "bg-primary/10 border-primary/30"
                                             }`}
@@ -345,12 +345,12 @@ export default function PropertiesPanel({
                                             <div className="flex items-start gap-2">
                                                 <span
                                                     className={`material-symbols-outlined text-lg ${
-                                                        link.type === "portal"
+                                                        link.type === "gateway"
                                                             ? "text-purple-400"
                                                             : "text-primary"
                                                     }`}
                                                 >
-                                                    {link.type === "portal"
+                                                    {link.type === "gateway"
                                                         ? "door_open"
                                                         : "arrow_forward"}
                                                 </span>
@@ -358,13 +358,13 @@ export default function PropertiesPanel({
                                                     <div
                                                         className={`text-xs font-bold uppercase tracking-wide ${
                                                             link.type ===
-                                                            "portal"
+                                                            "gateway"
                                                                 ? "text-purple-400"
                                                                 : "text-primary"
                                                         }`}
                                                     >
-                                                        {link.type === "portal"
-                                                            ? "PORTAL: "
+                                                        {link.type === "gateway"
+                                                            ? "GATEWAY: "
                                                             : "NAVIGASI: "}
                                                         <span className="text-white">
                                                             {link.target_name ||
@@ -372,7 +372,7 @@ export default function PropertiesPanel({
                                                         </span>
                                                     </div>
                                                     <div className="text-[10px] text-slate-500 mt-1 font-mono">
-                                                        {link.type === "portal"
+                                                        {link.type === "gateway"
                                                             ? link.target_name
                                                             : link.target_name}
                                                     </div>
