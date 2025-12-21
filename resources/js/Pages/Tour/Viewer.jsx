@@ -61,25 +61,30 @@ export default function Viewer({ scene, initial_heading }) {
                 `Hotspot ${index}:`,
                 hotspot.type,
                 hotspot.text,
-                hotspot.yaw
+                "yaw:",
+                hotspot.yaw,
+                "pitch:",
+                hotspot.pitch
             );
             const el = document.createElement("div");
-            const isPortal = hotspot.type === "gateway";
+            const isGateway = hotspot.type === "gateway";
 
-            el.className = isPortal ? "hotspot-portal" : "hotspot-nav";
+            el.className = isGateway ? "hotspot-gateway" : "hotspot-nav";
 
-            // Floating Marker: Simple Icon
-            el.innerHTML = isPortal
-                ? `<div class="marker-container gateway-marker">
-                     <div class="marker-ring gateway-ring"></div>
-                     <div class="marker-icon">🚪</div>
+            // Floating Marker: Chevron for navigation, Door for gateway
+            el.innerHTML = isGateway
+                ? `<div class="gateway-btn">
+                     <svg viewBox="0 0 24 24" fill="currentColor" class="gateway-icon">
+                       <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z"/>
+                     </svg>
                    </div>
-                   <div class="label">${hotspot.text}</div>`
-                : `<div class="marker-container">
-                     <div class="marker-ring"></div>
-                     <div class="marker-dot"></div>
+                   <div class="hotspot-label">${hotspot.text}</div>`
+                : `<div class="nav-btn">
+                     <svg viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                       <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
+                     </svg>
                    </div>
-                   <div class="label">${hotspot.text}</div>`;
+                   <div class="hotspot-label">${hotspot.text}</div>`;
 
             // Handle Klik Navigasi
             el.addEventListener("click", () => {
@@ -108,13 +113,13 @@ export default function Viewer({ scene, initial_heading }) {
             });
 
             // Hitung Posisi
-            // Pitch 0 agar sejajar mata (Eye Level), sama seperti di Editor
-            const pitch = 0;
+            // Gunakan pitch dari database (manual link mendukung pitch, auto-link default 0)
+            const pitch = hotspot.pitch || 0;
+            const yaw = hotspot.yaw;
 
-            // PENTING: Gunakan hotspot.yaw LANGSUNG tanpa konversi!
-            // Database sudah menyimpan nilai dalam format yang diexpect Marzipano
-            // Konversi radian sudah dilakukan saat save, jangan convert lagi!
-            const yaw = hotspot.yaw; // ✅ Langsung, sama seperti Editor!
+            console.log(
+                `Hotspot ${index} - Final position: yaw=${yaw}, pitch=${pitch}`
+            );
 
             marzipanoScene.hotspotContainer().createHotspot(el, { yaw, pitch });
         });
@@ -153,103 +158,98 @@ export default function Viewer({ scene, initial_heading }) {
         <>
             <Head title={scene.name} />
             <style>{`
-                /* FLOATING MARKER STYLE */
+                /* ============================================ */
+                /* NAVIGATION HOTSPOT - Blue/White Chevron */
+                /* ============================================ */
                 .hotspot-nav {
-                    width: 40px;
-                    height: 40px;
                     cursor: pointer;
-                    /* Tidak ada rotasi 3D, selalu menghadap kamera (Billboard) */
                     transition: transform 0.2s ease-out;
-                    opacity: 0.9;
                 }
-
-                .marker-container {
-                    width: 100%;
-                    height: 100%;
-                    position: relative;
+                .nav-btn {
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                    border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);
+                    animation: pulse-nav 2s infinite;
                 }
-
-                /* Titik Tengah */
-                .marker-dot {
-                    width: 12px;
-                    height: 12px;
-                    background-color: white;
-                    border-radius: 50%;
-                    box-shadow: 0 0 8px rgba(0,0,0,0.5);
-                    z-index: 2;
+                .nav-icon {
+                    width: 28px;
+                    height: 28px;
+                    color: white;
+                    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
                 }
-
-                /* Cincin Luar (Pulsing) */
-                .marker-ring {
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    border: 2px solid rgba(255, 255, 255, 0.8);
-                    border-radius: 50%;
-                    animation: ripple 2s infinite;
-                    box-shadow: 0 0 4px rgba(0,0,0,0.3);
-                }
-
-                /* Hover Effect */
                 .hotspot-nav:hover {
-                    transform: scale(1.2);
-                    opacity: 1;
+                    transform: scale(1.15);
                 }
-                .hotspot-nav:hover .marker-dot {
-                    background-color: #ffeb3b; /* Kuning saat hover */
+                .hotspot-nav:hover .nav-btn {
+                    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.7), 0 0 0 4px rgba(255,255,255,0.5);
                 }
-                .hotspot-nav:hover .marker-ring {
-                    border-color: #ffeb3b;
+                @keyframes pulse-nav {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
                 }
-                
-                /* PORTAL (GATEWAY - PINTU MASUK) */
-                .hotspot-portal { 
-                    width: 50px;
-                    height: 50px;
-                    cursor: pointer; 
+
+                /* ============================================ */
+                /* GATEWAY HOTSPOT - Purple/White Door */
+                /* ============================================ */
+                .hotspot-gateway {
+                    cursor: pointer;
                     transition: transform 0.2s ease-out;
-                    opacity: 0.9;
                 }
-                .gateway-marker {
-                    width: 100%;
-                    height: 100%;
-                    position: relative;
+                .gateway-btn {
+                    width: 52px;
+                    height: 52px;
+                    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+                    border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5), 0 0 0 3px rgba(255,255,255,0.3);
+                    animation: pulse-gateway 2s infinite;
                 }
-                .gateway-ring {
-                    border-color: rgba(255, 100, 100, 0.8) !important;
-                    animation: ripple-gateway 2s infinite !important;
+                .gateway-icon {
+                    width: 30px;
+                    height: 30px;
+                    color: white;
+                    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
                 }
-                .marker-icon {
-                    font-size: 28px;
-                    z-index: 2;
-                    filter: drop-shadow(0 0 4px rgba(255, 100, 100, 0.6));
+                .hotspot-gateway:hover {
+                    transform: scale(1.15);
                 }
-                .hotspot-portal:hover {
-                    transform: scale(1.2);
-                    opacity: 1;
+                .hotspot-gateway:hover .gateway-btn {
+                    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.7), 0 0 0 4px rgba(255,255,255,0.5);
                 }
-                .hotspot-portal:hover .gateway-ring {
-                    border-color: #ff6b6b !important;
+                @keyframes pulse-gateway {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.08); }
                 }
-                @keyframes ripple-gateway {
-                    0% { transform: scale(0.8); opacity: 1; border-color: rgba(255, 100, 100, 0.8); }
-                    100% { transform: scale(1.5); opacity: 0; border-color: rgba(255, 100, 100, 0); }
+
+                /* ============================================ */
+                /* SHARED LABEL STYLE */
+                /* ============================================ */
+                .hotspot-label { 
+                    display: none; 
+                    position: absolute; 
+                    background: rgba(0,0,0,0.85); 
+                    color: white; 
+                    padding: 6px 12px; 
+                    font-size: 13px; 
+                    font-weight: 500;
+                    border-radius: 6px; 
+                    white-space: nowrap; 
+                    top: -45px; 
+                    left: 50%; 
+                    transform: translateX(-50%); 
+                    pointer-events: none;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 }
-                
-                /* LABEL TEXT */
-                .label { display: none; position: absolute; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; white-space: nowrap; top: -35px; left: 50%; transform: translateX(-50%); pointer-events: none; }
-                .hotspot-nav:hover .label, .hotspot-portal:hover .label { display: block; }
-                
-                @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-                @keyframes ripple {
-                    0% { transform: scale(0.8); opacity: 1; }
-                    100% { transform: scale(1.5); opacity: 0; }
+                .hotspot-nav:hover .hotspot-label, 
+                .hotspot-gateway:hover .hotspot-label { 
+                    display: block; 
                 }
             `}</style>
 

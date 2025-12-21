@@ -184,7 +184,10 @@ export default function SceneView({
         if (currentSceneRef.current) {
             currentSceneRef.current
                 .hotspotContainer()
-                .createHotspot(wrapper, { yaw: link.yaw, pitch: 0 });
+                .createHotspot(wrapper, {
+                    yaw: link.yaw,
+                    pitch: link.pitch || 0,
+                });
         }
     };
 
@@ -195,6 +198,15 @@ export default function SceneView({
         const view = viewerRef.current.view();
         const yaw = view.yaw();
         const pitch = view.pitch();
+
+        console.log(
+            "SceneView - Adding link with yaw:",
+            yaw,
+            "pitch:",
+            pitch,
+            "type:",
+            type
+        );
 
         // Pass 'type' (navigasi | gateway) along with coords
         onAddLink({ yaw, pitch, type });

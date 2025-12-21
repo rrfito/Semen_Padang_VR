@@ -116,8 +116,9 @@ class EditorController extends Controller
                     'id' => $link->id,
                     'target_scene_id' => $link->target_scene_id,
                     'yaw' => (float) $link->yaw,
+                    'pitch' => (float) $link->pitch,
                     'type' => $link->type,
-                    'target_name' => $link->type === 'portal'
+                    'target_name' => $link->type === 'gateway'
                         ? ($link->targetScene->area->name ?? 'Unknown Area')
                         : ($link->targetScene->name ?? 'Scene #' . $link->target_scene_id),
                 ];
@@ -150,6 +151,11 @@ class EditorController extends Controller
         }
 
         // Create the link
+        \Log::info('Creating link with pitch:', [
+            'raw_pitch' => $request->input('pitch'),
+            'validated_pitch' => $validated['pitch'] ?? 'NULL',
+        ]);
+
         $link = Link::create([
             'source_scene_id' => $scene->id,
             'target_scene_id' => $validated['target_id'],
@@ -157,6 +163,8 @@ class EditorController extends Controller
             'pitch' => $validated['pitch'] ?? 0,
             'type' => $validated['type'],
         ]);
+
+        \Log::info('Link created with pitch:', ['pitch' => $link->pitch]);
 
         // Reload scene with links
         $scene->load(['outgoingLinks.targetScene.area']);
@@ -184,8 +192,9 @@ class EditorController extends Controller
                         'id' => $l->id,
                         'target_scene_id' => $l->target_scene_id,
                         'yaw' => (float) $l->yaw,
+                        'pitch' => (float) $l->pitch,
                         'type' => $l->type,
-                        'target_name' => $l->type === 'portal'
+                        'target_name' => $l->type === 'gateway'
                             ? ($l->targetScene->area->name ?? 'Unknown Area')
                             : ($l->targetScene->name ?? 'Scene #' . $l->target_scene_id),
                     ];
