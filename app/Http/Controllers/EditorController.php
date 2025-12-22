@@ -203,6 +203,116 @@ class EditorController extends Controller
         ]);
     }
 
+    // 1b. UPDATE LINK
+    public function updateLink(Request $request, Scene $scene, Link $link)
+    {
+        // Verify link belongs to scene
+        if ($link->source_scene_id !== $scene->id) {
+            return response()->json(['success' => false, 'message' => 'Link does not belong to this scene'], 403);
+        }
+
+        $validated = $request->validate([
+            'yaw' => 'nullable|numeric',
+            'pitch' => 'nullable|numeric',
+            'target_id' => 'nullable|exists:scenes,id',
+            'type' => 'nullable|in:navigasi,gateway',
+        ]);
+
+        // Update only provided fields
+        if (isset($validated['yaw'])) {
+            $link->yaw = $validated['yaw'];
+        }
+        if (isset($validated['pitch'])) {
+            $link->pitch = $validated['pitch'];
+        }
+        if (isset($validated['target_id'])) {
+            $link->target_scene_id = $validated['target_id'];
+        }
+        if (isset($validated['type'])) {
+            $link->type = $validated['type'];
+        }
+
+        $link->save();
+
+        // Reload scene with links for response
+        $scene->load(['outgoingLinks.targetScene.area']);
+
+        return response()->json([
+            'success' => true,
+            'link' => [
+                'id' => $link->id,
+                'target_scene_id' => $link->target_scene_id,
+                'yaw' => (float) $link->yaw,
+                'pitch' => (float) $link->pitch,
+                'type' => $link->type,
+            ],
+            'scene' => [
+                'id' => $scene->id,
+                'area_id' => $scene->area_id,
+                'name' => $scene->name,
+                'image_url' => asset('storage/' . $scene->image_path),
+                'heading' => (float) $scene->heading,
+                'lat' => $scene->location_array['lat'] ?? 0,
+                'lng' => $scene->location_array['lng'] ?? 0,
+                'can_be_gateway' => (bool) $scene->can_be_gateway,
+                'is_published' => (bool) $scene->is_published,
+                'links' => $scene->outgoingLinks->map(function ($l) {
+                    return [
+                        'id' => $l->id,
+                        'target_scene_id' => $l->target_scene_id,
+                        'yaw' => (float) $l->yaw,
+                        'pitch' => (float) $l->pitch,
+                        'type' => $l->type,
+                        'target_name' => $l->type === 'gateway'
+                            ? ($l->targetScene->area->name ?? 'Unknown Area')
+                            : ($l->targetScene->name ?? 'Scene #' . $l->target_scene_id),
+                    ];
+                }),
+            ]
+        ]);
+    }
+
+    // 1c. DELETE LINK
+    public function deleteLink(Scene $scene, Link $link)
+    {
+        // Verify link belongs to scene
+        if ($link->source_scene_id !== $scene->id) {
+            return response()->json(['success' => false, 'message' => 'Link does not belong to this scene'], 403);
+        }
+
+        $link->delete();
+
+        // Reload scene with links for response
+        $scene->load(['outgoingLinks.targetScene.area']);
+
+        return response()->json([
+            'success' => true,
+            'scene' => [
+                'id' => $scene->id,
+                'area_id' => $scene->area_id,
+                'name' => $scene->name,
+                'image_url' => asset('storage/' . $scene->image_path),
+                'heading' => (float) $scene->heading,
+                'lat' => $scene->location_array['lat'] ?? 0,
+                'lng' => $scene->location_array['lng'] ?? 0,
+                'can_be_gateway' => (bool) $scene->can_be_gateway,
+                'is_published' => (bool) $scene->is_published,
+                'links' => $scene->outgoingLinks->map(function ($l) {
+                    return [
+                        'id' => $l->id,
+                        'target_scene_id' => $l->target_scene_id,
+                        'yaw' => (float) $l->yaw,
+                        'pitch' => (float) $l->pitch,
+                        'type' => $l->type,
+                        'target_name' => $l->type === 'gateway'
+                            ? ($l->targetScene->area->name ?? 'Unknown Area')
+                            : ($l->targetScene->name ?? 'Scene #' . $l->target_scene_id),
+                    ];
+                }),
+            ]
+        ]);
+    }
+
     // 2. CREATE SUB AREA (Global)
     public function createSubArea(Request $request)
     {

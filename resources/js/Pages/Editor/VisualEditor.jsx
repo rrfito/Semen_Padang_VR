@@ -440,13 +440,33 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
         handleUpdateNode(sourceId, "scene", { links: newLinks });
     };
 
-    const handleDeleteLink = (linkId) => {
+    const handleDeleteLink = async (linkId) => {
         // Only if currently selected is scene
-        if (selection?.type === "scene") {
-            const scene = sceneCache[selection.id];
-            if (!scene) return;
-            const newLinks = scene.links.filter((l) => l.id !== linkId);
-            handleUpdateNode(selection.id, "scene", { links: newLinks });
+        if (selection?.type !== "scene") return;
+
+        const currentSceneId = selection.id;
+
+        try {
+            const response = await axios.delete(
+                `/admin/visual-editor/api/scene/${currentSceneId}/link/${linkId}`
+            );
+
+            if (response.data.success) {
+                // Update scene cache with response data (ensures sync with DB)
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                console.log("Link deleted successfully");
+            } else {
+                alert("Failed to delete link: " + response.data.message);
+            }
+        } catch (error) {
+            console.error("Error deleting link:", error);
+            alert(
+                "Error deleting link: " +
+                    (error.response?.data?.message || error.message)
+            );
         }
     };
 
@@ -677,6 +697,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         });
                     }}
                     onDeleteLink={handleDeleteLink}
+                    onUpdateLink={handleUpdateLink}
                 />
             );
         }
@@ -734,6 +755,37 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             }
         } finally {
             setLinkTargetModal({ isOpen: false, data: null });
+        }
+    };
+
+    // --- LINK UPDATE HANDLER ---
+    const handleUpdateLink = async (linkId, updates) => {
+        if (!selection || selection.type !== "scene") return;
+
+        const currentSceneId = selection.id;
+
+        try {
+            const response = await axios.patch(
+                `/admin/visual-editor/api/scene/${currentSceneId}/link/${linkId}`,
+                updates
+            );
+
+            if (response.data.success) {
+                // Update scene cache with new data
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                console.log("Link updated successfully");
+            } else {
+                alert("Failed to update link: " + response.data.message);
+            }
+        } catch (error) {
+            console.error("Error updating link:", error);
+            alert(
+                "Error updating link: " +
+                    (error.response?.data?.message || error.message)
+            );
         }
     };
 

@@ -17,6 +17,10 @@ export default function SceneView({
     // --- NEW STATE: Add Mode ---
     const [isAdding, setIsAdding] = useState(false);
 
+    // --- EDIT MODE STATE ---
+    const [selectedHotspot, setSelectedHotspot] = useState(null);
+    const [isRepositioning, setIsRepositioning] = useState(false);
+
     useEffect(() => {
         if (!scene || !scene.image_url) {
             console.warn("SceneView: Missing scene or image_url", scene);
@@ -168,16 +172,22 @@ export default function SceneView({
             "SceneView: Hotspots re-rendered, count:",
             scene.links.length
         );
-    }, [scene?.links?.length, JSON.stringify(scene?.links?.map((l) => l.id))]);
+    }, [JSON.stringify(scene?.links)]); // Watch entire links array for any changes
 
     const createHotspot = (link) => {
         const wrapper = document.createElement("div");
         wrapper.classList.add("hotspot-wrapper", "cursor-pointer");
-        // Add inline style for hover-only transition to avoid lag during camera movement
-        wrapper.style.cssText = "transition: none;";
+        // Use flex column to stack icon and tooltip
+        wrapper.style.cssText =
+            "transition: none; display: flex; flex-direction: column; align-items: center;";
 
         const isGateway = link.type === "gateway";
         const icon = document.createElement("div");
+        // Center icon at coordinate: icon is 48px (gateway) or 44px (nav), offset by half
+        const iconSize = isGateway ? 48 : 44;
+        icon.style.cssText = `flex-shrink: 0; margin-left: -${
+            iconSize / 2
+        }px; margin-top: -${iconSize / 2}px;`;
 
         // Use same SVG icons as Viewer for consistency
         icon.innerHTML = isGateway
@@ -196,7 +206,8 @@ export default function SceneView({
             "rounded",
             "mt-1",
             "opacity-0",
-            "transition-opacity"
+            "transition-opacity",
+            "whitespace-nowrap"
         );
         wrapper.appendChild(icon);
         wrapper.appendChild(tooltip);
@@ -212,6 +223,18 @@ export default function SceneView({
                 onDeleteLink(link.id);
             }
         });
+
+        // Left-click to select hotspot for editing
+        wrapper.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setSelectedHotspot(link);
+            setIsAdding(false); // Exit add mode if active
+        });
+
+        // Store wrapper reference for visual selection indicator
+        wrapper.dataset.linkId = link.id;
+        hotspotElementsRef.current.push(wrapper);
+
         if (currentSceneRef.current) {
             currentSceneRef.current.hotspotContainer().createHotspot(wrapper, {
                 yaw: link.yaw,
@@ -259,58 +282,239 @@ export default function SceneView({
                     <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200">
                         {/* Center Icon (Chevron) - Visual Anchor */}
                         <div className="relative z-20 flex items-center justify-center">
-                            <div className="size-16 rounded-full bg-slate-700/80 backdrop-blur-md border-[3px] border-white/40 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                                <span className="material-symbols-outlined text-4xl text-white font-bold drop-shadow-md">
+                            <div className="size-12 rounded-full bg-slate-700/80 backdrop-blur-md border-2 border-white/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.4)]">
+                                <span className="material-symbols-outlined text-2xl text-white font-bold drop-shadow-md">
                                     expand_less
                                 </span>
                             </div>
                         </div>
 
-                        {/* Button: CANCEL / DELETE (Left) */}
-                        <button
-                            onClick={() => setIsAdding(false)}
-                            className="absolute bg-red-500 hover:bg-red-600 text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -left-[4.5rem] top-1/2 -translate-y-1/2 flex items-center justify-center group border-2 border-white/20"
-                            title="Cancel"
-                        >
-                            <span className="material-symbols-outlined text-2xl font-bold">
-                                delete
-                            </span>
-                        </button>
-
-                        {/* Button: GATEWAY FALSE (Top Right) - Regular Navigation */}
+                        {/* Curved Left Side Buttons - Marzipano style */}
+                        {/* Button: Navigation (Top Left - curved) */}
                         <button
                             onClick={() => handleTriggerAdd("navigasi")}
-                            className="absolute bg-blue-500 hover:bg-blue-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -top-[3rem] flex items-center justify-center group"
+                            className="absolute bg-blue-500 hover:bg-blue-600 border-2 border-white/20 hover:border-white text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+                            style={{ left: "-1.5rem", top: "-2.5rem" }}
                             title="Link to Scene in Same Area"
                         >
                             <svg
                                 viewBox="0 0 24 24"
                                 fill="white"
-                                className="w-6 h-6"
+                                className="w-4 h-4"
+                                style={{ transform: "rotate(-90deg)" }}
                             >
                                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
                             </svg>
                         </button>
 
-                        {/* Button: GATEWAY TRUE (Bottom Right) - Portal */}
+                        {/* Button: Gateway (Middle Left - curved) */}
                         <button
                             onClick={() => handleTriggerAdd("gateway")}
-                            className="absolute bg-purple-500 hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -bottom-[3rem] flex items-center justify-center group"
+                            className="absolute bg-purple-500 hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+                            style={{
+                                left: "-3rem",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                            }}
                             title="Link to Different Area (Gateway)"
                         >
                             <svg
                                 viewBox="0 0 24 24"
                                 fill="white"
-                                className="w-7 h-7"
+                                className="w-5 h-5"
                             >
                                 <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z" />
                             </svg>
+                        </button>
+
+                        {/* Button: Cancel (Bottom Left - curved) */}
+                        <button
+                            onClick={() => setIsAdding(false)}
+                            className="absolute bg-red-500/80 hover:bg-red-600 text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group border-2 border-white/20"
+                            style={{ left: "-1.5rem", bottom: "-2.5rem" }}
+                            title="Cancel"
+                        >
+                            <span className="material-symbols-outlined text-lg">
+                                close
+                            </span>
                         </button>
                     </div>
 
                     {/* Helper Text */}
                     <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
                         Align center to target, then choose type
+                    </div>
+                </div>
+            )}
+
+            {/* --- REPOSITIONING MODE OVERLAY --- */}
+            {isRepositioning && selectedHotspot && (
+                <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+                    {/* Darken overlay */}
+                    <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
+
+                    {/* Center Anchor */}
+                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200">
+                        <div className="relative z-20 flex items-center justify-center">
+                            <div
+                                className={`size-14 rounded-full backdrop-blur-md border-[3px] border-white/50 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] ${
+                                    selectedHotspot.type === "gateway"
+                                        ? "bg-purple-600/80"
+                                        : "bg-blue-600/80"
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-3xl text-white font-bold drop-shadow-md">
+                                    my_location
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Confirm Button (Top) */}
+                        <button
+                            onClick={() => {
+                                if (!viewerRef.current) return;
+                                const view = viewerRef.current.view();
+                                onUpdateLink(selectedHotspot.id, {
+                                    yaw: view.yaw(),
+                                    pitch: view.pitch(),
+                                });
+                                setIsRepositioning(false);
+                                setSelectedHotspot(null);
+                            }}
+                            className="absolute bg-emerald-500 hover:bg-emerald-600 border-2 border-white/30 hover:border-white text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -top-[3.5rem]"
+                            title="Confirm new position"
+                        >
+                            <span className="material-symbols-outlined text-xl">
+                                check
+                            </span>
+                        </button>
+
+                        {/* Cancel Button (Bottom) */}
+                        <button
+                            onClick={() => setIsRepositioning(false)}
+                            className="absolute bg-red-500/80 hover:bg-red-600 border-2 border-white/30 text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -bottom-[3.5rem]"
+                            title="Cancel repositioning"
+                        >
+                            <span className="material-symbols-outlined text-xl">
+                                close
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* Helper Text */}
+                    <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
+                        Move camera to new position, then confirm
+                    </div>
+                </div>
+            )}
+
+            {/* --- EDIT HOTSPOT PANEL --- */}
+            {selectedHotspot && !isAdding && !isRepositioning && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 theme-card backdrop-blur-md rounded-xl shadow-2xl p-3">
+                    <div className="flex items-center gap-2 mb-2 pb-2 border-b theme-border">
+                        <div
+                            className={`size-8 rounded-full flex items-center justify-center ${
+                                selectedHotspot.type === "gateway"
+                                    ? "bg-purple-500"
+                                    : "bg-blue-500"
+                            }`}
+                        >
+                            {selectedHotspot.type === "gateway" ? (
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="white"
+                                    className="w-4 h-4"
+                                >
+                                    <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z" />
+                                </svg>
+                            ) : (
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="white"
+                                    className="w-4 h-4"
+                                    style={{ transform: "rotate(-90deg)" }}
+                                >
+                                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
+                                </svg>
+                            )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold theme-text truncate">
+                                {selectedHotspot.target_name}
+                            </p>
+                            <p className="text-xs theme-text-muted">
+                                {selectedHotspot.type === "gateway"
+                                    ? "Gateway"
+                                    : "Navigation"}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setSelectedHotspot(null)}
+                            className="theme-text-muted hover:theme-text transition-colors p-1"
+                            title="Close"
+                        >
+                            <span className="material-symbols-outlined text-lg">
+                                close
+                            </span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Update Position - Enter repositioning mode */}
+                        <button
+                            onClick={() => setIsRepositioning(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-600 text-white"
+                            title="Enter repositioning mode"
+                        >
+                            <span className="material-symbols-outlined text-sm">
+                                my_location
+                            </span>
+                            <span>Update Position</span>
+                        </button>
+
+                        {/* Toggle Type */}
+                        <button
+                            onClick={() => {
+                                const newType =
+                                    selectedHotspot.type === "gateway"
+                                        ? "navigasi"
+                                        : "gateway";
+                                onUpdateLink(selectedHotspot.id, {
+                                    type: newType,
+                                });
+                                setSelectedHotspot((prev) => ({
+                                    ...prev,
+                                    type: newType,
+                                }));
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-indigo-500 hover:bg-indigo-600 text-white"
+                            title="Toggle between navigation and gateway"
+                        >
+                            <span className="material-symbols-outlined text-sm">
+                                swap_horiz
+                            </span>
+                            <span>
+                                {selectedHotspot.type === "gateway"
+                                    ? "To Nav"
+                                    : "To Gateway"}
+                            </span>
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                            onClick={() => {
+                                if (confirm("Delete this hotspot?")) {
+                                    onDeleteLink(selectedHotspot.id);
+                                    setSelectedHotspot(null);
+                                }
+                            }}
+                            className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors bg-red-500 hover:bg-red-600 text-white"
+                            title="Delete hotspot"
+                        >
+                            <span className="material-symbols-outlined text-sm">
+                                delete
+                            </span>
+                        </button>
                     </div>
                 </div>
             )}
