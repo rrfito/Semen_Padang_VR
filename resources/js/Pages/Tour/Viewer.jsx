@@ -80,7 +80,7 @@ export default function Viewer({ scene, initial_heading }) {
                    </div>
                    <div class="hotspot-label">${hotspot.text}</div>`
                 : `<div class="nav-btn">
-                     <svg viewBox="0 0 24 24" fill="currentColor" class="nav-icon">
+                     <svg viewBox="0 0 24 24" fill="currentColor" class="nav-icon" style="transform: rotate(-90deg);">
                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
                      </svg>
                    </div>
@@ -163,7 +163,6 @@ export default function Viewer({ scene, initial_heading }) {
                 /* ============================================ */
                 .hotspot-nav {
                     cursor: pointer;
-                    transition: transform 0.2s ease-out;
                 }
                 .nav-btn {
                     width: 48px;
@@ -198,7 +197,6 @@ export default function Viewer({ scene, initial_heading }) {
                 /* ============================================ */
                 .hotspot-gateway {
                     cursor: pointer;
-                    transition: transform 0.2s ease-out;
                 }
                 .gateway-btn {
                     width: 52px;

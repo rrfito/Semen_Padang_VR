@@ -12,6 +12,35 @@ export default function PropertiesPanel({
     onUpdate,
     onDelete,
 }) {
+    // Show loading placeholder when scene is selected but data not yet loaded
+    if (selection && selection.type === "scene" && !activeNode) {
+        return (
+            <aside className="w-96 flex flex-col border-l theme-border theme-sidebar z-10 transition-all font-sans">
+                <div className="px-6 py-5 border-b theme-border flex items-center gap-3 theme-surface">
+                    <div className="size-10 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
+                        <span className="material-symbols-outlined text-[24px]">
+                            panorama_photosphere
+                        </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-lg font-bold theme-text leading-tight">
+                            {selection.name || `Scene #${selection.id}`}
+                        </h2>
+                        <p className="text-xs font-medium theme-text-muted mt-0.5">
+                            Memuat properti...
+                        </p>
+                    </div>
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 flex items-center justify-center">
+                    <div className="text-center text-white/50 flex flex-col items-center gap-3">
+                        <div className="w-6 h-6 border-2 border-white/30 border-t-emerald-400 rounded-full animate-spin"></div>
+                        <span className="text-sm">Memuat data scene...</span>
+                    </div>
+                </div>
+            </aside>
+        );
+    }
+
     if (!selection || !activeNode) {
         // RENDER GETTING STARTED GUIDE
         return (

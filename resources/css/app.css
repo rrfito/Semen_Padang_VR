@@ -290,10 +290,14 @@
     /* Interactive element with subtle feedback */
     .theme-interactive {
         @apply transition-all duration-150 ease-out;
+        transform: translateZ(0) scale(1);
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
     }
     
     .theme-interactive:hover {
-        @apply transform scale-[1.02];
+        transform: translateZ(0) scale(1.02);
     }
     
     .theme-interactive:active {

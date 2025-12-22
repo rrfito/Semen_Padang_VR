@@ -132,7 +132,7 @@ export default function SceneContainerView({
                             </div>
                             <div className="p-4 flex-1 flex flex-col">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h3 className="text-sm font-bold theme-text group-hover:text-primary transition-colors truncate pr-2">
+                                    <h3 className="text-sm font-bold theme-text group-hover:text-action-primary transition-colors truncate pr-2">
                                         {scene.name}
                                     </h3>
                                     <button className="theme-text-muted hover:text-primary transition-colors">

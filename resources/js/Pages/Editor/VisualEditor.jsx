@@ -651,18 +651,18 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
 
         if (selection.type === "scene") {
             const details = sceneCache[selection.id];
-            if (isLoadingDetails)
+
+            // If loading or no details yet, show a minimal loading state that looks like SceneView
+            if (isLoadingDetails || !details) {
                 return (
-                    <div className="flex-1 bg-black text-white flex items-center justify-center">
-                        Loading Scene...
-                    </div>
+                    <main className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden items-center justify-center h-full w-full">
+                        <div className="text-white/50 flex flex-col items-center gap-3">
+                            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span className="text-sm">Memuat Scene...</span>
+                        </div>
+                    </main>
                 );
-            if (!details)
-                return (
-                    <div className="flex-1 bg-black text-white flex items-center justify-center">
-                        Scene Data Missing
-                    </div>
-                );
+            }
 
             return (
                 <SceneView

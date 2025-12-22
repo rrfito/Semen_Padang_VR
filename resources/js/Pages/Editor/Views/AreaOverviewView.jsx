@@ -430,7 +430,7 @@ export default function AreaOverviewView({
                                         more_vert
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold theme-text mb-1 group-hover:text-primary transition-colors">
+                                <h3 className="text-lg font-bold theme-text mb-1 group-hover:text-action-primary transition-colors">
                                     {child.name}
                                 </h3>
                                 <p className="text-sm theme-text-muted">

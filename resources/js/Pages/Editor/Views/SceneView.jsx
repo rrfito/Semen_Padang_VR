@@ -149,7 +149,8 @@ export default function SceneView({
     useEffect(() => {
         if (!currentSceneRef.current || !scene?.links) return;
 
-        const container = currentSceneRef.current.hotspotContainer();
+        const container = currentSceneRef.current.hotspotContainer?.();
+        if (!container) return; // Scene not fully initialized yet
 
         // Destroy existing hotspots individually
         const existingHotspots = container.listHotspots();
@@ -171,12 +172,9 @@ export default function SceneView({
 
     const createHotspot = (link) => {
         const wrapper = document.createElement("div");
-        wrapper.classList.add(
-            "hotspot-wrapper",
-            "cursor-pointer",
-            "hover:scale-110",
-            "transition-transform"
-        );
+        wrapper.classList.add("hotspot-wrapper", "cursor-pointer");
+        // Add inline style for hover-only transition to avoid lag during camera movement
+        wrapper.style.cssText = "transition: none;";
 
         const isGateway = link.type === "gateway";
         const icon = document.createElement("div");
@@ -184,7 +182,7 @@ export default function SceneView({
         // Use same SVG icons as Viewer for consistency
         icon.innerHTML = isGateway
             ? `<div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-7 h-7"><path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z"/></svg></div>`
-            : `<div class="w-11 h-11 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-6 h-6"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></div>`;
+            : `<div class="w-11 h-11 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-6 h-6" style="transform: rotate(-90deg);"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></div>`;
 
         const tooltip = document.createElement("div");
         tooltip.innerText = link.target_name || "Unknown";
