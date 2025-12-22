@@ -125,20 +125,20 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-fade-in-up">
+        <div className="theme-modal-backdrop backdrop-blur-sm">
+            <div className="w-full max-w-2xl theme-modal overflow-hidden animate-fade-in-up">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between bg-gray-800">
+                <div className="theme-modal-header flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                        <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                             <FaNetworkWired size={18} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-white">
+                            <h3 className="text-lg font-bold theme-text">
                                 Auto-Link Scenes
                             </h3>
                             {preview && (
-                                <p className="text-xs text-gray-400 mt-0.5">
+                                <p className="text-xs theme-text-muted mt-0.5">
                                     {preview.scope === "universal"
                                         ? "🌍 All Areas"
                                         : "📂 " +
@@ -150,7 +150,7 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-white transition-colors"
+                        className="theme-text-subtle hover:text-primary transition-colors"
                     >
                         <FaTimes />
                     </button>
@@ -159,14 +159,14 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                 {/* Body */}
                 <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                     {loading ? (
-                        <div className="py-12 text-center text-gray-400">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <div className="py-12 text-center theme-text-muted">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             <p className="mt-3 text-sm">Loading preview...</p>
                         </div>
                     ) : preview ? (
                         <>
                             {/* Universal Toggle */}
-                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                            <div className="theme-alert-info">
                                 <label className="flex items-start gap-3 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -174,13 +174,13 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                         onChange={(e) =>
                                             setLinkAllAreas(e.target.checked)
                                         }
-                                        className="mt-0.5 w-4 h-4 rounded border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
+                                        className="mt-0.5 w-4 h-4 rounded border-gray-400 dark:border-gray-600 text-primary focus:ring-primary"
                                     />
                                     <div className="flex-1">
-                                        <div className="font-bold text-white text-sm">
+                                        <div className="font-bold theme-text text-sm">
                                             Link in all areas
                                         </div>
-                                        <div className="text-xs text-gray-400 mt-1">
+                                        <div className="text-xs theme-text-muted mt-1">
                                             {linkAllAreas
                                                 ? `Process all areas in the database (Universal mode)`
                                                 : `Process only "${
@@ -194,7 +194,7 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
 
                             {/* Mode Toggle */}
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase block mb-3">
+                                <label className="theme-section-header block mb-3">
                                     Link Creation Mode
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -202,25 +202,25 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                         onClick={() => setReplaceMode(false)}
                                         className={`p-4 rounded-lg border-2 transition-all ${
                                             !replaceMode
-                                                ? "border-blue-500 bg-blue-500/10"
-                                                : "border-gray-700 bg-gray-800 hover:border-gray-600"
+                                                ? "border-primary bg-primary/10"
+                                                : "theme-border bg-gray-100 dark:bg-gray-800 hover:border-primary/50"
                                         }`}
                                     >
                                         <div className="flex items-start gap-3">
                                             <div
                                                 className={`text-2xl ${
                                                     !replaceMode
-                                                        ? "text-blue-500"
-                                                        : "text-gray-500"
+                                                        ? "text-primary"
+                                                        : "theme-text-muted"
                                                 }`}
                                             >
                                                 ➕
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <div className="font-bold text-white text-sm">
+                                                <div className="font-bold theme-text text-sm">
                                                     Skip Existing
                                                 </div>
-                                                <div className="text-xs text-gray-400 mt-1">
+                                                <div className="text-xs theme-text-muted mt-1">
                                                     Only create new links. Safe
                                                     to re-run.
                                                 </div>
@@ -233,7 +233,7 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                         className={`p-4 rounded-lg border-2 transition-all ${
                                             replaceMode
                                                 ? "border-orange-500 bg-orange-500/10"
-                                                : "border-gray-700 bg-gray-800 hover:border-gray-600"
+                                                : "theme-border bg-gray-100 dark:bg-gray-800 hover:border-orange-300"
                                         }`}
                                     >
                                         <div className="flex items-start gap-3">
@@ -247,14 +247,14 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                                 🔄
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <div className="font-bold text-white text-sm">
+                                                <div className="font-bold theme-text text-sm">
                                                     Replace All
                                                 </div>
                                                 <div
                                                     className={`text-xs mt-1  ${
                                                         replaceMode
-                                                            ? "text-orange-400"
-                                                            : "text-gray-400"
+                                                            ? "text-orange-500"
+                                                            : "theme-text-muted"
                                                     }`}
                                                 >
                                                     Delete{" "}
@@ -269,7 +269,7 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
 
                             {/* Radius Input */}
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase block mb-2">
+                                <label className="theme-section-header block mb-2">
                                     Link Radius (meters)
                                 </label>
                                 <input
@@ -289,23 +289,23 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                             )
                                         )
                                     }
-                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="theme-form-input"
                                     placeholder="5"
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
+                                <p className="theme-form-hint">
                                     Maximum distance to create links between
                                     scenes (1-100 meters)
                                 </p>
                             </div>
 
-                            <div className="border-t border-gray-700"></div>
+                            <div className="theme-divider"></div>
 
                             {/* Preview Stats */}
                             <div>
-                                <h4 className="text-sm font-bold text-white mb-3">
+                                <h4 className="text-sm font-bold theme-text mb-3">
                                     Target Areas ({preview.target_areas.length})
                                 </h4>
-                                <div className="bg-gray-800 rounded-lg p-4 space-y-2 max-h-32 overflow-y-auto">
+                                <div className="theme-surface-elevated rounded-lg p-4 space-y-2 max-h-32 overflow-y-auto">
                                     {preview.target_areas
                                         .slice(0, 10)
                                         .map((a) => (
@@ -313,16 +313,16 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                                                 key={a.id}
                                                 className="flex items-center justify-between text-sm"
                                             >
-                                                <span className="text-gray-300">
+                                                <span className="theme-text-secondary">
                                                     ✓ {a.name}
                                                 </span>
-                                                <span className="text-gray-500 text-xs">
+                                                <span className="theme-text-subtle text-xs">
                                                     {a.scene_count} scenes
                                                 </span>
                                             </div>
                                         ))}
                                     {preview.target_areas.length > 10 && (
-                                        <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-700">
+                                        <div className="text-xs theme-text-subtle text-center pt-2 border-t theme-border">
                                             +{preview.target_areas.length - 10}{" "}
                                             more areas
                                         </div>
@@ -332,9 +332,9 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
 
                             {/* Warnings */}
                             {preview.scenes_without_gps > 0 && (
-                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 flex items-start gap-3">
-                                    <FaExclamationTriangle className="text-yellow-500 mt-0.5" />
-                                    <div className="text-sm text-yellow-200">
+                                <div className="theme-alert-warning flex items-start gap-3">
+                                    <FaExclamationTriangle className="text-amber-500 dark:text-amber-400 mt-0.5" />
+                                    <div className="text-sm theme-text-secondary">
                                         <strong>
                                             {preview.scenes_without_gps}
                                         </strong>{" "}
@@ -344,16 +344,16 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                             )}
 
                             {preview.gateway_scenes === 0 && (
-                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-sm text-blue-200">
+                                <div className="theme-alert-info text-sm theme-text-secondary">
                                     ℹ️ No gateway scenes found - only navigation
                                     links will be created
                                 </div>
                             )}
 
                             {replaceMode && preview.existing_links > 0 && (
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3">
-                                    <FaExclamationTriangle className="text-red-500 mt-0.5" />
-                                    <div className="text-sm text-red-200">
+                                <div className="theme-alert-danger flex items-start gap-3">
+                                    <FaExclamationTriangle className="text-red-500 dark:text-red-400 mt-0.5" />
+                                    <div className="text-sm theme-text-secondary">
                                         <strong>Warning:</strong> This will
                                         permanently delete{" "}
                                         {preview.existing_links} existing links!
@@ -365,11 +365,11 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-700 bg-gray-800 flex justify-end gap-3">
+                <div className="theme-modal-footer flex justify-end gap-3">
                     <button
                         onClick={onClose}
                         disabled={executing}
-                        className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                        className="theme-btn-secondary disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -381,10 +381,10 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                             !preview ||
                             preview.total_scenes === 0
                         }
-                        className={`px-6 py-2 text-sm font-bold text-white rounded-lg shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
                             replaceMode
-                                ? "bg-orange-600 hover:bg-orange-500 shadow-orange-600/20"
-                                : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+                                ? "!bg-orange-600 hover:!bg-orange-500 shadow-orange-600/20"
+                                : ""
                         }`}
                     >
                         {executing ? (

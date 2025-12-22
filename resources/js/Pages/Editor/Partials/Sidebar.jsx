@@ -38,8 +38,10 @@ export default function Sidebar({
 
         const getIconColorClass = () => {
             if (isSelected && node.type === "area") return "text-primary";
-            if (level === 0) return "text-amber-500";
-            return "text-slate-400"; // Default slate for others
+            if (node.type === "scene") return "text-purple-500"; // Scenes - purple
+            if (level === 0) return "text-amber-500"; // Level 1 - amber
+            if (level === 1) return "text-blue-500"; // Level 2 - blue
+            return "text-teal-500"; // Level 3+ - teal
         };
 
         // Indentation via nested padding/margins mimicking the HTML structure
@@ -52,8 +54,8 @@ export default function Sidebar({
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors
                     ${
                         isSelected
-                            ? "bg-primary/10 text-primary border border-primary/20"
-                            : "hover:bg-slate-100 dark:hover:bg-[#233648] text-slate-600 dark:text-[#92adc9] border border-transparent"
+                            ? "theme-sidebar-item-active border"
+                            : "theme-sidebar-item border border-transparent"
                     }`}
                     onClick={handleClick}
                 >
@@ -74,11 +76,9 @@ export default function Sidebar({
                             >
                                 arrow_right
                             </span>
-                        ) : // Dot for leaf items roughly matches "meeting_room" indentation in HTML #2 example
-                        // actually HTML #2 uses dot for leaf areas? No, looks like arrow_right is used if it's a folder.
-                        // If it is a scene, HTML #3 uses "360" icon directly without arrow.
+                        ) : // Dot for leaf items
                         node.type === "scene" ? null : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+                            <div className="w-1.5 h-1.5 rounded-full theme-text-subtle"></div>
                         )}
                     </div>
 
@@ -134,15 +134,15 @@ export default function Sidebar({
     };
 
     return (
-        <aside className="w-80 flex flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark z-10 font-sans">
+        <aside className="w-80 flex flex-col border-r theme-border theme-sidebar z-10 font-sans">
             {/* User Provided Header (Search + Buttons) */}
-            <div className="p-4 border-b border-border-light dark:border-border-dark space-y-3 shrink-0">
+            <div className="p-4 border-b theme-border space-y-3 shrink-0">
                 <label className="relative flex items-center w-full">
-                    <span className="absolute left-3 text-slate-400 material-symbols-outlined text-[20px]">
+                    <span className="absolute left-3 theme-text-muted material-symbols-outlined text-[20px]">
                         search
                     </span>
                     <input
-                        className="w-full bg-slate-100 dark:bg-[#111a22] text-sm text-slate-900 dark:text-white placeholder-slate-500 rounded-lg pl-10 pr-4 py-2.5 border-none focus:ring-2 focus:ring-primary/50 outline-none transition-all"
+                        className="w-full theme-input text-sm theme-text rounded-lg pl-10 pr-4 py-2.5 border theme-border focus:ring-2 focus:ring-primary/50 outline-none transition-all"
                         placeholder="Filter scenes..."
                     />
                 </label>
@@ -150,7 +150,7 @@ export default function Sidebar({
                     <button
                         onClick={onCreateArea}
                         disabled={selection?.type === "scene"}
-                        className="flex-1 flex items-center justify-center gap-2 h-9 bg-slate-100 dark:bg-[#233648] hover:bg-slate-200 dark:hover:bg-[#2f455a] text-slate-700 dark:text-white text-xs font-bold rounded-lg transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 theme-btn-action"
                         title={
                             selection?.type === "scene"
                                 ? "Cannot add area to a scene (Select an area or root first)"
@@ -160,19 +160,13 @@ export default function Sidebar({
                         <span className="material-symbols-outlined text-[18px]">
                             create_new_folder
                         </span>
-                        <span>Area</span>
-                    </button>
-                    <button className="flex-1 flex items-center justify-center gap-2 h-9 bg-slate-100 dark:bg-[#233648] hover:bg-slate-200 dark:hover:bg-[#2f455a] text-slate-700 dark:text-white text-xs font-bold rounded-lg transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500">
-                        <span className="material-symbols-outlined text-[18px]">
-                            add_photo_alternate
-                        </span>
-                        <span>Add Scene</span>
+                        <span>Create New Area</span>
                     </button>
                 </div>
                 <button
                     onClick={() => onAutoLink?.(selection)}
                     disabled={!selection || selection?.type === "scene"}
-                    className="w-full flex items-center justify-center gap-2 h-9 bg-slate-100 dark:bg-[#233648] hover:bg-slate-200 dark:hover:bg-[#2f455a] text-slate-700 dark:text-white text-xs font-bold rounded-lg transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full theme-btn-action"
                     title={
                         !selection
                             ? "Select an area first"
@@ -184,16 +178,14 @@ export default function Sidebar({
                     <span className="material-symbols-outlined text-[18px]">
                         link
                     </span>
-                    <span>Auto Link Scene</span>
+                    <span>Create Auto Link Scene</span>
                 </button>
             </div>
 
             {/* Tree Section Header */}
-            <div className="px-4 py-2 bg-slate-50 dark:bg-[#15202b] border-b border-border-light dark:border-border-dark flex items-center justify-between shrink-0 sticky top-0 z-10">
-                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Areas Hierarchy
-                </h3>
-                <span className="material-symbols-outlined text-slate-400 text-[16px]">
+            <div className="px-4 py-2 bg-gray-50 dark:bg-[#111a22] border-b theme-border flex items-center justify-between shrink-0 sticky top-0 z-10">
+                <h3 className="theme-section-header">Areas Hierarchy</h3>
+                <span className="material-symbols-outlined theme-text-muted text-[16px]">
                     folder
                 </span>
             </div>
@@ -210,12 +202,12 @@ export default function Sidebar({
                     ))
                 ) : (
                     <div className="p-8 text-center">
-                        <div className="text-slate-600 text-xs mb-2">
+                        <div className="theme-text-muted text-xs mb-2">
                             No areas found
                         </div>
                         <button
                             onClick={onCreateArea}
-                            className="text-[10px] font-bold text-blue-500 border border-blue-500/30 rounded px-3 py-1 hover:bg-blue-500/10 transition-colors"
+                            className="text-[10px] font-bold text-primary border border-primary/30 rounded px-3 py-1 hover:bg-primary/10 transition-colors"
                         >
                             Create Root Area
                         </button>

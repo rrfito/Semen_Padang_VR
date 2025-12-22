@@ -21,7 +21,7 @@ export default function SceneContainerView({
     };
 
     return (
-        <div className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden group/canvas font-display">
+        <div className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas font-display">
             {/* Hidden Input */}
             <input
                 type="file"
@@ -33,7 +33,7 @@ export default function SceneContainerView({
             />
 
             {/* Background Grid */}
-            <div className="absolute inset-0 bg-[#0c141d]">
+            <div className="absolute inset-0 theme-view-grid">
                 <svg
                     className="w-full h-full opacity-[0.03]"
                     xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +48,7 @@ export default function SceneContainerView({
                             <path
                                 d="M 40 0 L 0 0 0 40"
                                 fill="none"
-                                stroke="white"
+                                stroke="currentColor"
                                 strokeWidth="1"
                             ></path>
                         </pattern>
@@ -59,8 +59,8 @@ export default function SceneContainerView({
                         width="100%"
                     ></rect>
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none overflow-hidden">
-                    <span className="material-symbols-outlined text-[600px] text-white">
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.03] pointer-events-none overflow-hidden">
+                    <span className="material-symbols-outlined text-[600px] theme-text-subtle">
                         photo_camera_back
                     </span>
                 </div>
@@ -75,14 +75,11 @@ export default function SceneContainerView({
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">
                                 Level {area.level || 3} • Leaf Area
                             </span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-500 uppercase tracking-wider">
-                                Indoor
-                            </span>
                         </div>
-                        <h2 className="text-3xl font-bold text-white mb-2">
+                        <h2 className="text-3xl font-bold theme-text mb-2">
                             {area.name}
                         </h2>
-                        <p className="text-slate-400 text-lg">
+                        <p className="theme-text-secondary text-lg">
                             Manage 360° scenes in this area.
                         </p>
                     </div>
@@ -103,7 +100,7 @@ export default function SceneContainerView({
                         info
                     </span>
                     <div>
-                        <p className="text-sm text-slate-300">
+                        <p className="text-sm theme-text-secondary">
                             This area is a container for scenes, not sub-areas.
                             You can upload and manage 360 panorama images
                             directly here.
@@ -117,9 +114,9 @@ export default function SceneContainerView({
                         <div
                             key={scene.id}
                             onClick={() => onSelectScene(scene)}
-                            className="bg-surface-dark border border-border-dark hover:border-primary/50 rounded-xl overflow-hidden group cursor-pointer transition-all shadow-lg hover:shadow-xl hover:shadow-primary/5 flex flex-col"
+                            className="theme-card overflow-hidden group flex flex-col"
                         >
-                            <div className="relative aspect-video bg-slate-800">
+                            <div className="relative aspect-video theme-view-canvas">
                                 <div
                                     className="w-full h-full bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
                                     style={{
@@ -159,16 +156,16 @@ export default function SceneContainerView({
                             </div>
                             <div className="p-4 flex-1 flex flex-col">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h3 className="text-sm font-bold text-white group-hover:text-primary transition-colors truncate pr-2">
+                                    <h3 className="text-sm font-bold theme-text group-hover:text-primary transition-colors truncate pr-2">
                                         {scene.name}
                                     </h3>
-                                    <button className="text-slate-500 hover:text-white transition-colors">
+                                    <button className="theme-text-muted hover:text-primary transition-colors">
                                         <span className="material-symbols-outlined text-[18px]">
                                             more_vert
                                         </span>
                                     </button>
                                 </div>
-                                <p className="text-xs text-slate-500 font-mono mt-auto">
+                                <p className="text-xs theme-text-subtle font-mono mt-auto">
                                     ID: {scene.id}
                                 </p>
                             </div>
@@ -177,17 +174,17 @@ export default function SceneContainerView({
 
                     <button
                         onClick={handleUploadClick}
-                        className="border-2 border-dashed border-border-dark hover:border-primary/50 hover:bg-primary/5 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all group min-h-[220px]"
+                        className="theme-dashed-card p-5 flex flex-col items-center justify-center gap-3 group min-h-[220px]"
                     >
-                        <div className="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+                        <div className="size-12 rounded-full theme-icon-bg theme-icon-bg-hover flex items-center justify-center transition-colors">
                             <span className="material-symbols-outlined text-[24px]">
                                 add_a_photo
                             </span>
                         </div>
-                        <span className="text-sm font-bold text-slate-400 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold theme-text-muted group-hover:text-primary transition-colors">
                             Add Scene
                         </span>
-                        <span className="text-xs text-slate-600">
+                        <span className="text-xs theme-text-subtle">
                             Upload 360° Panorama
                         </span>
                     </button>

@@ -530,6 +530,20 @@ class EditorController extends Controller
     // Helper: Execute linking
     private function executeAutoLinking(array $targetAreaIds, bool $replaceExisting, int $radius = 5): \Illuminate\Http\JsonResponse
     {
+        // Validate: Check for scenes with identical/very close GPS locations (< 0.5 meter)
+        $duplicateLocations = $this->findDuplicateLocationScenes($targetAreaIds);
+        if (!empty($duplicateLocations)) {
+            $errorMsg = "Found scenes with nearly identical GPS locations:\n";
+            foreach ($duplicateLocations as $dup) {
+                $errorMsg .= "- '{$dup->scene1_name}' and '{$dup->scene2_name}' (distance: " . round($dup->distance, 2) . "m)\n";
+            }
+            $errorMsg .= "\nPlease fix GPS coordinates or delete duplicate scenes.";
+            return response()->json([
+                'success' => false,
+                'error' => $errorMsg
+            ], 400);
+        }
+
         DB::beginTransaction();
         try {
             $deletedCount = 0;
@@ -1388,5 +1402,31 @@ class EditorController extends Controller
         ", $areaIds);
 
         return $result[0]->count ?? 0;
+    }
+
+    // Helper: Find scenes with nearly identical GPS locations (< 0.5 meter)
+    private function findDuplicateLocationScenes(array $areaIds): array
+    {
+        if (empty($areaIds))
+            return [];
+
+        $placeholders = implode(',', array_fill(0, count($areaIds), '?'));
+
+        // Check both same-area and cross-area (for gateway links)
+        return DB::select("
+            SELECT 
+                s1.id as scene1_id,
+                s1.name as scene1_name,
+                s2.id as scene2_id,
+                s2.name as scene2_name,
+                COALESCE(ST_DistanceSphere(s1.location::geometry, s2.location::geometry), 0) as distance
+            FROM scenes s1
+            JOIN scenes s2 ON s1.id < s2.id
+            WHERE (s1.area_id IN ($placeholders) OR s2.area_id IN ($placeholders))
+                AND s1.location IS NOT NULL 
+                AND s2.location IS NOT NULL
+                AND COALESCE(ST_DistanceSphere(s1.location::geometry, s2.location::geometry), 0) < 0.5
+            LIMIT 10
+        ", array_merge($areaIds, $areaIds));
     }
 }

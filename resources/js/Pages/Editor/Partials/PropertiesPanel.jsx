@@ -15,92 +15,92 @@ export default function PropertiesPanel({
     if (!selection || !activeNode) {
         // RENDER GETTING STARTED GUIDE
         return (
-            <aside className="w-96 flex flex-col border-l border-border-dark bg-surface-dark z-10 transition-all font-sans">
-                <div className="px-6 py-5 border-b border-border-dark flex items-center gap-3 bg-[#15202b]">
+            <aside className="w-96 flex flex-col border-l theme-border theme-sidebar z-10 transition-all font-sans">
+                <div className="px-6 py-5 border-b theme-border flex items-center gap-3 theme-surface">
                     <div className="size-10 flex items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0">
                         <span className="material-symbols-outlined text-[24px]">
                             lightbulb
                         </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-bold text-white leading-tight">
+                        <h2 className="text-lg font-bold theme-text leading-tight">
                             Getting Started
                         </h2>
-                        <p className="text-xs font-medium text-slate-400 mt-0.5">
+                        <p className="text-xs font-medium theme-text-muted mt-0.5">
                             Quick Start Guide
                         </p>
                     </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+                    <h3 className="theme-section-header mb-4">
                         Workflow Steps
                     </h3>
                     <ul className="space-y-6 relative">
-                        <div className="absolute left-[11px] top-2 bottom-4 w-px bg-border-dark -z-10"></div>
+                        <div className="absolute left-[11px] top-2 bottom-4 w-px theme-border -z-10"></div>
                         <li className="flex gap-4 items-start">
-                            <span className="flex items-center justify-center size-6 rounded-full bg-[#233648] text-slate-300 text-xs font-bold shrink-0 border border-slate-600">
+                            <span className="flex items-center justify-center size-6 rounded-full theme-icon-bg theme-text-secondary text-xs font-bold shrink-0 border theme-border">
                                 1
                             </span>
                             <div className="pt-0.5">
-                                <p className="text-sm font-medium text-slate-200">
+                                <p className="text-sm font-medium theme-text-secondary">
                                     Create or select an Area
                                 </p>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs theme-text-muted mt-1">
                                     Define the structure of your location.
                                 </p>
                             </div>
                         </li>
                         <li className="flex gap-4 items-start">
-                            <span className="flex items-center justify-center size-6 rounded-full bg-[#233648] text-slate-300 text-xs font-bold shrink-0 border border-slate-600">
+                            <span className="flex items-center justify-center size-6 rounded-full bg-gray-100 dark:bg-[#233648] text-gray-600 dark:text-slate-300 text-xs font-bold shrink-0 border border-gray-200 dark:border-slate-600">
                                 2
                             </span>
                             <div className="pt-0.5">
-                                <p className="text-sm font-medium text-slate-200">
+                                <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
                                     Upload scenes
                                 </p>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
                                     Upload 360° panoramas or splats.
                                 </p>
                             </div>
                         </li>
                         <li className="flex gap-4 items-start">
-                            <span className="flex items-center justify-center size-6 rounded-full bg-[#233648] text-slate-300 text-xs font-bold shrink-0 border border-slate-600">
+                            <span className="flex items-center justify-center size-6 rounded-full bg-gray-100 dark:bg-[#233648] text-gray-600 dark:text-slate-300 text-xs font-bold shrink-0 border border-gray-200 dark:border-slate-600">
                                 3
                             </span>
                             <div className="pt-0.5">
-                                <p className="text-sm font-medium text-slate-200">
+                                <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
                                     Link scenes
                                 </p>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
                                     Use auto-link to connect viewpoints.
                                 </p>
                             </div>
                         </li>
                         <li className="flex gap-4 items-start">
-                            <span className="flex items-center justify-center size-6 rounded-full bg-[#233648] text-slate-300 text-xs font-bold shrink-0 border border-slate-600">
+                            <span className="flex items-center justify-center size-6 rounded-full bg-gray-100 dark:bg-[#233648] text-gray-600 dark:text-slate-300 text-xs font-bold shrink-0 border border-gray-200 dark:border-slate-600">
                                 4
                             </span>
                             <div className="pt-0.5">
-                                <p className="text-sm font-medium text-slate-200">
+                                <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
                                     Review and publish
                                 </p>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
                                     Make your tour live for users.
                                 </p>
                             </div>
                         </li>
                     </ul>
-                    <div className="mt-8 pt-6 border-t border-border-dark">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-border-dark">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-3">
                             Legend
                         </h3>
-                        <div className="bg-[#111a22] rounded-lg p-3 space-y-2 border border-border-dark">
+                        <div className="bg-gray-100 dark:bg-[#111a22] rounded-lg p-3 space-y-2 border border-gray-200 dark:border-border-dark">
                             <div className="flex items-center gap-3">
                                 <span className="material-symbols-outlined text-amber-500 text-[20px]">
                                     domain
                                 </span>
-                                <span className="text-sm text-slate-300">
+                                <span className="text-sm text-gray-700 dark:text-slate-300">
                                     <span className="font-bold">Area</span> =
                                     Room / Location
                                 </span>
@@ -109,7 +109,7 @@ export default function PropertiesPanel({
                                 <span className="material-symbols-outlined text-primary text-[20px]">
                                     360
                                 </span>
-                                <span className="text-sm text-slate-300">
+                                <span className="text-sm text-gray-700 dark:text-slate-300">
                                     <span className="font-bold">Scene</span> =
                                     Viewpoint inside
                                 </span>
@@ -181,9 +181,9 @@ export default function PropertiesPanel({
     };
 
     return (
-        <aside className="w-80 flex flex-col border-l border-border-dark bg-surface-dark z-10 shadow-xl font-sans">
+        <aside className="w-80 flex flex-col border-l theme-border theme-surface z-10 font-sans">
             {/* Header */}
-            <div className="px-6 py-6 border-b border-border-dark flex items-start gap-4">
+            <div className="px-6 py-6 border-b theme-border flex items-start gap-4">
                 <div
                     className={`mt-1 size-10 flex items-center justify-center rounded-xl shadow-lg border border-white/5 ${
                         selection.type === "area"
@@ -196,10 +196,10 @@ export default function PropertiesPanel({
                     </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-white leading-tight truncate">
+                    <h2 className="text-lg font-bold theme-text leading-tight truncate">
                         {activeNode.name}
                     </h2>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">
+                    <p className="text-xs font-bold theme-text-muted uppercase tracking-wider mt-1">
                         {selection.type === "area"
                             ? "Area Properties"
                             : "Scene Properties"}
@@ -243,13 +243,13 @@ export default function PropertiesPanel({
                 {selection.type === "scene" && (
                     <>
                         {/* GPS Location */}
-                        <div className="space-y-3 pt-4 border-t border-border-dark">
+                        <div className="space-y-3 pt-4 border-t theme-border">
                             <SectionHeader>
                                 Optional GPS Reference
                             </SectionHeader>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                                    <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
                                         Latitude
                                     </label>
                                     <FormInput
@@ -266,7 +266,7 @@ export default function PropertiesPanel({
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                                    <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
                                         Longitude
                                     </label>
                                     <FormInput
@@ -286,7 +286,7 @@ export default function PropertiesPanel({
                             <button
                                 type="button"
                                 onClick={() => setShowMapPicker(true)}
-                                className="w-full flex items-center justify-center gap-2 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg border border-slate-700 transition-all"
+                                className="w-full flex items-center justify-center gap-2 h-9 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 theme-text-secondary font-bold text-xs rounded-lg border theme-border transition-all"
                             >
                                 <span className="material-symbols-outlined text-[16px]">
                                     explore
@@ -296,9 +296,9 @@ export default function PropertiesPanel({
                         </div>
 
                         {/* Gateway Toggle */}
-                        <div className="space-y-3 pt-4 border-t border-border-dark">
+                        <div className="space-y-3 pt-4 border-t theme-border">
                             <SectionHeader>Gateway Connection</SectionHeader>
-                            <label className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 cursor-pointer hover:border-slate-600 transition-colors">
+                            <label className="flex items-start gap-3 p-4 bg-gray-100 dark:bg-slate-800/50 rounded-lg border theme-border-subtle cursor-pointer hover:border-primary/30 transition-colors">
                                 <div className="flex items-center h-6">
                                     <input
                                         type="checkbox"
@@ -316,10 +316,10 @@ export default function PropertiesPanel({
                                     <div className="relative w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-medium text-white">
+                                    <div className="text-sm font-medium theme-text">
                                         Allow connecting to different areas
                                     </div>
-                                    <p className="text-xs text-slate-400 mt-1">
+                                    <p className="text-xs theme-text-muted mt-1">
                                         Enable this if the scene serves as a
                                         gateway or entrance point between
                                         different areas
@@ -329,7 +329,7 @@ export default function PropertiesPanel({
                         </div>
 
                         {/* Active Links */}
-                        <div className="space-y-3 pt-4 border-t border-border-dark">
+                        <div className="space-y-3 pt-4 border-t theme-border">
                             <SectionHeader>Active Links</SectionHeader>
                             {activeNode.links && activeNode.links.length > 0 ? (
                                 <div className="space-y-2">
@@ -338,16 +338,16 @@ export default function PropertiesPanel({
                                             key={link.id}
                                             className={`p-3 rounded-lg border ${
                                                 link.type === "gateway"
-                                                    ? "bg-purple-500/10 border-purple-500/30"
-                                                    : "bg-primary/10 border-primary/30"
+                                                    ? "theme-link-gateway"
+                                                    : "theme-link-navigation"
                                             }`}
                                         >
                                             <div className="flex items-start gap-2">
                                                 <span
                                                     className={`material-symbols-outlined text-lg ${
                                                         link.type === "gateway"
-                                                            ? "text-purple-400"
-                                                            : "text-primary"
+                                                            ? "theme-link-gateway-icon"
+                                                            : "theme-link-navigation-icon"
                                                     }`}
                                                 >
                                                     {link.type === "gateway"
@@ -359,19 +359,19 @@ export default function PropertiesPanel({
                                                         className={`text-xs font-bold uppercase tracking-wide ${
                                                             link.type ===
                                                             "gateway"
-                                                                ? "text-purple-400"
-                                                                : "text-primary"
+                                                                ? "theme-link-gateway-label"
+                                                                : "theme-link-navigation-label"
                                                         }`}
                                                     >
                                                         {link.type === "gateway"
                                                             ? "GATEWAY: "
                                                             : "NAVIGASI: "}
-                                                        <span className="text-white">
+                                                        <span className="theme-text">
                                                             {link.target_name ||
                                                                 "Unknown"}
                                                         </span>
                                                     </div>
-                                                    <div className="text-[10px] text-slate-500 mt-1 font-mono">
+                                                    <div className="text-[10px] theme-text-muted mt-1 font-mono">
                                                         {link.type === "gateway"
                                                             ? link.target_name
                                                             : link.target_name}
@@ -382,14 +382,14 @@ export default function PropertiesPanel({
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-6 px-4 bg-slate-800/30 border border-dashed border-slate-700 rounded-lg">
-                                    <span className="material-symbols-outlined text-3xl text-slate-600 mb-2 block">
+                                <div className="text-center py-6 px-4 bg-gray-100 dark:bg-slate-800/30 border border-dashed theme-border rounded-lg">
+                                    <span className="material-symbols-outlined text-3xl theme-text-subtle mb-2 block">
                                         link_off
                                     </span>
-                                    <p className="text-xs text-slate-500">
+                                    <p className="text-xs theme-text-muted">
                                         No links yet
                                     </p>
-                                    <p className="text-[10px] text-slate-600 mt-1">
+                                    <p className="text-[10px] theme-text-subtle mt-1">
                                         Use the canvas to add navigation links
                                     </p>
                                 </div>
@@ -401,7 +401,7 @@ export default function PropertiesPanel({
                 {/* ========== AREA-SPECIFIC PROPERTIES ========== */}
                 {/* Priority Input - only for areas */}
                 {selection.type === "area" && (
-                    <div className="space-y-3 pt-4 border-t border-border-dark">
+                    <div className="space-y-3 pt-4 border-t theme-border">
                         <SectionHeader>Priority Order</SectionHeader>
                         <FormInput
                             type="number"
@@ -418,7 +418,7 @@ export default function PropertiesPanel({
                             }
                             placeholder="10"
                         />
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
                             Smaller numbers will appear first. Default: 10
                         </p>
                     </div>
@@ -426,20 +426,20 @@ export default function PropertiesPanel({
 
                 {/* Settings Section - Restricted Access (Areas Only) */}
                 {selection.type === "area" && (
-                    <div className="space-y-3 pt-4 border-t border-border-dark">
+                    <div className="space-y-3 pt-4 border-t theme-border">
                         <SectionHeader>Settings</SectionHeader>
 
                         <label
                             className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                                 activeNode.is_restricted
-                                    ? "bg-amber-500/5 border-amber-500/30"
-                                    : "bg-[#111a22] border-border-dark hover:border-slate-600"
+                                    ? "bg-amber-50 dark:bg-amber-500/5 border-amber-300 dark:border-amber-500/30"
+                                    : "theme-input theme-border hover:border-primary/30"
                             }`}
                         >
                             <div className="pt-0.5">
                                 <input
                                     type="checkbox"
-                                    className="bg-[#233648] border-slate-600 rounded text-amber-500 focus:ring-0 focus:ring-offset-0"
+                                    className="bg-gray-200 dark:bg-[#233648] border-gray-400 dark:border-slate-600 rounded text-amber-500 focus:ring-0 focus:ring-offset-0"
                                     checked={activeNode.is_restricted || false}
                                     onChange={(e) =>
                                         handleChange(
@@ -450,19 +450,19 @@ export default function PropertiesPanel({
                                 />
                             </div>
                             <div className="flex-1">
-                                <div className="flex items-center gap-2 text-slate-200 text-xs font-bold mb-0.5">
+                                <div className="flex items-center gap-2 theme-text text-xs font-bold mb-0.5">
                                     <span
                                         className={`material-symbols-outlined text-[16px] ${
                                             activeNode.is_restricted
                                                 ? "text-amber-500"
-                                                : "text-slate-500"
+                                                : "theme-text-muted"
                                         }`}
                                     >
                                         lock
                                     </span>
                                     Restricted Access
                                 </div>
-                                <p className="text-[10px] text-slate-500 leading-snug">
+                                <p className="text-[10px] theme-text-muted leading-snug">
                                     If checked, only authorized personnel can
                                     view this item in the public tour.
                                 </p>
@@ -488,13 +488,6 @@ export default function PropertiesPanel({
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-border-dark bg-[#111a22]">
-                <div className="flex items-center justify-between text-[10px] text-slate-600 font-mono">
-                    <span>ID: {activeNode.id}</span>
-                </div>
-            </div>
-
             {/* Delete Confirmation Modal with Cascade Warning */}
             <ConfirmModal
                 isOpen={showDeleteConfirm}
@@ -509,9 +502,9 @@ export default function PropertiesPanel({
                 message={
                     deletionImpact ? (
                         <div className="space-y-4">
-                            <p className="text-sm text-slate-300">
+                            <p className="text-sm theme-text-secondary">
                                 You are about to delete{" "}
-                                <span className="font-bold text-white">
+                                <span className="font-bold theme-text">
                                     "{deletionImpact.area_name}"
                                 </span>
                             </p>
@@ -522,10 +515,10 @@ export default function PropertiesPanel({
                                         warning
                                     </span>
                                     <div className="flex-1">
-                                        <p className="text-sm font-bold text-amber-400 mb-1">
+                                        <p className="text-sm font-bold text-amber-500 dark:text-amber-400 mb-1">
                                             Cascade Deletion Warning
                                         </p>
-                                        <p className="text-xs text-slate-300">
+                                        <p className="text-xs theme-text-secondary">
                                             {deletionImpact.warning}
                                         </p>
                                     </div>
@@ -536,8 +529,8 @@ export default function PropertiesPanel({
                                         <span className="material-symbols-outlined text-amber-400 text-base">
                                             domain
                                         </span>
-                                        <span className="text-slate-300">
-                                            <span className="font-bold text-white">
+                                        <span className="theme-text-secondary">
+                                            <span className="font-bold theme-text">
                                                 {deletionImpact.total_areas}
                                             </span>{" "}
                                             area
@@ -552,8 +545,8 @@ export default function PropertiesPanel({
                                         <span className="material-symbols-outlined text-amber-400 text-base">
                                             360
                                         </span>
-                                        <span className="text-slate-300">
-                                            <span className="font-bold text-white">
+                                        <span className="theme-text-secondary">
+                                            <span className="font-bold theme-text">
                                                 {deletionImpact.total_scenes}
                                             </span>{" "}
                                             scene
@@ -592,8 +585,8 @@ export default function PropertiesPanel({
                                     )}
                             </div>
 
-                            <p className="text-xs text-slate-500 bg-slate-800/50 p-3 rounded border border-slate-700">
-                                <span className="font-bold text-white">
+                            <p className="text-xs theme-text-muted bg-gray-200 dark:bg-slate-800/50 p-3 rounded border theme-border-subtle">
+                                <span className="font-bold theme-text">
                                     Warning:
                                 </span>{" "}
                                 This action cannot be undone. All data and files

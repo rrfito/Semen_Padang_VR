@@ -74,10 +74,10 @@ export default function CreateAreaModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="w-full max-w-lg bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="theme-modal max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between bg-gray-800 shrink-0">
+                <div className="theme-modal-header flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div
                             className={`size-10 rounded-full flex items-center justify-center ${
@@ -89,13 +89,13 @@ export default function CreateAreaModal({
                             {isBlocked ? <FaBan /> : <FaFolderPlus />}
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-white">
+                            <h3 className="text-lg font-bold theme-text">
                                 {isBlocked
                                     ? "Tidak Bisa Tambah Area"
                                     : "Tambah Area Baru"}
                             </h3>
                             {!isBlocked && (
-                                <p className="text-xs text-gray-400">
+                                <p className="text-xs theme-text-muted">
                                     {effectiveParent
                                         ? "Menambahkan sub-area baru"
                                         : "Menambahkan area utama baru"}
@@ -105,7 +105,7 @@ export default function CreateAreaModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-white transition-colors"
+                        className="theme-text-subtle hover:text-primary transition-colors"
                     >
                         <FaTimes />
                     </button>
@@ -114,22 +114,22 @@ export default function CreateAreaModal({
                 {/* Body */}
                 <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
                     {/* Context Visualization */}
-                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                    <div className="theme-surface-elevated rounded-lg p-4 border theme-border">
                         <div className="flex items-center justify-between mb-3">
-                            <div className="text-xs font-bold text-gray-500 uppercase">
+                            <div className="text-xs font-bold theme-text-muted uppercase">
                                 Lokasi Penempatan
                             </div>
                             {parentArea && (
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="rounded bg-gray-900 border-gray-600 text-blue-500 focus:ring-blue-500 w-3.5 h-3.5"
+                                        className="rounded theme-input border theme-border text-primary focus:ring-primary w-3.5 h-3.5"
                                         checked={isRootOverride}
                                         onChange={(e) =>
                                             setIsRootOverride(e.target.checked)
                                         }
                                     />
-                                    <span className="text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                                    <span className="text-[10px] uppercase font-bold text-primary hover:text-primary/80 transition-colors">
                                         Buat di Halaman Utama
                                     </span>
                                 </label>
@@ -141,11 +141,11 @@ export default function CreateAreaModal({
                             <div
                                 className={`flex items-center gap-2 ${
                                     effectiveParent
-                                        ? "text-white"
-                                        : "text-gray-400"
+                                        ? "theme-text"
+                                        : "theme-text-muted"
                                 }`}
                             >
-                                <FaLayerGroup className="text-gray-600" />
+                                <FaLayerGroup className="theme-text-muted" />
                                 <span>
                                     {effectiveParent
                                         ? effectiveParent.name
@@ -153,16 +153,16 @@ export default function CreateAreaModal({
                                 </span>
                             </div>
 
-                            <FaArrowRight className="text-gray-600 text-xs" />
+                            <FaArrowRight className="theme-text-subtle text-xs" />
 
                             {/* New Node Placeholder */}
                             {isBlocked ? (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border bg-red-500/10 border-red-500/30 text-red-400">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border theme-alert-danger">
                                     <FaBan size={12} />
                                     <span>Penuh</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border bg-blue-500/10 border-blue-500/30 text-blue-400 font-medium">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border bg-primary/10 border-primary/30 text-primary font-medium">
                                     <FaFolderPlus size={12} />
                                     <span>{name || "Nama Area"}</span>
                                 </div>
@@ -172,22 +172,22 @@ export default function CreateAreaModal({
 
                     {/* Blocked State Message */}
                     {isBlocked ? (
-                        <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg">
+                        <div className="theme-alert-danger">
                             {isSceneContainerBlocked ? (
                                 <>
-                                    <h4 className="text-sm font-bold text-red-400 mb-2">
+                                    <h4 className="text-sm font-bold text-red-500 dark:text-red-400 mb-2">
                                         Area Ini Hanya Untuk Scene
                                     </h4>
-                                    <p className="text-sm text-gray-400 leading-relaxed">
-                                        <span className="text-white font-medium">
+                                    <p className="text-sm theme-text-secondary leading-relaxed">
+                                        <span className="theme-text font-medium">
                                             "{effectiveParent?.name}"
                                         </span>{" "}
                                         adalah Ruangan Foto yang hanya bisa
                                         berisi foto-foto 360°.
                                     </p>
-                                    <p className="text-sm text-gray-400 mt-2">
+                                    <p className="text-sm theme-text-secondary mt-2">
                                         Gunakan tombol{" "}
-                                        <span className="text-white font-medium">
+                                        <span className="theme-text font-medium">
                                             "Add Scene"
                                         </span>{" "}
                                         untuk menambahkan foto.
@@ -195,20 +195,20 @@ export default function CreateAreaModal({
                                 </>
                             ) : (
                                 <>
-                                    <h4 className="text-sm font-bold text-red-400 mb-2">
+                                    <h4 className="text-sm font-bold text-red-500 dark:text-red-400 mb-2">
                                         Batas Level Tercapai
                                     </h4>
-                                    <p className="text-sm text-gray-400 leading-relaxed">
+                                    <p className="text-sm theme-text-secondary leading-relaxed">
                                         Anda tidak bisa membuat area lagi di
                                         dalam{" "}
-                                        <span className="text-white font-medium">
+                                        <span className="theme-text font-medium">
                                             "{effectiveParent?.name}"
                                         </span>
                                         . Sistem hanya mendukung 3 tingkat
                                         kedalaman (Gedung &gt; Lantai &gt;
                                         Ruangan).
                                     </p>
-                                    <p className="text-sm text-gray-400 mt-2">
+                                    <p className="text-sm theme-text-secondary mt-2">
                                         Silakan pilih area lain atau buat area
                                         baru di Halaman Utama.
                                     </p>
@@ -221,7 +221,7 @@ export default function CreateAreaModal({
                             {/* Level 2 Content Type Selection */}
                             {targetLevel === 2 && (
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-400">
+                                    <label className="theme-form-label block">
                                         Jenis Area Ini
                                     </label>
                                     <div className="grid grid-cols-2 gap-3">
@@ -231,16 +231,16 @@ export default function CreateAreaModal({
                                             }
                                             className={`p-3 rounded-lg border cursor-pointer transition-all ${
                                                 contentType === "group"
-                                                    ? "bg-blue-500/10 border-blue-500 text-white"
-                                                    : "bg-black/30 border-gray-700 text-gray-400 hover:border-gray-600"
+                                                    ? "theme-sidebar-item-active"
+                                                    : "theme-surface-elevated theme-border theme-sidebar-item"
                                             }`}
                                         >
                                             <div className="flex items-center gap-2 mb-1.5">
                                                 <FaLayerGroup
                                                     className={
                                                         contentType === "group"
-                                                            ? "text-blue-400"
-                                                            : "text-gray-500"
+                                                            ? "text-primary"
+                                                            : "theme-text-muted"
                                                     }
                                                 />
                                                 <span className="text-xs font-bold uppercase">
@@ -260,8 +260,8 @@ export default function CreateAreaModal({
                                             }
                                             className={`p-3 rounded-lg border cursor-pointer transition-all ${
                                                 contentType === "default"
-                                                    ? "bg-blue-500/10 border-blue-500 text-white"
-                                                    : "bg-black/30 border-gray-700 text-gray-400 hover:border-gray-600"
+                                                    ? "theme-sidebar-item-active"
+                                                    : "theme-surface-elevated theme-border theme-sidebar-item"
                                             }`}
                                         >
                                             <div className="flex items-center gap-2 mb-1.5">
@@ -269,8 +269,8 @@ export default function CreateAreaModal({
                                                     className={
                                                         contentType ===
                                                         "default"
-                                                            ? "text-blue-400"
-                                                            : "text-gray-500"
+                                                            ? "text-primary"
+                                                            : "theme-text-muted"
                                                     }
                                                 />
                                                 <span className="text-xs font-bold uppercase">
@@ -288,7 +288,7 @@ export default function CreateAreaModal({
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">
+                                <label className="theme-form-label block mb-1">
                                     Nama Area{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
@@ -297,19 +297,19 @@ export default function CreateAreaModal({
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="Contoh: Gedung Serbaguna, Lantai 1, Ruang Rapat"
-                                    className="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all"
+                                    className="theme-form-input"
                                     autoFocus
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="theme-form-hint">
                                     Gunakan nama yang jelas dan mudah
                                     dimengerti.
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">
+                                <label className="theme-form-label block mb-1">
                                     Keterangan{" "}
-                                    <span className="text-xs text-gray-600">
+                                    <span className="theme-text-subtle text-xs">
                                         (Opsional)
                                     </span>
                                 </label>
@@ -320,7 +320,7 @@ export default function CreateAreaModal({
                                     }
                                     placeholder="Penjelasan singkat tentang area ini..."
                                     rows={3}
-                                    className="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all resize-none"
+                                    className="theme-form-input resize-none"
                                 />
                             </div>
                         </div>
@@ -328,11 +328,8 @@ export default function CreateAreaModal({
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-700 bg-gray-800 flex justify-end gap-3 shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
-                    >
+                <div className="theme-modal-footer flex justify-end gap-3 shrink-0">
+                    <button onClick={onClose} className="theme-btn-secondary">
                         {isBlocked ? "Tutup" : "Batal"}
                     </button>
 
@@ -341,11 +338,11 @@ export default function CreateAreaModal({
                             <button
                                 onClick={() => handleSubmit(true)}
                                 disabled={!name.trim() || isLoading}
-                                className="px-4 py-2 text-sm font-bold text-white bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
+                                className="theme-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {isLoading ? (
                                     <>
-                                        <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                                        <div className="size-4 rounded-full border-2 border-gray-400 dark:border-white/30 border-t-gray-700 dark:border-t-white animate-spin"></div>
                                         <span>Menyimpan...</span>
                                     </>
                                 ) : (
@@ -358,7 +355,7 @@ export default function CreateAreaModal({
                             <button
                                 onClick={() => handleSubmit(false)}
                                 disabled={!name.trim() || isLoading}
-                                className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2"
+                                className="theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {isLoading ? (
                                     <>

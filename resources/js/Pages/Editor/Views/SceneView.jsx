@@ -145,14 +145,47 @@ export default function SceneView({
         };
     }, [scene?.id]);
 
+    // Re-render hotspots when links change (for seamless hotspot creation)
+    useEffect(() => {
+        if (!currentSceneRef.current || !scene?.links) return;
+
+        const container = currentSceneRef.current.hotspotContainer();
+
+        // Destroy existing hotspots individually
+        const existingHotspots = container.listHotspots();
+        existingHotspots.forEach((hotspot) => {
+            container.destroyHotspot(hotspot);
+        });
+        hotspotElementsRef.current = [];
+
+        // Re-create all hotspots
+        scene.links.forEach((link) => {
+            createHotspot(link);
+        });
+
+        console.log(
+            "SceneView: Hotspots re-rendered, count:",
+            scene.links.length
+        );
+    }, [scene?.links?.length, JSON.stringify(scene?.links?.map((l) => l.id))]);
+
     const createHotspot = (link) => {
         const wrapper = document.createElement("div");
-        wrapper.classList.add("hotspot-wrapper");
+        wrapper.classList.add(
+            "hotspot-wrapper",
+            "cursor-pointer",
+            "hover:scale-110",
+            "transition-transform"
+        );
+
+        const isGateway = link.type === "gateway";
         const icon = document.createElement("div");
-        icon.classList.add("hotspot-icon");
-        icon.innerHTML = `<span class="material-symbols-outlined text-3xl text-white drop-shadow-md cursor-pointer hover:scale-110 transition-transform">${
-            link.type === "gateway" ? "door_open" : "arrow_circle_up"
-        }</span>`;
+
+        // Use same SVG icons as Viewer for consistency
+        icon.innerHTML = isGateway
+            ? `<div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-7 h-7"><path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z"/></svg></div>`
+            : `<div class="w-11 h-11 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-6 h-6"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></div>`;
+
         const tooltip = document.createElement("div");
         tooltip.innerText = link.target_name || "Unknown";
         tooltip.classList.add(
@@ -182,12 +215,10 @@ export default function SceneView({
             }
         });
         if (currentSceneRef.current) {
-            currentSceneRef.current
-                .hotspotContainer()
-                .createHotspot(wrapper, {
-                    yaw: link.yaw,
-                    pitch: link.pitch || 0,
-                });
+            currentSceneRef.current.hotspotContainer().createHotspot(wrapper, {
+                yaw: link.yaw,
+                pitch: link.pitch || 0,
+            });
         }
     };
 
@@ -214,7 +245,7 @@ export default function SceneView({
     };
 
     return (
-        <main className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden group/canvas items-center justify-center h-full w-full">
+        <main className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas items-center justify-center h-full w-full">
             <div
                 ref={panoRef}
                 className="absolute inset-0 z-0 cursor-move"
@@ -251,23 +282,31 @@ export default function SceneView({
                         {/* Button: GATEWAY FALSE (Top Right) - Regular Navigation */}
                         <button
                             onClick={() => handleTriggerAdd("navigasi")}
-                            className="absolute bg-[#1e293b] hover:bg-primary border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -top-[3rem] flex items-center justify-center group"
+                            className="absolute bg-blue-500 hover:bg-blue-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -top-[3rem] flex items-center justify-center group"
                             title="Link to Scene in Same Area"
                         >
-                            <span className="material-symbols-outlined text-2xl font-bold">
-                                arrow_circle_up
-                            </span>
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="white"
+                                className="w-6 h-6"
+                            >
+                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
+                            </svg>
                         </button>
 
                         {/* Button: GATEWAY TRUE (Bottom Right) - Portal */}
                         <button
                             onClick={() => handleTriggerAdd("gateway")}
-                            className="absolute bg-[#1e293b] hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -bottom-[3rem] flex items-center justify-center group"
+                            className="absolute bg-purple-500 hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 -right-[3.5rem] -bottom-[3rem] flex items-center justify-center group"
                             title="Link to Different Area (Gateway)"
                         >
-                            <span className="material-symbols-outlined text-2xl font-bold">
-                                door_open
-                            </span>
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="white"
+                                className="w-7 h-7"
+                            >
+                                <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z" />
+                            </svg>
                         </button>
                     </div>
 
@@ -280,7 +319,7 @@ export default function SceneView({
 
             {/* Floating Toolbar */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
-                <div className="flex items-center gap-1 p-1.5 bg-surface-dark/90 backdrop-blur-md border border-border-dark rounded-xl shadow-2xl">
+                <div className="flex items-center gap-1 p-1.5 theme-toolbar">
                     <ToolbarButton
                         icon="near_me"
                         title="Select tool"
@@ -288,20 +327,20 @@ export default function SceneView({
                         onClick={() => setIsAdding(false)}
                     />
 
-                    <div className="w-px h-6 bg-border-dark mx-1"></div>
+                    <div className="w-px h-6 theme-divider mx-1"></div>
 
-                    {/* UPDATED ADD BUTTON */}
+                    {/* ADD HOTSPOT BUTTON */}
                     <button
                         onClick={() => setIsAdding(!isAdding)}
-                        className={`h-10 flex items-center gap-2 px-4 rounded-lg transition-all font-medium text-sm ${
+                        className={`h-10 flex items-center gap-2 px-3 rounded-lg transition-all font-medium text-sm ${
                             isAdding
-                                ? "bg-primary text-white shadow-sm"
-                                : "text-slate-300 hover:text-white hover:bg-white/10"
+                                ? "bg-primary text-white"
+                                : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary"
                         }`}
                         title="Add Link / Hotspot"
                     >
-                        <span className="material-symbols-outlined">
-                            arrow_circle_up
+                        <span className="material-symbols-outlined text-[20px]">
+                            add_location
                         </span>
                         <span>Add Hotspot</span>
                     </button>

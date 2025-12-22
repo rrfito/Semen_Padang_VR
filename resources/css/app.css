@@ -2,6 +2,313 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CENTRALIZED EDITOR THEME SYSTEM
+   ============================================
+   Ubah warna di sini untuk mengubah seluruh editor.
+   Light mode = default, Dark mode = class .dark di html
+   ============================================ */
+
+@layer components {
+    /* -----------------------------------------
+       SURFACE / BACKGROUND COLORS
+       ----------------------------------------- */
+    
+    /* Main page/canvas background (paling gelap untuk light, paling terang untuk dark) */
+    .theme-canvas {
+        @apply bg-[#e8e8e8] dark:bg-[#05090c];
+    }
+    
+    /* Surface/card background - unified with sidebar */
+    .theme-surface {
+        @apply bg-gray-50 dark:bg-[#182430];
+    }
+    
+    /* Elevated surface (header, footer, modal headers) */
+    .theme-surface-elevated {
+        @apply bg-[#e0e0e0] dark:bg-[#15202b];
+    }
+    
+    /* Input/form field background */
+    .theme-input {
+        @apply bg-white dark:bg-[#111a22];
+    }
+    
+    /* Hover state background */
+    .theme-hover {
+        @apply hover:bg-[#d8d8d8] dark:hover:bg-[#233648];
+    }
+    
+    /* Selected/active state background */
+    .theme-selected {
+        @apply bg-primary/10;
+    }
+
+    /* -----------------------------------------
+       BORDER COLORS
+       ----------------------------------------- */
+    
+    /* Standard border */
+    .theme-border {
+        @apply border-[#c8c8c8] dark:border-[#233648];
+    }
+    
+    /* Subtle border (untuk input fields) */
+    .theme-border-subtle {
+        @apply border-[#d0d0d0] dark:border-[#2a3f52];
+    }
+
+    /* -----------------------------------------
+       TEXT COLORS
+       ----------------------------------------- */
+    
+    /* Primary text (judul, label utama) */
+    .theme-text {
+        @apply text-gray-900 dark:text-white;
+    }
+    
+    /* Secondary text (deskripsi, subtitle) */
+    .theme-text-secondary {
+        @apply text-gray-600 dark:text-slate-300;
+    }
+    
+    /* Muted/helper text (placeholder, hints) */
+    .theme-text-muted {
+        @apply text-gray-500 dark:text-slate-400;
+    }
+    
+    /* Very muted text (timestamps, metadata) */
+    .theme-text-subtle {
+        @apply text-gray-400 dark:text-slate-500;
+    }
+
+    /* -----------------------------------------
+       INTERACTIVE COMPONENTS
+       ----------------------------------------- */
+    
+    /* Standard button (cancel, secondary actions) */
+    .theme-btn-secondary {
+        @apply px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium;
+    }
+    
+    /* Primary button */
+    .theme-btn-primary {
+        @apply px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all;
+    }
+    
+    /* Action button (neutral default, primary on hover) */
+    .theme-btn-action {
+        @apply flex items-center justify-center gap-2 h-9 bg-gray-100 dark:bg-[#1a2838] text-gray-600 dark:text-slate-400 text-xs font-bold rounded-lg transition-all border border-gray-200 dark:border-[#233648] hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary dark:hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600 dark:disabled:hover:bg-[#1a2838] dark:disabled:hover:text-slate-400;
+    }
+
+    /* -----------------------------------------
+       FORM INPUTS
+       ----------------------------------------- */
+    
+    /* Text input styling */
+    .theme-form-input {
+        @apply w-full bg-white dark:bg-[#111a22] border border-[#d0d0d0] dark:border-[#233648] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all;
+    }
+    
+    /* Form label */
+    .theme-form-label {
+        @apply text-sm font-medium text-gray-700 dark:text-slate-400;
+    }
+    
+    /* Helper/hint text below inputs */
+    .theme-form-hint {
+        @apply text-xs text-gray-500 dark:text-slate-500 mt-1;
+    }
+
+    /* -----------------------------------------
+       MODAL COMPONENTS
+       ----------------------------------------- */
+    
+    /* Modal backdrop */
+    .theme-modal-backdrop {
+        @apply fixed inset-0 bg-black/30 dark:bg-black/60 flex items-center justify-center z-50 p-4;
+    }
+    
+    /* Modal container */
+    .theme-modal {
+        @apply bg-[#f0f0f0] dark:bg-[#182430] rounded-xl shadow-2xl border border-[#c8c8c8] dark:border-[#233648];
+    }
+    
+    /* Modal header */
+    .theme-modal-header {
+        @apply px-6 py-4 border-b border-[#d0d0d0] dark:border-[#233648] bg-[#e0e0e0] dark:bg-[#15202b];
+    }
+    
+    /* Modal footer */
+    .theme-modal-footer {
+        @apply px-6 py-4 border-t border-[#d0d0d0] dark:border-[#233648] bg-[#e0e0e0] dark:bg-[#111a22];
+    }
+
+    /* -----------------------------------------
+       SECTION HEADERS & DIVIDERS
+       ----------------------------------------- */
+    
+    /* Section header in panels */
+    .theme-section-header {
+        @apply text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400;
+    }
+    
+    /* Divider line */
+    .theme-divider {
+        @apply border-t border-[#d0d0d0] dark:border-[#233648];
+    }
+
+    /* -----------------------------------------
+       ALERT / INFO BOXES
+       ----------------------------------------- */
+    
+    /* Info box */
+    .theme-alert-info {
+        @apply p-4 bg-primary/5 border border-primary/20 rounded-lg;
+    }
+    
+    /* Warning box */
+    .theme-alert-warning {
+        @apply p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg;
+    }
+    
+    /* Error/danger box */
+    .theme-alert-danger {
+        @apply p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg;
+    }
+
+    /* -----------------------------------------
+       CARDS
+       ----------------------------------------- */
+    
+    /* Clickable card */
+    .theme-card {
+        @apply bg-white dark:bg-[#182430] border border-gray-200 dark:border-[#233648] rounded-xl shadow-lg hover:shadow-xl hover:border-primary/50 transition-all cursor-pointer;
+    }
+    
+    /* Static card (non-clickable) */
+    .theme-card-static {
+        @apply bg-white dark:bg-[#182430] border border-gray-200 dark:border-[#233648] rounded-xl;
+    }
+
+    /* -----------------------------------------
+       SIDEBAR & PANELS
+       ----------------------------------------- */
+    
+    /* Sidebar container */
+    .theme-sidebar {
+        @apply bg-gray-50 dark:bg-[#182430] border-gray-200 dark:border-[#233648];
+    }
+    
+    /* Sidebar item hover */
+    .theme-sidebar-item {
+        @apply hover:bg-gray-100 dark:hover:bg-[#233648] text-gray-600 dark:text-slate-400;
+    }
+    
+    /* Sidebar item selected */
+    .theme-sidebar-item-active {
+        @apply bg-primary/10 text-primary border-primary/20;
+    }
+
+    /* -----------------------------------------
+       TOOLBAR
+       ----------------------------------------- */
+    
+    /* Floating toolbar container */
+    .theme-toolbar {
+        @apply bg-white/90 dark:bg-[#182430]/90 backdrop-blur-md border border-gray-200 dark:border-[#233648] rounded-xl shadow-2xl;
+    }
+    
+    /* Toolbar button */
+    .theme-toolbar-btn {
+        @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10;
+    }
+    
+    /* Toolbar button active */
+    .theme-toolbar-btn-active {
+        @apply bg-primary text-white shadow-sm;
+    }
+
+    /* -----------------------------------------
+       SCENE & VIEW BACKGROUNDS
+       ----------------------------------------- */
+    
+    /* Main view canvas (lighter than theme-canvas) */
+    .theme-view-canvas {
+        @apply bg-gray-100 dark:bg-[#05090c];
+    }
+    
+    /* View grid background */
+    .theme-view-grid {
+        @apply bg-gray-50 dark:bg-[#0c141d];
+    }
+
+    /* -----------------------------------------
+       BADGES & TAGS
+       ----------------------------------------- */
+    
+    /* Success badge (Live, Published) */
+    .theme-badge-success {
+        @apply bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30;
+    }
+    
+    /* Warning badge (Draft, Pending) */
+    .theme-badge-warning {
+        @apply bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30;
+    }
+    
+    /* Primary badge */
+    .theme-badge-primary {
+        @apply bg-primary/10 text-primary border border-primary/20;
+    }
+
+    /* -----------------------------------------
+       LINK CARDS (Active Links)
+       ----------------------------------------- */
+    
+    /* Navigation link card */
+    .theme-link-navigation {
+        @apply bg-blue-100 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30;
+    }
+    .theme-link-navigation-icon {
+        @apply text-blue-600 dark:text-blue-400;
+    }
+    .theme-link-navigation-label {
+        @apply text-blue-600 dark:text-blue-400;
+    }
+    
+    /* Gateway link card */
+    .theme-link-gateway {
+        @apply bg-purple-100 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30;
+    }
+    .theme-link-gateway-icon {
+        @apply text-purple-600 dark:text-purple-400;
+    }
+    .theme-link-gateway-label {
+        @apply text-purple-600 dark:text-purple-400;
+    }
+
+    /* -----------------------------------------
+       DASHED BORDERS (Create buttons)
+       ----------------------------------------- */
+    
+    .theme-dashed-card {
+        @apply border-2 border-dashed border-gray-300 dark:border-[#233648] hover:border-primary/50 hover:bg-primary/5 rounded-xl transition-all;
+    }
+
+    /* -----------------------------------------
+       ICON BACKGROUNDS
+       ----------------------------------------- */
+    
+    .theme-icon-bg {
+        @apply bg-gray-100 dark:bg-[#233648] text-gray-400 dark:text-slate-500;
+    }
+    
+    .theme-icon-bg-hover {
+        @apply group-hover:bg-primary/20 group-hover:text-primary;
+    }
+}
+
 
 
 .map-label-transparent {
@@ -48,21 +355,40 @@
     animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* Custom Scrollbar for Dark Theme */
+/* Custom Scrollbar - Dark Mode (default in dark theme) */
+.dark .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Scrollbar - Light Mode */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.25);
 }

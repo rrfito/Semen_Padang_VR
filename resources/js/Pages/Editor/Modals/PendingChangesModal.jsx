@@ -214,21 +214,21 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-surface-dark rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-border-dark">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-border-light dark:border-border-dark">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-border-dark flex items-center justify-between bg-[#15202b]">
+                <div className="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#15202b]">
                     <div>
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                             📋 Pending Changes
                         </h2>
-                        <p className="text-sm text-slate-400 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                             Review unpublished changes before making them live
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors"
+                        className="text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white transition-colors"
                     >
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -236,32 +236,38 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
 
                 {/* Stats Summary - Purple/Cyan/Indigo/Pink */}
                 {!loading && (
-                    <div className="px-6 py-4 bg-[#111a22] border-b border-border-dark grid grid-cols-4 gap-4">
+                    <div className="px-6 py-4 bg-gray-200/50 dark:bg-[#111a22] border-b border-border-light dark:border-border-dark grid grid-cols-4 gap-4">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-purple-400">
+                            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                                 {data.summary.total_changes || 0}
                             </div>
-                            <div className="text-xs text-slate-400">
+                            <div className="text-xs text-gray-500 dark:text-slate-400">
                                 Total Changes
                             </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-cyan-400">
+                            <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
                                 {data.summary.areas_count || 0}
                             </div>
-                            <div className="text-xs text-slate-400">Areas</div>
+                            <div className="text-xs text-gray-500 dark:text-slate-400">
+                                Areas
+                            </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-400">
+                            <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                                 {data.summary.scenes_count || 0}
                             </div>
-                            <div className="text-xs text-slate-400">Scenes</div>
+                            <div className="text-xs text-gray-500 dark:text-slate-400">
+                                Scenes
+                            </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-pink-400">
+                            <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
                                 {data.summary.links_count || 0}
                             </div>
-                            <div className="text-xs text-slate-400">Links</div>
+                            <div className="text-xs text-gray-500 dark:text-slate-400">
+                                Links
+                            </div>
                         </div>
                     </div>
                 )}
@@ -269,18 +275,18 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                 {/* Changes List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {loading ? (
-                        <div className="text-center py-12 text-slate-400">
+                        <div className="text-center py-12 text-gray-500 dark:text-slate-400">
                             Loading...
                         </div>
                     ) : data.summary.total_changes === 0 ? (
                         <div className="text-center py-12">
-                            <span className="material-symbols-outlined text-6xl text-slate-700 mb-4 block">
+                            <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-slate-700 mb-4 block">
                                 check_circle
                             </span>
-                            <p className="text-lg text-slate-400 font-medium">
+                            <p className="text-lg text-gray-500 dark:text-slate-400 font-medium">
                                 No Pending Changes
                             </p>
-                            <p className="text-sm text-slate-500 mt-2">
+                            <p className="text-sm text-gray-400 dark:text-slate-500 mt-2">
                                 All changes have been published
                             </p>
                         </div>
@@ -289,7 +295,7 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                             {Object.entries(data.changes).map(
                                 ([type, changes]) => (
                                     <div key={type}>
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                                        <h3 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase mb-3 flex items-center gap-2">
                                             <span className="material-symbols-outlined text-lg">
                                                 {type === "Area"
                                                     ? "domain"
@@ -317,7 +323,7 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                                                             </span>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center justify-between gap-2">
-                                                                    <div className="text-sm font-medium text-white flex-1">
+                                                                    <div className="text-sm font-medium text-gray-800 dark:text-white flex-1">
                                                                         {
                                                                             change.description
                                                                         }
@@ -326,7 +332,7 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                                                                         {/* Show edit count if multiple edits */}
                                                                         {change.edit_count >
                                                                             1 && (
-                                                                            <span className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300 border border-slate-600">
+                                                                            <span className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-slate-700/50 text-gray-600 dark:text-slate-300 border border-gray-300 dark:border-slate-600">
                                                                                 {
                                                                                     change.edit_count
                                                                                 }{" "}
@@ -342,7 +348,7 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="text-xs text-slate-500 mt-1">
+                                                                <div className="text-xs text-gray-500 dark:text-slate-500 mt-1">
                                                                     {change.edit_count >
                                                                     1 ? (
                                                                         <>
@@ -584,8 +590,8 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-border-dark flex items-center justify-between bg-[#111a22]">
-                    <div className="text-xs text-slate-500">
+                <div className="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#111a22]">
+                    <div className="text-xs text-gray-500 dark:text-slate-500">
                         {data.summary.oldest_change && (
                             <>Oldest: {data.summary.oldest_change}</>
                         )}
@@ -593,7 +599,7 @@ export default function PendingChangesModal({ isOpen, onClose, onPublished }) {
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-slate-400 hover:text-white transition-colors font-medium"
+                            className="px-4 py-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white transition-colors font-medium"
                         >
                             Close
                         </button>

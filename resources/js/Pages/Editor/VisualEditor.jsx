@@ -18,6 +18,9 @@ import AutoLinkModal from "./Modals/AutoLinkModal";
 import CreateAreaModal from "./Modals/CreateAreaModal";
 import LinkTargetModal from "./Modals/LinkTargetModal";
 
+// Theme
+import { ThemeProvider } from "@/Contexts/ThemeContext";
+
 export default function VisualEditor({ hierarchy: initialHierarchy }) {
     // --- STATE ---
     const [hierarchy, setHierarchy] = useState(initialHierarchy || []);
@@ -706,13 +709,13 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             );
 
             if (response.data.success) {
-                // Update scene cache with new data
+                // Update scene cache with new data (this triggers re-render with new hotspot)
                 setSceneCache((prev) => ({
                     ...prev,
                     [response.data.scene.id]: response.data.scene,
                 }));
-                handleSelect(selection.type, selection.id);
-                alert("Link created successfully!");
+                // No need to call handleSelect - sceneCache update will trigger re-render
+                console.log("Link created successfully");
             } else {
                 alert("Failed to create link: " + response.data.message);
             }
@@ -735,111 +738,121 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
     };
 
     return (
-        <div className="flex flex-col h-screen w-screen bg-[#05090c] text-white font-sans overflow-hidden">
-            <Head title="Visual Editor" />
+        <ThemeProvider defaultTheme="light">
+            <div className="flex flex-col h-screen w-screen theme-surface theme-text font-sans overflow-hidden">
+                <Head title="Visual Editor" />
 
-            {/* HEADER */}
-            <Header
-                breadcrumbs={getCurrentBreadcrumbs()}
-                isDirty={isDirty}
-                isSaving={isSaving}
-                onSave={handleSave}
-            />
-
-            {/* BODY */}
-            <div className="flex-1 flex overflow-hidden">
-                {/* SIDEBAR */}
-                <Sidebar
-                    hierarchy={hierarchy}
-                    selection={selection}
-                    onSelect={handleSelect}
-                    onToggleExpand={handleToggleExpand}
-                    expandedIds={expandedIds}
-                    onCreateArea={handleOpenCreateArea}
-                    onAutoLink={(area) =>
-                        setAutoLinkModal({ isOpen: true, area })
-                    }
+                {/* HEADER */}
+                <Header
+                    breadcrumbs={getCurrentBreadcrumbs()}
+                    isDirty={isDirty}
+                    isSaving={isSaving}
+                    onSave={handleSave}
                 />
 
-                {/* MAIN CONTENT */}
-                <div className="flex-1 flex relative">{renderMainView()}</div>
+                {/* BODY */}
+                <div className="flex-1 flex overflow-hidden">
+                    {/* SIDEBAR */}
+                    <Sidebar
+                        hierarchy={hierarchy}
+                        selection={selection}
+                        onSelect={handleSelect}
+                        onToggleExpand={handleToggleExpand}
+                        expandedIds={expandedIds}
+                        onCreateArea={handleOpenCreateArea}
+                        onAutoLink={(area) =>
+                            setAutoLinkModal({ isOpen: true, area })
+                        }
+                    />
 
-                {/* RIGHT PANEL - PROPERTIES */}
-                <PropertiesPanel
-                    selection={selection}
-                    activeNode={
-                        selection
-                            ? selection.type === "scene"
-                                ? sceneCache[selection.id]
-                                : selection
-                            : null
+                    {/* MAIN CONTENT */}
+                    <div className="flex-1 flex relative">
+                        {renderMainView()}
+                    </div>
+
+                    {/* RIGHT PANEL - PROPERTIES */}
+                    <PropertiesPanel
+                        selection={selection}
+                        activeNode={
+                            selection
+                                ? selection.type === "scene"
+                                    ? sceneCache[selection.id]
+                                    : selection
+                                : null
+                        }
+                        onUpdate={handleUpdateNode}
+                        onDelete={handleDeleteNode}
+                    />
+                </div>
+
+                {/* MODALS */}
+                <AutoLinkModal
+                    isOpen={autoLinkModal.isOpen}
+                    onClose={() =>
+                        setAutoLinkModal({ ...autoLinkModal, isOpen: false })
                     }
-                    onUpdate={handleUpdateNode}
-                    onDelete={handleDeleteNode}
+                    area={autoLinkModal.area}
+                />
+
+                <CreateAreaModal
+                    isOpen={createAreaModal.isOpen}
+                    onClose={() =>
+                        setCreateAreaModal({
+                            ...createAreaModal,
+                            isOpen: false,
+                        })
+                    }
+                    parentArea={createAreaModal.parentArea}
+                    onConfirm={handleCreateArea}
+                />
+
+                {/* Hidden file input for scene uploads */}
+                <input
+                    id="scene-upload-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                            const areaIdStr = e.target.dataset.areaId;
+                            const areaId = parseInt(areaIdStr);
+
+                            console.log("Scene Upload Debug:", {
+                                areaIdStr,
+                                areaId,
+                                isValid: !isNaN(areaId),
+                                filesCount: e.target.files.length,
+                            });
+
+                            if (!areaId || isNaN(areaId)) {
+                                alert(
+                                    "Error: No area selected. Please select an area first."
+                                );
+                                return;
+                            }
+
+                            handleUploadScenes(e.target.files, areaId);
+                            e.target.value = ""; // Reset input
+                        }
+                    }}
+                />
+                {/* Link Target Modal */}
+                <LinkTargetModal
+                    isOpen={linkTargetModal.isOpen}
+                    onClose={() =>
+                        setLinkTargetModal({
+                            ...linkTargetModal,
+                            isOpen: false,
+                        })
+                    }
+                    onConfirm={handleConfirmLink}
+                    mode={linkTargetModal.data?.type || "navigasi"}
+                    currentSceneId={selection?.id}
+                    currentAreaId={selection?.parentId || null}
+                    hierarchy={hierarchy}
                 />
             </div>
-
-            {/* MODALS */}
-            <AutoLinkModal
-                isOpen={autoLinkModal.isOpen}
-                onClose={() =>
-                    setAutoLinkModal({ ...autoLinkModal, isOpen: false })
-                }
-                area={autoLinkModal.area}
-            />
-
-            <CreateAreaModal
-                isOpen={createAreaModal.isOpen}
-                onClose={() =>
-                    setCreateAreaModal({ ...createAreaModal, isOpen: false })
-                }
-                parentArea={createAreaModal.parentArea}
-                onConfirm={handleCreateArea}
-            />
-
-            {/* Hidden file input for scene uploads */}
-            <input
-                id="scene-upload-input"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                        const areaIdStr = e.target.dataset.areaId;
-                        const areaId = parseInt(areaIdStr);
-
-                        console.log("Scene Upload Debug:", {
-                            areaIdStr,
-                            areaId,
-                            isValid: !isNaN(areaId),
-                            filesCount: e.target.files.length,
-                        });
-
-                        if (!areaId || isNaN(areaId)) {
-                            alert(
-                                "Error: No area selected. Please select an area first."
-                            );
-                            return;
-                        }
-
-                        handleUploadScenes(e.target.files, areaId);
-                        e.target.value = ""; // Reset input
-                    }
-                }}
-            />
-            {/* Link Target Modal */}
-            <LinkTargetModal
-                isOpen={linkTargetModal.isOpen}
-                onClose={() =>
-                    setLinkTargetModal({ ...linkTargetModal, isOpen: false })
-                }
-                onConfirm={handleConfirmLink}
-                mode={linkTargetModal.data?.type || "navigasi"}
-                currentSceneId={selection?.id}
-                currentAreaId={selection?.parentId || null}
-                hierarchy={hierarchy}
-            />
-        </div>
+        </ThemeProvider>
     );
 }

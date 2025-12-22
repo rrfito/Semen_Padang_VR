@@ -1,19 +1,22 @@
-export default function ToolbarButton({ icon, onClick, title, variant = "secondary", active = false }) {
-    const baseClasses = "w-10 h-10 flex items-center justify-center rounded-lg transition-colors";
-    
-    const variants = {
-        primary: "bg-primary text-white shadow-sm",
-        secondary: "text-slate-300 hover:text-white hover:bg-white/10",
-        danger: "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-    };
-
+export default function ToolbarButton({
+    icon,
+    onClick,
+    title,
+    active = false,
+}) {
     return (
         <button
-            className={`${baseClasses} ${active ? variants.primary : variants[variant]}`}
+            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
+                active
+                    ? "bg-primary text-white"
+                    : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary"
+            }`}
             onClick={onClick}
             title={title}
         >
-            <span className="material-symbols-outlined">{icon}</span>
+            <span className="material-symbols-outlined text-[20px]">
+                {icon}
+            </span>
         </button>
     );
 }

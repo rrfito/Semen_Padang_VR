@@ -146,7 +146,7 @@ export default function AreaOverviewView({
 
     if (isLevel1) {
         return (
-            <div className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden font-display">
+            <div className="flex-1 relative flex flex-col theme-canvas overflow-hidden font-display">
                 {/* MAP CONTAINER - Full Screen */}
                 <div className="absolute inset-0 z-0">
                     <MapContainer
@@ -256,7 +256,7 @@ export default function AreaOverviewView({
                     {!isPickingMode ? (
                         <button
                             onClick={() => setIsPickingMode(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold shadow-2xl bg-surface-dark/90 backdrop-blur border border-border-dark text-white hover:bg-surface-dark transition-all"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold shadow-2xl theme-surface backdrop-blur border theme-border theme-text hover:bg-gray-200 dark:hover:bg-surface-dark transition-all"
                         >
                             <span className="material-symbols-outlined text-[20px]">
                                 edit_location
@@ -270,7 +270,7 @@ export default function AreaOverviewView({
                                     setIsPickingMode(false);
                                     setTempLocation(null);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold shadow-2xl bg-slate-700/90 backdrop-blur border border-slate-600 text-white hover:bg-slate-700 transition-all"
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold shadow-2xl bg-gray-300 dark:bg-slate-700/90 backdrop-blur border border-gray-400 dark:border-slate-600 theme-text dark:hover:bg-slate-700 transition-all"
                             >
                                 <span className="material-symbols-outlined text-[20px]">
                                     close
@@ -290,7 +290,7 @@ export default function AreaOverviewView({
                         </div>
                     )}
                     {isPickingMode && (
-                        <div className="absolute top-full mt-2 right-0 bg-surface-dark/95 backdrop-blur-md text-slate-200 text-xs px-4 py-2 rounded-lg max-w-[200px] text-right border border-primary/30 shadow-xl">
+                        <div className="absolute top-full mt-2 right-0 theme-surface backdrop-blur-md theme-text-secondary text-xs px-4 py-2 rounded-lg max-w-[200px] text-right border border-primary/30 shadow-xl">
                             Click on map to {hasLocation ? "move" : "place"}{" "}
                             marker
                         </div>
@@ -299,8 +299,8 @@ export default function AreaOverviewView({
 
                 {/* OVERLAY: Current Location Card (Bottom Left) - FIXED z-index */}
                 <div className="absolute bottom-8 left-8 z-10 w-80">
-                    <div className="bg-surface-dark/95 backdrop-blur border border-border-dark rounded-xl overflow-hidden shadow-2xl">
-                        <div className="px-4 py-3 bg-slate-800/80 border-b border-border-dark flex items-center justify-between">
+                    <div className="theme-surface backdrop-blur border theme-border rounded-xl overflow-hidden shadow-2xl">
+                        <div className="px-4 py-3 bg-gray-200 dark:bg-slate-800/80 border-b theme-border flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <span
                                     className={`w-2 h-2 rounded-full ${
@@ -308,22 +308,22 @@ export default function AreaOverviewView({
                                             ? "bg-primary animate-pulse"
                                             : hasLocation
                                             ? "bg-primary"
-                                            : "bg-slate-500"
+                                            : "bg-gray-400 dark:bg-slate-500"
                                     }`}
                                 ></span>
-                                <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">
+                                <span className="text-xs font-bold theme-text-secondary uppercase tracking-wide">
                                     {hasLocation
                                         ? "Current Location"
                                         : "No Location Set"}
                                 </span>
                             </div>
-                            <span className="material-symbols-outlined text-slate-500 text-[16px]">
+                            <span className="material-symbols-outlined theme-text-muted text-[16px]">
                                 my_location
                             </span>
                         </div>
                         <div className="p-4 grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">
+                                <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
                                     Latitude
                                 </label>
                                 <input
@@ -334,11 +334,11 @@ export default function AreaOverviewView({
                                     onChange={(e) =>
                                         handleInputChange("lat", e.target.value)
                                     }
-                                    className="w-full bg-black/20 border border-slate-600 rounded px-2 py-1.5 text-sm text-white font-mono focus:border-primary focus:ring-0 placeholder-gray-600"
+                                    className="w-full theme-input border theme-border rounded px-2 py-1.5 text-sm theme-text font-mono focus:border-primary focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">
+                                <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
                                     Longitude
                                 </label>
                                 <input
@@ -349,7 +349,7 @@ export default function AreaOverviewView({
                                     onChange={(e) =>
                                         handleInputChange("lng", e.target.value)
                                     }
-                                    className="w-full bg-black/20 border border-slate-600 rounded px-2 py-1.5 text-sm text-white font-mono focus:border-primary focus:ring-0 placeholder-gray-600"
+                                    className="w-full theme-input border theme-border rounded px-2 py-1.5 text-sm theme-text font-mono focus:border-primary focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
                                 />
                             </div>
                         </div>
@@ -361,9 +361,9 @@ export default function AreaOverviewView({
 
     // Level 2 (Sub-Area Grid View) - and Fallback
     return (
-        <div className="flex-1 relative flex flex-col bg-[#05090c] overflow-hidden group/canvas font-display">
+        <div className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas font-display">
             {/* Background Grid */}
-            <div className="absolute inset-0 bg-[#0c141d]">
+            <div className="absolute inset-0 theme-view-grid">
                 <svg
                     className="w-full h-full opacity-[0.03]"
                     xmlns="http://www.w3.org/2000/svg"
@@ -378,7 +378,7 @@ export default function AreaOverviewView({
                             <path
                                 d="M 40 0 L 0 0 0 40"
                                 fill="none"
-                                stroke="white"
+                                stroke="currentColor"
                                 strokeWidth="1"
                             ></path>
                         </pattern>
@@ -389,8 +389,8 @@ export default function AreaOverviewView({
                         width="100%"
                     ></rect>
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none overflow-hidden">
-                    <span className="material-symbols-outlined text-[600px] text-white">
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.05] pointer-events-none overflow-hidden">
+                    <span className="material-symbols-outlined text-[600px] theme-text-subtle">
                         layers
                     </span>
                 </div>
@@ -400,10 +400,10 @@ export default function AreaOverviewView({
             <div className="z-10 flex flex-col items-center justify-start w-full h-full overflow-y-auto custom-scrollbar p-10">
                 <div className="w-full max-w-5xl mb-8 flex items-end justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">
+                        <h2 className="text-3xl font-bold theme-text mb-2">
                             {area.name}
                         </h2>
-                        <p className="text-slate-400 text-lg">
+                        <p className="theme-text-secondary text-lg">
                             Sub-Area Overview
                         </p>
                     </div>
@@ -415,25 +415,25 @@ export default function AreaOverviewView({
                         area.children.map((child) => (
                             <div
                                 key={child.id}
-                                className="bg-surface-dark border border-border-dark hover:border-primary/50 rounded-xl p-5 group cursor-pointer transition-all shadow-lg hover:shadow-xl hover:shadow-primary/5"
+                                className="theme-card p-5 group"
                             >
                                 <div className="flex items-start justify-between mb-4">
-                                    <div className="size-10 rounded-lg bg-slate-800 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                                    <div className="size-10 rounded-lg bg-amber-100 dark:bg-slate-800 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
                                         <span className="material-symbols-outlined">
                                             meeting_room
                                         </span>
                                     </div>
-                                    <span className="material-symbols-outlined text-slate-600 hover:text-white transition-colors">
+                                    <span className="material-symbols-outlined theme-text-subtle hover:text-primary transition-colors">
                                         more_vert
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                                <h3 className="text-lg font-bold theme-text mb-1 group-hover:text-primary transition-colors">
                                     {child.name}
                                 </h3>
-                                <p className="text-sm text-slate-500">
+                                <p className="text-sm theme-text-muted">
                                     Child Area • Level 3
                                 </p>
-                                <div className="mt-4 flex items-center gap-2 text-xs font-medium text-slate-400 bg-slate-800/50 p-2 rounded border border-white/5">
+                                <div className="mt-4 flex items-center gap-2 text-xs font-medium theme-text-subtle theme-icon-bg p-2 rounded">
                                     <span className="material-symbols-outlined text-[14px]">
                                         photo_camera
                                     </span>
@@ -446,14 +446,14 @@ export default function AreaOverviewView({
 
                     <button
                         onClick={() => onCreateChild && onCreateChild(area.id)}
-                        className="border-2 border-dashed border-border-dark hover:border-primary/50 hover:bg-primary/5 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all group h-full min-h-[160px]"
+                        className="theme-dashed-card p-5 flex flex-col items-center justify-center gap-3 group h-full min-h-[160px]"
                     >
-                        <div className="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
+                        <div className="size-12 rounded-full theme-icon-bg theme-icon-bg-hover flex items-center justify-center transition-colors">
                             <span className="material-symbols-outlined text-[24px]">
                                 add
                             </span>
                         </div>
-                        <span className="text-sm font-bold text-slate-400 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold theme-text-muted group-hover:text-primary transition-colors">
                             Create Child Area
                         </span>
                     </button>

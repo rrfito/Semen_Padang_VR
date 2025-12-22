@@ -119,18 +119,18 @@ export default function LinkTargetModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-[#1e293b] border border-white/10 rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="theme-modal-backdrop backdrop-blur-sm">
+            <div className="theme-modal w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
                 {/* Header */}
-                <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#0f172a]">
-                    <h3 className="text-lg font-bold text-white">
+                <div className="theme-modal-header flex justify-between items-center">
+                    <h3 className="text-lg font-bold theme-text">
                         {mode === "navigasi"
                             ? "Select Target Scene"
                             : "Select Gateway Scene"}
                     </h3>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-white"
+                        className="theme-text-subtle hover:text-primary"
                     >
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -139,7 +139,7 @@ export default function LinkTargetModal({
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-2">
                     {targets.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400">
+                        <div className="p-8 text-center theme-text-muted">
                             {mode === "navigasi"
                                 ? "No other scenes found in this area."
                                 : "No gateway scenes found in other areas."}
@@ -153,7 +153,7 @@ export default function LinkTargetModal({
                                     className={`flex items-center gap-3 p-3 rounded-lg transition-all text-left ${
                                         selectedTarget === target.id
                                             ? "bg-primary text-white shadow-lg"
-                                            : "text-slate-300 hover:bg-white/5 hover:text-white"
+                                            : "theme-text-secondary hover:bg-gray-200 dark:hover:bg-white/5 hover:text-primary"
                                     }`}
                                 >
                                     <span className="material-symbols-outlined text-xl opacity-70">
@@ -171,11 +171,8 @@ export default function LinkTargetModal({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-white/10 bg-[#0f172a] flex justify-end gap-2">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-colors font-medium text-sm"
-                    >
+                <div className="theme-modal-footer flex justify-end gap-2">
+                    <button onClick={onClose} className="theme-btn-secondary">
                         Cancel
                     </button>
                     <button
@@ -183,7 +180,7 @@ export default function LinkTargetModal({
                             selectedTarget && onConfirm(selectedTarget)
                         }
                         disabled={!selectedTarget}
-                        className="px-6 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white transition-all font-bold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Create Link
                     </button>
