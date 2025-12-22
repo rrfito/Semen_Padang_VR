@@ -60,7 +60,7 @@ export default function Header({ breadcrumbs = [], saveStatus = "idle" }) {
                             className={`text-sm font-bold ${
                                 index === breadcrumbs.length - 1
                                     ? "theme-text"
-                                    : "theme-text-muted hover:text-primary cursor-pointer transition-colors"
+                                    : "theme-text-muted hover:text-action-primary cursor-pointer transition-colors"
                             }`}
                         >
                             {crumb.name}
@@ -104,22 +104,32 @@ export default function Header({ breadcrumbs = [], saveStatus = "idle" }) {
                     </div>
                 )}
 
-                {/* Review Changes Button - Changed to Blue/Slate (more comfortable) */}
+                {/* Review Changes Button - Primary action when there are changes */}
                 <button
                     onClick={() => {
                         setShowPendingChanges(true);
                     }}
-                    className="relative px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold rounded-lg border border-blue-500/30 transition-colors flex items-center gap-2"
+                    className={`relative px-4 py-2 font-bold rounded-lg border transition-all flex items-center gap-2 ${
+                        pendingCount > 0
+                            ? "bg-primary hover:bg-primary/90 text-white border-primary shadow-lg shadow-primary/25 animate-[pulse_3s_ease-in-out_infinite]"
+                            : "bg-slate-100 dark:bg-[#233648] text-text-secondary-light dark:text-text-secondary-dark border-border-light dark:border-border-dark hover:bg-slate-200 dark:hover:bg-[#2f455a]"
+                    }`}
                 >
-                    <span className="material-symbols-outlined text-[18px]">
-                        pending_actions
-                    </span>
-                    <span>Review Changes</span>
+                    {/* Pulsing dot indicator when there are changes */}
                     {pendingCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
-                            {pendingCount}
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                         </span>
                     )}
+                    <span className="material-symbols-outlined text-[18px]">
+                        {pendingCount > 0 ? "publish" : "check_circle"}
+                    </span>
+                    <span>
+                        {pendingCount > 0
+                            ? `Review ${pendingCount} Changes`
+                            : "All Synced"}
+                    </span>
                 </button>
 
                 {/* Theme Toggle Button */}

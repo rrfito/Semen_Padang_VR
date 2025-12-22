@@ -2,8 +2,8 @@ import React from "react";
 
 export default function WelcomeView({ onSelectExisting }) {
     return (
-        <main className="flex-1 relative flex flex-col theme-surface overflow-hidden group/canvas items-center justify-center font-sans">
-            <div className="absolute inset-0 theme-surface">
+        <main className="flex-1 relative flex flex-col theme-canvas overflow-hidden group/canvas items-center justify-center font-sans">
+            <div className="absolute inset-0 theme-canvas">
                 <svg
                     className="w-full h-full opacity-[0.03]"
                     xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@ export default function WelcomeView({ onSelectExisting }) {
 
             <div className="z-10 flex flex-col items-center max-w-lg w-full px-6 text-center">
                 <div className="size-24 rounded-3xl bg-gradient-to-br from-gray-200 dark:from-slate-700/50 to-gray-300 dark:to-slate-900/50 border theme-border shadow-2xl backdrop-blur-sm flex items-center justify-center mb-8">
-                    <span className="material-symbols-outlined text-primary text-[48px]">
+                    <span className="material-symbols-outlined text-action-primary text-[48px]">
                         add_location_alt
                     </span>
                 </div>
@@ -67,7 +67,7 @@ export default function WelcomeView({ onSelectExisting }) {
                     </button>
                 </div>
 
-                <button className="mt-8 text-xs font-medium theme-text-muted hover:text-primary transition-colors flex items-center gap-1.5 group">
+                <button className="mt-8 text-xs font-medium theme-text-muted hover:text-action-primary transition-colors flex items-center gap-1.5 group">
                     <span className="material-symbols-outlined text-[16px]">
                         help
                     </span>

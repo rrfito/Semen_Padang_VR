@@ -32,34 +32,10 @@ export default function SceneContainerView({
                 className="hidden"
             />
 
-            {/* Background Grid */}
-            <div className="absolute inset-0 theme-view-grid">
-                <svg
-                    className="w-full h-full opacity-[0.03]"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <defs>
-                        <pattern
-                            height="40"
-                            id="grid-pattern"
-                            patternUnits="userSpaceOnUse"
-                            width="40"
-                        >
-                            <path
-                                d="M 40 0 L 0 0 0 40"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1"
-                            ></path>
-                        </pattern>
-                    </defs>
-                    <rect
-                        fill="url(#grid-pattern)"
-                        height="100%"
-                        width="100%"
-                    ></rect>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.03] pointer-events-none overflow-hidden">
+            {/* Background - Clean, no grid (grid only for special modes) */}
+            <div className="absolute inset-0 theme-view-canvas">
+                {/* Subtle watermark icon only - extremely subtle */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.02] pointer-events-none overflow-hidden">
                     <span className="material-symbols-outlined text-[600px] theme-text-subtle">
                         photo_camera_back
                     </span>
@@ -114,7 +90,7 @@ export default function SceneContainerView({
                         <div
                             key={scene.id}
                             onClick={() => onSelectScene(scene)}
-                            className="theme-card overflow-hidden group flex flex-col"
+                            className="theme-card theme-interactive overflow-hidden group flex flex-col"
                         >
                             <div className="relative aspect-video theme-view-canvas">
                                 <div

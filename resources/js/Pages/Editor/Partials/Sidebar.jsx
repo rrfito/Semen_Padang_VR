@@ -37,7 +37,7 @@ export default function Sidebar({
         };
 
         const getIconColorClass = () => {
-            if (isSelected && node.type === "area") return "text-primary";
+            // NO red for selected - keep category-based colors
             if (node.type === "scene") return "text-purple-500"; // Scenes - purple
             if (level === 0) return "text-amber-500"; // Level 1 - amber
             if (level === 1) return "text-blue-500"; // Level 2 - blue
@@ -54,8 +54,8 @@ export default function Sidebar({
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors
                     ${
                         isSelected
-                            ? "theme-sidebar-item-active border"
-                            : "theme-sidebar-item border border-transparent"
+                            ? "theme-sidebar-item-active"
+                            : "theme-sidebar-item border-l-2 border-l-transparent"
                     }`}
                     onClick={handleClick}
                 >
@@ -68,7 +68,7 @@ export default function Sidebar({
                             <span
                                 className={`material-symbols-outlined ${
                                     isSelected
-                                        ? "text-primary"
+                                        ? "text-text-light dark:text-text-dark"
                                         : "text-slate-400"
                                 } text-[20px] transition-transform ${
                                     isExpanded ? "rotate-90" : ""
@@ -207,7 +207,7 @@ export default function Sidebar({
                         </div>
                         <button
                             onClick={onCreateArea}
-                            className="text-[10px] font-bold text-primary border border-primary/30 rounded px-3 py-1 hover:bg-primary/10 transition-colors"
+                            className="text-[10px] font-bold text-action-primary border border-action-primary/30 rounded px-3 py-1 hover:bg-action-primary/10 transition-colors"
                         >
                             Create Root Area
                         </button>

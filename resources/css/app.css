@@ -14,34 +14,33 @@
        SURFACE / BACKGROUND COLORS
        ----------------------------------------- */
     
-    /* Main page/canvas background (paling gelap untuk light, paling terang untuk dark) */
+    /* Main page background */
+    .theme-background {
+        @apply bg-background-light dark:bg-background-dark;
+    }
+    
+    /* Main content canvas (center area - slightly different from panels) */
     .theme-canvas {
-        @apply bg-[#e8e8e8] dark:bg-[#05090c];
+        @apply bg-canvas-light dark:bg-canvas-dark;
     }
     
-    /* Surface/card background - unified with sidebar */
+    /* View grid background (same as canvas) */
+    .theme-view-canvas {
+        @apply bg-canvas-light dark:bg-canvas-dark;
+    }
+    
+    .theme-view-grid {
+        @apply bg-canvas-light dark:bg-canvas-dark;
+    }
+    
+    /* Surface/card/panel background */
     .theme-surface {
-        @apply bg-gray-50 dark:bg-[#182430];
-    }
-    
-    /* Elevated surface (header, footer, modal headers) */
-    .theme-surface-elevated {
-        @apply bg-[#e0e0e0] dark:bg-[#15202b];
+        @apply bg-surface-light dark:bg-surface-dark;
     }
     
     /* Input/form field background */
     .theme-input {
         @apply bg-white dark:bg-[#111a22];
-    }
-    
-    /* Hover state background */
-    .theme-hover {
-        @apply hover:bg-[#d8d8d8] dark:hover:bg-[#233648];
-    }
-    
-    /* Selected/active state background */
-    .theme-selected {
-        @apply bg-primary/10;
     }
 
     /* -----------------------------------------
@@ -50,55 +49,45 @@
     
     /* Standard border */
     .theme-border {
-        @apply border-[#c8c8c8] dark:border-[#233648];
-    }
-    
-    /* Subtle border (untuk input fields) */
-    .theme-border-subtle {
-        @apply border-[#d0d0d0] dark:border-[#2a3f52];
+        @apply border-border-light dark:border-border-dark;
     }
 
     /* -----------------------------------------
        TEXT COLORS
        ----------------------------------------- */
     
-    /* Primary text (judul, label utama) */
+    /* Primary text */
     .theme-text {
-        @apply text-gray-900 dark:text-white;
+        @apply text-text-light dark:text-text-dark;
     }
     
-    /* Secondary text (deskripsi, subtitle) */
+    /* Secondary text */
     .theme-text-secondary {
-        @apply text-gray-600 dark:text-slate-300;
+        @apply text-text-secondary-light dark:text-text-secondary-dark;
     }
     
-    /* Muted/helper text (placeholder, hints) */
+    /* Muted/helper text */
     .theme-text-muted {
-        @apply text-gray-500 dark:text-slate-400;
-    }
-    
-    /* Very muted text (timestamps, metadata) */
-    .theme-text-subtle {
-        @apply text-gray-400 dark:text-slate-500;
+        @apply text-text-secondary-light dark:text-text-secondary-dark;
     }
 
     /* -----------------------------------------
        INTERACTIVE COMPONENTS
        ----------------------------------------- */
     
-    /* Standard button (cancel, secondary actions) */
+    /* Secondary button */
     .theme-btn-secondary {
-        @apply px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium;
+        @apply px-4 py-2 bg-surface-light hover:bg-slate-100 text-text-secondary-light border border-border-light rounded-lg transition-colors font-medium dark:bg-surface-dark dark:hover:bg-surface-dark/50 dark:text-text-secondary-dark dark:border-border-dark;
     }
     
-    /* Primary button */
+    /* Primary action button */
     .theme-btn-primary {
-        @apply px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all;
+        @apply px-4 py-2 bg-action-primary hover:bg-action-hover focus:ring-2 focus:ring-action-focus text-white font-bold rounded-lg shadow-lg shadow-action-primary/20 transition-all;
     }
     
     /* Action button (neutral default, primary on hover) */
     .theme-btn-action {
-        @apply flex items-center justify-center gap-2 h-9 bg-gray-100 dark:bg-[#1a2838] text-gray-600 dark:text-slate-400 text-xs font-bold rounded-lg transition-all border border-gray-200 dark:border-[#233648] hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white hover:border-primary dark:hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600 dark:disabled:hover:bg-[#1a2838] dark:disabled:hover:text-slate-400;
+        @apply flex items-center justify-center gap-2 h-9 bg-surface-light dark:bg-[#1a2838] text-text-secondary-light dark:text-text-secondary-dark text-xs font-bold rounded-lg transition-all border border-border-light dark:border-border-dark hover:bg-action-primary dark:hover:bg-action-primary hover:text-white dark:hover:text-white hover:border-action-primary dark:hover:border-action-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface-light disabled:hover:text-text-secondary-light dark:disabled:hover:bg-[#1a2838] dark:disabled:hover:text-text-secondary-dark;
     }
 
     /* -----------------------------------------
@@ -107,17 +96,17 @@
     
     /* Text input styling */
     .theme-form-input {
-        @apply w-full bg-white dark:bg-[#111a22] border border-[#d0d0d0] dark:border-[#233648] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all;
+        @apply w-full bg-slate-50 dark:bg-[#111a22] border border-border-light dark:border-border-dark rounded-lg px-3 py-2 text-sm text-text-light dark:text-text-dark placeholder-text-secondary-light dark:placeholder-text-secondary-dark focus:ring-2 focus:ring-action-primary/50 focus:border-action-primary outline-none transition-all;
     }
     
     /* Form label */
     .theme-form-label {
-        @apply text-sm font-medium text-gray-700 dark:text-slate-400;
+        @apply text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark;
     }
     
     /* Helper/hint text below inputs */
     .theme-form-hint {
-        @apply text-xs text-gray-500 dark:text-slate-500 mt-1;
+        @apply text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1;
     }
 
     /* -----------------------------------------
@@ -131,17 +120,17 @@
     
     /* Modal container */
     .theme-modal {
-        @apply bg-[#f0f0f0] dark:bg-[#182430] rounded-xl shadow-2xl border border-[#c8c8c8] dark:border-[#233648];
+        @apply bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl border border-border-light dark:border-border-dark;
     }
     
     /* Modal header */
     .theme-modal-header {
-        @apply px-6 py-4 border-b border-[#d0d0d0] dark:border-[#233648] bg-[#e0e0e0] dark:bg-[#15202b];
+        @apply px-6 py-4 border-b border-border-light dark:border-border-dark bg-background-light dark:bg-[#15202b];
     }
     
     /* Modal footer */
     .theme-modal-footer {
-        @apply px-6 py-4 border-t border-[#d0d0d0] dark:border-[#233648] bg-[#e0e0e0] dark:bg-[#111a22];
+        @apply px-6 py-4 border-t border-border-light dark:border-border-dark bg-background-light dark:bg-[#111a22];
     }
 
     /* -----------------------------------------
@@ -150,12 +139,12 @@
     
     /* Section header in panels */
     .theme-section-header {
-        @apply text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400;
+        @apply text-xs font-bold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark;
     }
     
     /* Divider line */
     .theme-divider {
-        @apply border-t border-[#d0d0d0] dark:border-[#233648];
+        @apply border-t border-border-light dark:border-border-dark;
     }
 
     /* -----------------------------------------
@@ -164,17 +153,17 @@
     
     /* Info box */
     .theme-alert-info {
-        @apply p-4 bg-primary/5 border border-primary/20 rounded-lg;
+        @apply p-4 bg-info/5 border border-info/20 rounded-lg;
     }
     
     /* Warning box */
     .theme-alert-warning {
-        @apply p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg;
+        @apply p-4 bg-warning/10 border border-warning/30 rounded-lg text-warning dark:text-warning;
     }
     
     /* Error/danger box */
     .theme-alert-danger {
-        @apply p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg;
+        @apply p-4 bg-danger/10 border border-danger/30 rounded-lg text-danger dark:text-danger;
     }
 
     /* -----------------------------------------
@@ -183,12 +172,12 @@
     
     /* Clickable card */
     .theme-card {
-        @apply bg-white dark:bg-[#182430] border border-gray-200 dark:border-[#233648] rounded-xl shadow-lg hover:shadow-xl hover:border-primary/50 transition-all cursor-pointer;
+        @apply bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-lg hover:shadow-xl hover:border-action-primary/50 transition-all cursor-pointer;
     }
     
     /* Static card (non-clickable) */
     .theme-card-static {
-        @apply bg-white dark:bg-[#182430] border border-gray-200 dark:border-[#233648] rounded-xl;
+        @apply bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl;
     }
 
     /* -----------------------------------------
@@ -197,17 +186,17 @@
     
     /* Sidebar container */
     .theme-sidebar {
-        @apply bg-gray-50 dark:bg-[#182430] border-gray-200 dark:border-[#233648];
+        @apply bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark;
     }
     
     /* Sidebar item hover */
     .theme-sidebar-item {
-        @apply hover:bg-gray-100 dark:hover:bg-[#233648] text-gray-600 dark:text-slate-400;
+        @apply hover:bg-slate-100 dark:hover:bg-[#233648] text-text-secondary-light dark:text-text-secondary-dark;
     }
     
-    /* Sidebar item selected */
+    /* Sidebar item selected - SUBTLE: left border accent only, not full red */
     .theme-sidebar-item-active {
-        @apply bg-primary/10 text-primary border-primary/20;
+        @apply bg-slate-100 dark:bg-[#1a2838] text-text-light dark:text-text-dark border-l-2 border-l-action-primary;
     }
 
     /* -----------------------------------------
@@ -216,31 +205,17 @@
     
     /* Floating toolbar container */
     .theme-toolbar {
-        @apply bg-white/90 dark:bg-[#182430]/90 backdrop-blur-md border border-gray-200 dark:border-[#233648] rounded-xl shadow-2xl;
+        @apply bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border border-border-light dark:border-border-dark rounded-xl shadow-2xl;
     }
     
     /* Toolbar button */
     .theme-toolbar-btn {
-        @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10;
+        @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-text-secondary-light dark:text-text-secondary-dark hover:text-action-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10;
     }
     
     /* Toolbar button active */
     .theme-toolbar-btn-active {
-        @apply bg-primary text-white shadow-sm;
-    }
-
-    /* -----------------------------------------
-       SCENE & VIEW BACKGROUNDS
-       ----------------------------------------- */
-    
-    /* Main view canvas (lighter than theme-canvas) */
-    .theme-view-canvas {
-        @apply bg-gray-100 dark:bg-[#05090c];
-    }
-    
-    /* View grid background */
-    .theme-view-grid {
-        @apply bg-gray-50 dark:bg-[#0c141d];
+        @apply bg-action-primary text-white shadow-sm;
     }
 
     /* -----------------------------------------
@@ -249,17 +224,17 @@
     
     /* Success badge (Live, Published) */
     .theme-badge-success {
-        @apply bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30;
+        @apply bg-success/10 text-success border border-success/30;
     }
     
     /* Warning badge (Draft, Pending) */
     .theme-badge-warning {
-        @apply bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30;
+        @apply bg-warning/10 text-warning border border-warning/30;
     }
     
     /* Primary badge */
     .theme-badge-primary {
-        @apply bg-primary/10 text-primary border border-primary/20;
+        @apply bg-action-primary/10 text-action-primary border border-action-primary/20;
     }
 
     /* -----------------------------------------
@@ -268,24 +243,24 @@
     
     /* Navigation link card */
     .theme-link-navigation {
-        @apply bg-blue-100 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30;
+        @apply bg-info/10 border-info/30;
     }
     .theme-link-navigation-icon {
-        @apply text-blue-600 dark:text-blue-400;
+        @apply text-info;
     }
     .theme-link-navigation-label {
-        @apply text-blue-600 dark:text-blue-400;
+        @apply text-info;
     }
     
     /* Gateway link card */
     .theme-link-gateway {
-        @apply bg-purple-100 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30;
+        @apply bg-portal-link/10 border-portal-link/30;
     }
     .theme-link-gateway-icon {
-        @apply text-purple-600 dark:text-purple-400;
+        @apply text-portal-link;
     }
     .theme-link-gateway-label {
-        @apply text-purple-600 dark:text-purple-400;
+        @apply text-portal-link;
     }
 
     /* -----------------------------------------
@@ -293,7 +268,7 @@
        ----------------------------------------- */
     
     .theme-dashed-card {
-        @apply border-2 border-dashed border-gray-300 dark:border-[#233648] hover:border-primary/50 hover:bg-primary/5 rounded-xl transition-all;
+        @apply border-2 border-dashed border-border-light dark:border-border-dark hover:border-action-primary/50 hover:bg-action-primary/5 rounded-xl transition-all;
     }
 
     /* -----------------------------------------
@@ -301,11 +276,47 @@
        ----------------------------------------- */
     
     .theme-icon-bg {
-        @apply bg-gray-100 dark:bg-[#233648] text-gray-400 dark:text-slate-500;
+        @apply bg-slate-100 dark:bg-[#233648] text-text-secondary-light dark:text-text-secondary-dark;
     }
     
     .theme-icon-bg-hover {
-        @apply group-hover:bg-primary/20 group-hover:text-primary;
+        @apply group-hover:bg-action-primary/20 group-hover:text-action-primary;
+    }
+
+    /* -----------------------------------------
+       MICRO-FEEDBACK (Enhanced interactions)
+       ----------------------------------------- */
+    
+    /* Interactive element with subtle feedback */
+    .theme-interactive {
+        @apply transition-all duration-150 ease-out;
+    }
+    
+    .theme-interactive:hover {
+        @apply transform scale-[1.02];
+    }
+    
+    .theme-interactive:active {
+        @apply transform scale-[0.98] opacity-90;
+    }
+    
+    /* Button with press feedback */
+    .theme-btn-feedback {
+        @apply transition-all duration-100;
+    }
+    
+    .theme-btn-feedback:active {
+        @apply transform translate-y-[1px] shadow-none;
+    }
+    
+    /* Saving animation keyframe */
+    @keyframes saving-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    .theme-saving {
+        animation: saving-pulse 1s ease-in-out infinite;
     }
 }
 

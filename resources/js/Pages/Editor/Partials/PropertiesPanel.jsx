@@ -106,7 +106,7 @@ export default function PropertiesPanel({
                                 </span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined text-primary text-[20px]">
+                                <span className="material-symbols-outlined text-action-primary text-[20px]">
                                     360
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
@@ -424,10 +424,15 @@ export default function PropertiesPanel({
                     </div>
                 )}
 
-                {/* Settings Section - Restricted Access (Areas Only) */}
+                {/* Settings Section - Restricted Access (Areas Only) - Lower visual weight */}
                 {selection.type === "area" && (
-                    <div className="space-y-3 pt-4 border-t theme-border">
-                        <SectionHeader>Settings</SectionHeader>
+                    <div className="space-y-3 pt-5 mt-2 border-t-2 border-dashed theme-border bg-slate-50/50 dark:bg-slate-900/30 -mx-6 px-6 pb-4">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                            <span className="material-symbols-outlined text-[14px]">
+                                settings
+                            </span>
+                            Settings
+                        </div>
 
                         <label
                             className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
@@ -471,20 +476,29 @@ export default function PropertiesPanel({
                     </div>
                 )}
 
-                {/* Delete Button */}
-                <div className="pt-8 mt-auto">
-                    <button
-                        onClick={handleDeleteClick}
-                        className="w-full flex items-center justify-center gap-2 h-10 bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 font-bold text-xs rounded-lg border border-transparent hover:border-red-500/30 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">
-                            delete
-                        </span>
-                        Delete {selection.type === "area" ? "Area" : "Scene"}
-                    </button>
-                    <p className="text-[10px] text-slate-600 text-center mt-2">
-                        This action cannot be undone.
-                    </p>
+                {/* DANGER ZONE - Separated section with intentional friction */}
+                <div className="pt-6 mt-6 border-t-2 border-dashed border-red-200 dark:border-red-500/20">
+                    <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-100 dark:border-red-500/10">
+                        <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-3">
+                            <span className="material-symbols-outlined text-[14px]">
+                                warning
+                            </span>
+                            Danger Zone
+                        </h4>
+                        <button
+                            onClick={handleDeleteClick}
+                            className="w-full flex items-center justify-center gap-2 h-10 bg-red-500/10 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white font-bold text-xs rounded-lg border border-red-200 dark:border-red-500/30 hover:border-red-600 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">
+                                delete
+                            </span>
+                            Delete{" "}
+                            {selection.type === "area" ? "Area" : "Scene"}
+                        </button>
+                        <p className="text-[10px] text-red-500/70 dark:text-red-400/50 text-center mt-2">
+                            This action cannot be undone.
+                        </p>
+                    </div>
                 </div>
             </div>
 
