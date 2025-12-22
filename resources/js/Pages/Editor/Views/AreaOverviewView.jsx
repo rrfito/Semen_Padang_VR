@@ -374,13 +374,40 @@ export default function AreaOverviewView({
 
             {/* Content Content - Scrollable */}
             <div className="z-10 flex flex-col items-center justify-start w-full h-full overflow-y-auto custom-scrollbar p-10">
+                {/* Header */}
                 <div className="w-full max-w-5xl mb-8 flex items-end justify-between">
                     <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">
+                                Zona
+                            </span>
+                        </div>
                         <h2 className="text-3xl font-bold theme-text mb-2">
                             {area.name}
                         </h2>
                         <p className="theme-text-secondary text-lg">
-                            Sub-Area Overview
+                            Manage sub-areas in this location.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => onCreateChild && onCreateChild(area.id)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all"
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                        <span>Add Sub-Area</span>
+                    </button>
+                </div>
+
+                {/* Info Alert */}
+                <div className="w-full max-w-5xl mb-8 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg flex items-start gap-3">
+                    <span className="material-symbols-outlined text-amber-500 mt-0.5">
+                        info
+                    </span>
+                    <div>
+                        <p className="text-sm theme-text-secondary">
+                            This area is a container for sub-areas, not scenes.
+                            You can create and organize child areas to build
+                            your location hierarchy.
                         </p>
                     </div>
                 </div>
@@ -394,7 +421,7 @@ export default function AreaOverviewView({
                                 className="theme-card p-5 group"
                             >
                                 <div className="flex items-start justify-between mb-4">
-                                    <div className="size-10 rounded-lg bg-amber-100 dark:bg-slate-800 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                                    <div className="size-10 rounded-lg bg-teal-100 dark:bg-slate-800 flex items-center justify-center text-teal-500 group-hover:scale-110 transition-transform">
                                         <span className="material-symbols-outlined">
                                             meeting_room
                                         </span>
@@ -407,7 +434,7 @@ export default function AreaOverviewView({
                                     {child.name}
                                 </h3>
                                 <p className="text-sm theme-text-muted">
-                                    Child Area • Level 3
+                                    Child Area • Level {(area.level || 2) + 1}
                                 </p>
                                 <div className="mt-4 flex items-center gap-2 text-xs font-medium theme-text-subtle theme-icon-bg p-2 rounded">
                                     <span className="material-symbols-outlined text-[14px]">
@@ -419,20 +446,6 @@ export default function AreaOverviewView({
                                 </div>
                             </div>
                         ))}
-
-                    <button
-                        onClick={() => onCreateChild && onCreateChild(area.id)}
-                        className="theme-dashed-card p-5 flex flex-col items-center justify-center gap-3 group h-full min-h-[160px]"
-                    >
-                        <div className="size-12 rounded-full theme-icon-bg theme-icon-bg-hover flex items-center justify-center transition-colors">
-                            <span className="material-symbols-outlined text-[24px]">
-                                add
-                            </span>
-                        </div>
-                        <span className="text-sm font-bold theme-text-muted group-hover:text-primary transition-colors">
-                            Create Child Area
-                        </span>
-                    </button>
                 </div>
             </div>
         </div>

@@ -185,14 +185,25 @@ export default function PropertiesPanel({
             {/* Header */}
             <div className="px-6 py-6 border-b theme-border flex items-start gap-4">
                 <div
-                    className={`mt-1 size-10 flex items-center justify-center rounded-xl shadow-lg border border-white/5 ${
-                        selection.type === "area"
+                    className={`mt-1 size-10 flex items-center justify-center rounded-xl shadow-lg border border-white/5 shrink-0 ${
+                        selection.type === "scene"
+                            ? "bg-purple-500 text-white"
+                            : activeNode.level === 1
                             ? "bg-amber-500 text-white"
-                            : "bg-primary text-white"
-                    } shrink-0`}
+                            : activeNode.level === 2 &&
+                              activeNode.children?.length > 0
+                            ? "bg-blue-500 text-white"
+                            : "bg-teal-500 text-white"
+                    }`}
                 >
                     <span className="material-symbols-outlined text-xl">
-                        {selection.type === "area" ? "domain" : "360"}
+                        {selection.type === "scene"
+                            ? "360"
+                            : activeNode.level === 1
+                            ? "domain"
+                            : activeNode.level === 2
+                            ? "layers"
+                            : "meeting_room"}
                     </span>
                 </div>
                 <div className="flex-1 min-w-0">

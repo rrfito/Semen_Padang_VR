@@ -40,7 +40,11 @@ export default function Sidebar({
             // NO red for selected - keep category-based colors
             if (node.type === "scene") return "text-purple-500"; // Scenes - purple
             if (level === 0) return "text-amber-500"; // Level 1 - amber
-            if (level === 1) return "text-blue-500"; // Level 2 - blue
+            // Level 2: blue if container (has children), teal if leaf
+            if (level === 1) {
+                const hasChildren = node.children && node.children.length > 0;
+                return hasChildren ? "text-blue-500" : "text-teal-500";
+            }
             return "text-teal-500"; // Level 3+ - teal
         };
 

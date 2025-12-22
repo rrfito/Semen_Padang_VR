@@ -49,7 +49,7 @@ export default function SceneContainerView({
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">
-                                Level {area.level || 3} • Leaf Area
+                                Ruangan
                             </span>
                         </div>
                         <h2 className="text-3xl font-bold theme-text mb-2">
@@ -71,8 +71,8 @@ export default function SceneContainerView({
                 </div>
 
                 {/* Info Alert */}
-                <div className="w-full max-w-6xl mb-8 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary mt-0.5">
+                <div className="w-full max-w-6xl mb-8 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg flex items-start gap-3">
+                    <span className="material-symbols-outlined text-amber-500 mt-0.5">
                         info
                     </span>
                     <div>
@@ -147,23 +147,6 @@ export default function SceneContainerView({
                             </div>
                         </div>
                     ))}
-
-                    <button
-                        onClick={handleUploadClick}
-                        className="theme-dashed-card p-5 flex flex-col items-center justify-center gap-3 group min-h-[220px]"
-                    >
-                        <div className="size-12 rounded-full theme-icon-bg theme-icon-bg-hover flex items-center justify-center transition-colors">
-                            <span className="material-symbols-outlined text-[24px]">
-                                add_a_photo
-                            </span>
-                        </div>
-                        <span className="text-sm font-bold theme-text-muted group-hover:text-primary transition-colors">
-                            Add Scene
-                        </span>
-                        <span className="text-xs theme-text-subtle">
-                            Upload 360° Panorama
-                        </span>
-                    </button>
                 </div>
             </div>
         </div>

@@ -25,15 +25,15 @@ export default {
                 "action-focus": "#E53935",      // Focus state
                 
                 // Backgrounds
-                "background-light": "#F0F0F0",
+                "background-light": "#f8f8f8",
                 "background-dark": "#101922",
                 
                 // Canvas (main content area - slightly different from surface)
-                "canvas-light": "#E8E8E8",      // Darker than surface for visual separation
+                "canvas-light": "#f0f0f0",      // Darker than surface for visual separation
                 "canvas-dark": "#0c141d",       // Darker than surface-dark
                 
                 // Surfaces (panels, cards, sidebar)
-                "surface-light": "#FFFFFF",
+                "surface-light": "#f8f8f8",
                 "surface-dark": "#182430",
                 
                 // Text
