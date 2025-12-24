@@ -62,6 +62,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/publish-all', [EditorController::class, 'publishAll'])->name('publish-all');
         Route::post('/discard-all/{rootDraftId}', [EditorController::class, 'discardDrafts'])->name('discard-all');
         Route::post('/autolink/execute', [EditorController::class, 'autoLinkExecute'])->name('autolink.execute');
+        Route::post('/{type}/{id}/reorder', [EditorController::class, 'reorderNode'])->name('reorder');
     });
 
     // LEGACY REDIRECT: /admin/editor/{area} -> /admin/visual-editor?focus=area:{id}

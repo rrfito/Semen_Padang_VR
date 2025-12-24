@@ -42,13 +42,43 @@ class EditorController extends Controller
             ->where('marked_for_deletion', false)
             ->with(['children.children', 'scenes', 'children.scenes', 'children.children.scenes'])
             ->orderBy('priority')
+            ->orderBy('name')
             ->get();
 
         $hierarchy = $roots->map(fn($root) => $this->formatAreaDraftNode($root));
 
+        // 3. Get Modified Item IDs for UI Status Labels
+        $modifiedNodes = [
+            'areas' => [],
+            'scenes' => []
+        ];
+
+        foreach ($roots as $root) {
+            $changesResponse = $this->draftService->getPendingChanges($root);
+            $changes = $changesResponse['changes'] ?? []; // Access inner array if formatted
+            // Note: formatDiffForFrontend keys are 'Area', 'Scene', 'Link'
+            // The content of each is a list of change objects with ['id' => draftId, 'event' => 'updated'|'created'|'deleted']
+
+            if (isset($changes['Area'])) {
+                foreach ($changes['Area'] as $change) {
+                    if ($change['event'] === 'updated') {
+                        $modifiedNodes['areas'][] = $change['id'];
+                    }
+                }
+            }
+            if (isset($changes['Scene'])) {
+                foreach ($changes['Scene'] as $change) {
+                    if ($change['event'] === 'updated') {
+                        $modifiedNodes['scenes'][] = $change['id'];
+                    }
+                }
+            }
+        }
+
         return Inertia::render('Editor/VisualEditor', [
             'hierarchy' => $hierarchy,
-            'focusedAreaId' => $request->query('focus')
+            'focusedAreaId' => $request->query('focus'),
+            'modifiedNodes' => $modifiedNodes, // Pass to frontend
         ]);
     }
 
@@ -62,7 +92,7 @@ class EditorController extends Controller
             'level' => $draft->level,
             'is_container' => (bool) $draft->is_container,
             'type' => 'area',
-            'is_restricted' => false, // Not implemented in Draft yet?
+            'is_restricted' => (bool) $draft->is_restricted,
             'priority' => $draft->priority,
             'parent_id' => $draft->parent_id,
             'status' => 'draft', // Identify as draft
@@ -174,10 +204,13 @@ class EditorController extends Controller
             'area' => $this->formatAreaDraftNode($area),
             'scenes' => $area->scenes->map(fn($scene) => [
                 'id' => $scene->id,
+                'published_id' => $scene->published_id,
                 'name' => $scene->name,
                 'type' => 'scene',
                 'is_restricted' => (bool) $scene->can_be_gateway,
-                'path' => asset('storage/' . $scene->image_path)
+                'can_be_gateway' => (bool) $scene->can_be_gateway, // Explicitly needed by frontend
+                'path' => asset('storage/' . $scene->image_path),
+                'marked_for_deletion' => (bool) $scene->marked_for_deletion,
             ])
         ]);
     }
@@ -399,6 +432,54 @@ class EditorController extends Controller
                 'success' => false,
                 'message' => 'Publish failed: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function reorderNode(Request $request, $type, $id)
+    {
+        $request->validate([
+            'new_index' => 'required|integer|min:0'
+        ]);
+        $newIndex = $request->new_index;
+
+        DB::beginTransaction();
+        try {
+            if ($type === 'area') {
+                $item = AreaDraft::findOrFail($id);
+                // Get siblings ordered by priority (asc)
+                // Filter out marked_for_deletion to keep clean list
+                $siblings = AreaDraft::where('parent_id', $item->parent_id)
+                    ->where('marked_for_deletion', false)
+                    ->where('id', '!=', $item->id)
+                    ->orderBy('priority')
+                    ->get();
+            } else if ($type === 'scene') {
+                $item = SceneDraft::findOrFail($id);
+                $siblings = SceneDraft::where('area_id', $item->area_id)
+                    ->where('marked_for_deletion', false)
+                    ->where('id', '!=', $item->id)
+                    ->orderBy('priority') // Assume scene drafts also have priority or we use ID order if missing
+                    ->get();
+            } else {
+                return response()->json(['error' => 'Invalid type'], 400);
+            }
+
+            // Insert item at new index within the collection
+            $siblings->splice($newIndex, 0, [$item]);
+
+            // Reassign priority
+            foreach ($siblings as $index => $sibling) {
+                // Determine priority value (e.g. increments of 10)
+                // Using input loop index is simplest.
+                $sibling->priority = ($index + 1) * 10;
+                $sibling->save();
+            }
+
+            DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

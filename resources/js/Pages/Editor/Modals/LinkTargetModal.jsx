@@ -8,6 +8,7 @@ export default function LinkTargetModal({
     currentSceneId,
     currentAreaId,
     hierarchy,
+    excludedTargetIds = [],
 }) {
     const [targets, setTargets] = useState([]);
     const [selectedTarget, setSelectedTarget] = useState(null);
@@ -33,17 +34,22 @@ export default function LinkTargetModal({
             currentSceneId,
             currentAreaId,
             effectiveAreaId,
+            excludedTargetIds,
             hierarchyLength: hierarchy?.length,
         });
 
         if (mode === "navigasi") {
-            // Find current area in hierarchy and list its scenes (excluding current)
+            // Find current area in hierarchy and list its scenes (excluding current AND excluded targets)
             const area = findAreaById(hierarchy, effectiveAreaId);
             console.log("Found area for navigasi:", area);
 
             if (area && area.scenes) {
                 candidates = area.scenes
-                    .filter((scene) => scene.id !== currentSceneId)
+                    .filter(
+                        (scene) =>
+                            scene.id !== currentSceneId &&
+                            !excludedTargetIds.includes(scene.id)
+                    )
                     .map((s) => ({ id: s.id, name: s.name, type: "scene" }));
             }
         } else if (mode === "gateway") {
@@ -55,7 +61,11 @@ export default function LinkTargetModal({
                         // Collect gateway scenes from this area (if it's not the current area)
                         if (node.id !== excludeAreaId && node.scenes) {
                             const gatewayScenes = node.scenes
-                                .filter((s) => s.can_be_gateway === true)
+                                .filter(
+                                    (s) =>
+                                        s.can_be_gateway === true &&
+                                        !excludedTargetIds.includes(s.id)
+                                )
                                 .map((s) => ({
                                     id: s.id,
                                     name: `${s.name} (${node.name})`, // Include area name for clarity

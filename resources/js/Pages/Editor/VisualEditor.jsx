@@ -22,10 +22,50 @@ import PendingChangesModal from "./Modals/PendingChangesModal";
 // Theme
 import { ThemeProvider } from "@/Contexts/ThemeContext";
 
-export default function VisualEditor({ hierarchy: initialHierarchy }) {
+export default function VisualEditor({
+    hierarchy: initialHierarchy,
+    modifiedNodes,
+}) {
+    // --- HELPER: Inject Status ---
+    const enrichHierarchyWithStatus = (nodes) => {
+        if (!nodes) return [];
+        return nodes.map((node) => {
+            let status = "live";
+            if (!node.published_id) {
+                status = "new";
+            } else if (
+                modifiedNodes?.areas?.includes(node.id) ||
+                modifiedNodes?.scenes?.includes(node.id)
+            ) {
+                status = "modified";
+            }
+
+            // Recurse children
+            const children = enrichHierarchyWithStatus(node.children);
+
+            // Recurse scenes
+            const scenes = node.scenes?.map((scene) => {
+                let sceneStatus = "live";
+                if (!scene.published_id) {
+                    sceneStatus = "new";
+                } else if (modifiedNodes?.scenes?.includes(scene.id)) {
+                    sceneStatus = "modified";
+                }
+                return { ...scene, status: sceneStatus };
+            });
+
+            return { ...node, status, children, scenes };
+        });
+    };
+
     // --- STATE ---
-    const [hierarchy, setHierarchy] = useState(initialHierarchy || []);
+    const [hierarchy, setHierarchy] = useState(
+        enrichHierarchyWithStatus(initialHierarchy) || []
+    );
     const [selection, setSelection] = useState(null); // { type, id, ...node }
+
+    // Visibility State (Toggle Status)
+    const [showStatusLabels, setShowStatusLabels] = useState(true);
 
     // Initialize expandedIds from localStorage
     const [expandedIds, setExpandedIds] = useState(() => {
@@ -166,15 +206,30 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
         const updateTree = (nodes) => {
             return nodes.map((node) => {
                 if (node.id === id && node.type === type) {
-                    return { ...node, ...changes };
+                    // Update field + Recalculate Status
+                    // If it was 'live' (has published_id), change to 'modified'.
+                    // If it was 'new' (no published_id), keep 'new'.
+                    const currentStatus = node.status || "live";
+                    let newStatus = currentStatus;
+
+                    if (currentStatus === "live") {
+                        newStatus = "modified";
+                    }
+
+                    return { ...node, ...changes, status: newStatus };
                 }
                 if (node.children) {
                     node.children = updateTree(node.children);
                 }
                 if (node.scenes) {
                     node.scenes = node.scenes.map((s) => {
-                        if (s.id === id && type === "scene")
-                            return { ...s, ...changes };
+                        if (s.id === id && type === "scene") {
+                            const currentStatus = s.status || "live";
+                            let newStatus = currentStatus;
+                            if (currentStatus === "live")
+                                newStatus = "modified";
+                            return { ...s, ...changes, status: newStatus };
+                        }
                         return s;
                     });
                 }
@@ -191,14 +246,24 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
         // If the updated node is the currently selected one, we MUST update selection state too
         // otherwise the View receiving 'selection' prop will be stale.
         if (selection && selection.id === id && selection.type === type) {
-            setSelection((prev) => ({ ...prev, ...changes }));
+            setSelection((prev) => {
+                const currentStatus = prev.status || "live";
+                let newStatus = currentStatus;
+                if (currentStatus === "live") newStatus = "modified";
+                return { ...prev, ...changes, status: newStatus };
+            });
         }
 
         // 3. If Scene, Update Cache
         if (type === "scene" && sceneCache[id]) {
             setSceneCache((prev) => ({
                 ...prev,
-                [id]: { ...prev[id], ...changes },
+                [id]: {
+                    ...prev[id],
+                    ...changes,
+                    // Cache logic for status is tricky, let's just merge changes.
+                    // The hierarchy status is the source of truth for labels.
+                },
             }));
         }
 
@@ -233,7 +298,13 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                                         node.id === syncedArea.id &&
                                         node.type === "area"
                                     ) {
-                                        return { ...node, ...syncedArea };
+                                        // Preserve existing status (calculated locally as 'modified' or 'new')
+                                        // Backend doesn't send status.
+                                        return {
+                                            ...node,
+                                            ...syncedArea,
+                                            status: node.status,
+                                        };
                                     }
                                     if (node.children) {
                                         return {
@@ -330,9 +401,12 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
 
             if (!newArea) throw new Error("Server returned invalid area data");
 
+            // Inject Status for New Area
+            const formattedNewArea = { ...newArea, status: "new" };
+
             if (!data.parent_id) {
                 // ADD TO ROOT
-                setHierarchy((prev) => [...prev, res.data.area]);
+                setHierarchy((prev) => [...prev, formattedNewArea]);
                 fetchPendingCount();
             } else {
                 // ADD TO CHILD
@@ -344,7 +418,10 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         ) {
                             return {
                                 ...node,
-                                children: [...(node.children || []), newArea],
+                                children: [
+                                    ...(node.children || []),
+                                    formattedNewArea,
+                                ],
                             };
                         }
                         if (node.children) {
@@ -417,11 +494,47 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                 const updateScenes = (nodes) => {
                     return nodes.map((node) => {
                         if (node.id === targetAreaId && node.type === "area") {
-                            // Merge updated area data including new scenes
-                            return {
+                            // 1. Merge Area Data
+                            // IMPORTANT: Preserve existing children!
+                            // Backend 'showArea' might return incomplete children or trigger re-render issues.
+                            // Scene upload strictly affects scenes, not sub-areas.
+                            const newAreaData = {
                                 ...node,
                                 ...updatedArea.data.area,
-                                scenes: updatedArea.data.scenes || [],
+                                children: node.children,
+                            };
+
+                            // 2. Process Scenes - Inject Status!
+                            // Backend scenes don't have 'status'.
+                            // Newly uploaded scenes are "new" (unless they somehow existed? No, bulk upload implies new).
+                            // Existing scenes might be "live" or "modified".
+                            // We need to re-enrich them.
+
+                            const enrichedScenes = (
+                                updatedArea.data.scenes || []
+                            ).map((scene) => {
+                                let status = "live";
+                                if (!scene.published_id) {
+                                    status = "new";
+                                } else if (
+                                    modifiedNodes?.scenes?.includes(scene.id)
+                                ) {
+                                    status = "modified";
+                                }
+                                return { ...scene, status };
+                            });
+
+                            return {
+                                ...newAreaData,
+                                scenes: enrichedScenes,
+                                // Area status logic:
+                                status: !newAreaData.published_id
+                                    ? "new"
+                                    : modifiedNodes?.areas?.includes(
+                                          newAreaData.id
+                                      )
+                                    ? "modified"
+                                    : "live",
                             };
                         }
                         if (node.children) {
@@ -534,62 +647,115 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             return;
         }
 
-        try {
-            if (type === "area") {
-                await axios.delete(route("admin.editor.area.destroy", id));
-                // Remove from local state
-                // 1. If it's root
-                setHierarchy((prev) => prev.filter((n) => n.id !== id));
-                // 2. If it's child (Recursive filter)
-                const removeFromTree = (nodes) => {
-                    return nodes.filter((n) => {
-                        if (n.id === id && n.type === "area") return false;
-                        if (n.children) {
-                            n.children = removeFromTree(n.children);
-                        }
-                        return true;
-                    });
-                };
-                setHierarchy((prev) => removeFromTree(prev));
-            } else if (type === "scene") {
-                await axios.delete(route("admin.editor.scene.destroy", id));
-                // Update Parent Area scene list
-                const removeFromScenes = (nodes) => {
-                    return nodes.map((n) => {
-                        if (n.scenes) {
-                            n.scenes = n.scenes.filter((s) => s.id !== id);
-                        }
-                        if (n.children) {
-                            n.children = removeFromScenes(n.children);
+        const previousHierarchy = [...hierarchy];
+        const previousSceneCache = { ...sceneCache };
+
+        // 1. OPTIMISTIC UPDATE (Remove immediately)
+        // 1. OPTIMISTIC UPDATE (Remove immediately)
+        if (type === "area") {
+            // Recursive filter
+            const removeFromTree = (nodes) => {
+                if (!Array.isArray(nodes)) return [];
+                return nodes
+                    .filter((n) => !(n.id == id && n.type === "area")) // Loose equality for safety
+                    .map((n) => {
+                        if (n.children && n.children.length > 0) {
+                            return {
+                                ...n,
+                                children: removeFromTree(n.children),
+                            }; // Immutable update
                         }
                         return n;
                     });
-                };
-                setHierarchy((prev) => removeFromScenes(prev));
-
-                // Also remove from cache
-                setSceneCache((prev) => {
-                    const next = { ...prev };
-                    delete next[id];
-                    return next;
+            };
+            setHierarchy((prev) => removeFromTree(prev));
+        } else if (type === "scene") {
+            // Update Parent Area scene list
+            const removeFromScenes = (nodes) => {
+                if (!Array.isArray(nodes)) return [];
+                return nodes.map((n) => {
+                    if (n.scenes) {
+                        n.scenes = n.scenes.filter((s) => s.id != id);
+                    }
+                    if (n.children) {
+                        n.children = removeFromScenes(n.children);
+                    }
+                    return n;
                 });
+            };
+            setHierarchy((prev) => removeFromScenes(prev));
+
+            // Also remove from cache
+            setSceneCache((prev) => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+        }
+
+        setSelection(null);
+
+        // 2. BACKGROUND API CALL
+        try {
+            if (type === "area") {
+                await axios.delete(route("admin.editor.area.destroy", id));
+            } else if (type === "scene") {
+                await axios.delete(route("admin.editor.scene.destroy", id));
             }
 
-            setSelection(null);
-            alert(
-                `${type === "area" ? "Area" : "Scene"} deleted successfully.`
-            );
+            // Success - Silent (or Toast)
+            console.log(`${type} deleted successfully.`);
             fetchPendingCount();
         } catch (error) {
-            console.error(error);
-            alert("Failed to delete item.");
+            console.error("Delete failed, reverting...", error);
+            alert(
+                "Failed to delete item: " +
+                    (error.response?.data?.message || error.message)
+            );
+            // Revert state
+            setHierarchy(previousHierarchy);
+            setSceneCache(previousSceneCache);
         }
     };
 
     // --- RENDER HELPERS ---
+    const findPath = (nodes, targetId, targetType, currentPath = []) => {
+        if (!nodes) return null;
+        for (const node of nodes) {
+            // Check current node (Area)
+            if (node.id === targetId && node.type === targetType) {
+                return [...currentPath, node];
+            }
+
+            // Check children (Sub-Areas)
+            if (node.children) {
+                const found = findPath(node.children, targetId, targetType, [
+                    ...currentPath,
+                    node,
+                ]);
+                if (found) return found;
+            }
+
+            // Check scenes (if target is scene)
+            if (targetType === "scene" && node.scenes) {
+                const foundScene = node.scenes.find((s) => s.id === targetId);
+                if (foundScene) {
+                    return [...currentPath, node, foundScene];
+                }
+            }
+        }
+        return null;
+    };
+
     const getCurrentBreadcrumbs = () => {
-        if (!selection) return [];
-        // TODO: Traverse up tree to build crumbs
+        if (!selection) return [{ name: "Home" }];
+
+        const path = findPath(hierarchy, selection.id, selection.type);
+        if (path) {
+            return path.map((node) => ({ name: node.name }));
+        }
+
+        // Fallback if not found (shouldn't happen if hierarchy is sync)
         return [{ name: selection.name }];
     };
 
@@ -645,6 +811,8 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         onAutoLink={(area) =>
                             setAutoLinkModal({ isOpen: true, area })
                         }
+                        // Audit Mode Props
+                        showStatusLabels={showStatusLabels}
                     />
                 );
             }
@@ -659,6 +827,8 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         scenes={[]}
                         onSelectScene={handleSelect}
                         onUpload={handleUploadScenes}
+                        // Audit Mode Props
+                        showStatusLabels={showStatusLabels}
                     />
                 );
             }
@@ -843,6 +1013,12 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         onAutoLink={(area) =>
                             setAutoLinkModal({ isOpen: true, area })
                         }
+                        setHierarchy={setHierarchy}
+                        // Audit Mode Props
+                        showStatusLabels={showStatusLabels}
+                        toggleStatusLabels={() =>
+                            setShowStatusLabels((prev) => !prev)
+                        }
                     />
 
                     {/* MAIN CONTENT */}
@@ -862,6 +1038,8 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                         }
                         onUpdate={handleUpdateNode}
                         onDelete={handleDeleteNode}
+                        // Audit Mode Props
+                        showStatusLabels={showStatusLabels}
                     />
                 </div>
 
@@ -931,6 +1109,15 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     currentSceneId={selection?.id}
                     currentAreaId={selection?.parentId || null}
                     hierarchy={hierarchy}
+                    excludedTargetIds={
+                        selection &&
+                        selection.type === "scene" &&
+                        sceneCache[selection.id]?.links
+                            ? sceneCache[selection.id].links.map(
+                                  (l) => l.target_scene_id
+                              )
+                            : []
+                    }
                 />
 
                 <PendingChangesModal

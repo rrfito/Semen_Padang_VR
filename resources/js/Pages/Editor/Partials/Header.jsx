@@ -116,18 +116,12 @@ export default function Header({
                 {/* Review Changes Button */}
                 <button
                     onClick={onOpenReview}
-                    className={`relative px-4 py-2 font-bold rounded-lg border transition-all flex items-center gap-2 ${
+                    className={`theme-btn-submit transition-all flex items-center gap-2 ${
                         pendingCount > 0
                             ? "bg-primary hover:bg-primary/90 text-white border-primary shadow-lg shadow-primary/25 animate-[pulse_3s_ease-in-out_infinite]"
                             : "bg-slate-100 dark:bg-[#233648] text-text-secondary-light dark:text-text-secondary-dark border-border-light dark:border-border-dark hover:bg-slate-200 dark:hover:bg-[#2f455a]"
                     }`}
                 >
-                    {pendingCount > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                        </span>
-                    )}
                     <span className="material-symbols-outlined text-[18px]">
                         {pendingCount > 0 ? "publish" : "check_circle"}
                     </span>

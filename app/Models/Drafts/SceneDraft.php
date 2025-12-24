@@ -19,6 +19,7 @@ class SceneDraft extends Model
         'can_be_gateway',
         'lat',
         'lng',
+        'priority',
         'marked_for_deletion'
     ];
 
@@ -27,6 +28,7 @@ class SceneDraft extends Model
         'can_be_gateway' => 'boolean',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
+        'priority' => 'integer',
         'marked_for_deletion' => 'boolean',
     ];
 

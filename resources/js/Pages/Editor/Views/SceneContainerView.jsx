@@ -6,6 +6,7 @@ export default function SceneContainerView({
     onSelectScene,
     onUpload,
     onAutoLink,
+    showStatusLabels, // Audit Mode
 }) {
     const fileInputRef = useRef(null);
 
@@ -86,67 +87,76 @@ export default function SceneContainerView({
 
                 {/* Grid */}
                 <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {scenes.map((scene) => (
-                        <div
-                            key={scene.id}
-                            onClick={() => onSelectScene(scene)}
-                            className="theme-card theme-interactive overflow-hidden group flex flex-col"
-                        >
-                            <div className="relative aspect-video theme-view-canvas">
-                                <div
-                                    className="w-full h-full bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
-                                    style={{
-                                        backgroundImage: `url('${(() => {
-                                            const path =
-                                                scene.path ||
-                                                scene.url ||
-                                                scene.image_path;
-                                            return path?.startsWith("http")
-                                                ? path
-                                                : `/storage/${path}`;
-                                        })()}')`,
-                                    }} // Use original, WebP will load when ready
-                                ></div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
-                                <div className="absolute top-2 right-2 flex gap-1">
-                                    <span
-                                        className={`bg-black/60 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-white/10 ${
-                                            scene.is_published
-                                                ? "text-green-400"
-                                                : "text-amber-500"
-                                        }`}
-                                    >
-                                        {scene.is_published ? "Live" : "Draft"}
-                                    </span>
-                                    {scene.can_be_gateway && (
-                                        <span className="bg-purple-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-purple-400 text-white shadow-lg">
-                                            Gateway
+                    {scenes.map((scene) => {
+                        return (
+                            <div
+                                key={scene.id}
+                                onClick={() => onSelectScene(scene)}
+                                className="theme-card theme-interactive overflow-hidden group flex flex-col"
+                            >
+                                <div className="relative aspect-video theme-view-canvas">
+                                    <div
+                                        className="w-full h-full bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"
+                                        style={{
+                                            backgroundImage: `url('${(() => {
+                                                const path =
+                                                    scene.path ||
+                                                    scene.url ||
+                                                    scene.image_path;
+                                                return path?.startsWith("http")
+                                                    ? path
+                                                    : `/storage/${path}`;
+                                            })()}')`,
+                                        }}
+                                    ></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
+                                    <div className="absolute top-2 right-2 flex gap-1">
+                                        {/* Status Badge */}
+                                        {showStatusLabels && (
+                                            <>
+                                                {scene.status === "new" && (
+                                                    <span className="bg-blue-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-blue-400 text-white shadow-lg">
+                                                        New
+                                                    </span>
+                                                )}
+                                                {scene.status ===
+                                                    "modified" && (
+                                                    <span className="bg-amber-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-amber-400 text-white shadow-lg">
+                                                        Modified
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
+                                        {scene.can_be_gateway && (
+                                            <span className="bg-purple-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-purple-400 text-white shadow-lg">
+                                                Gateway
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end">
+                                        <span className="material-symbols-outlined text-white/80 text-[24px]">
+                                            360
                                         </span>
-                                    )}
+                                    </div>
                                 </div>
-                                <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end">
-                                    <span className="material-symbols-outlined text-white/80 text-[24px]">
-                                        360
-                                    </span>
+                                <div className="p-4 flex-1 flex flex-col">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="text-sm font-bold theme-text group-hover:text-action-primary transition-colors truncate pr-2">
+                                            {scene.name}
+                                        </h3>
+                                        <button className="theme-text-muted hover:text-primary transition-colors">
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                more_vert
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <p className="text-xs theme-text-subtle font-mono mt-auto">
+                                        ID: {scene.id}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="p-4 flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="text-sm font-bold theme-text group-hover:text-action-primary transition-colors truncate pr-2">
-                                        {scene.name}
-                                    </h3>
-                                    <button className="theme-text-muted hover:text-primary transition-colors">
-                                        <span className="material-symbols-outlined text-[18px]">
-                                            more_vert
-                                        </span>
-                                    </button>
-                                </div>
-                                <p className="text-xs theme-text-subtle font-mono mt-auto">
-                                    ID: {scene.id}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>

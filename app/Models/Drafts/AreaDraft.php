@@ -49,12 +49,12 @@ class AreaDraft extends Model
 
     public function children()
     {
-        return $this->hasMany(AreaDraft::class, 'parent_id')->orderBy('priority');
+        return $this->hasMany(AreaDraft::class, 'parent_id')->orderBy('priority')->orderBy('name');
     }
 
     public function scenes()
     {
-        return $this->hasMany(SceneDraft::class, 'area_id');
+        return $this->hasMany(SceneDraft::class, 'area_id')->orderBy('priority')->orderBy('name');
     }
 
     public function syncState()

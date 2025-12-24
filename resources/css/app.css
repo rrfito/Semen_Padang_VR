@@ -84,6 +84,21 @@
     .theme-btn-primary {
         @apply px-4 py-2 bg-action-primary hover:bg-action-hover focus:ring-2 focus:ring-action-focus text-white font-bold rounded-lg shadow-lg shadow-action-primary/20 transition-all;
     }
+
+    /* Danger action button */
+    .theme-btn-danger {
+        @apply px-4 py-2 bg-white text-danger border border-danger hover:bg-danger hover:text-white dark:bg-transparent dark:text-danger dark:border-danger dark:hover:bg-danger dark:hover:text-white font-bold rounded-lg transition-all flex items-center gap-2;
+    }
+
+    /* Submit/Safe action button (Blue/Primary) */
+    .theme-btn-submit {
+        @apply px-4 py-2 bg-primary hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 text-white font-bold rounded-lg shadow-lg shadow-blue-500/20 transition-all;
+    }
+
+    /* Success button (Green) */
+    .theme-btn-success {
+        @apply px-4 py-2 bg-success hover:bg-green-600 text-white font-bold rounded-lg shadow-lg shadow-green-500/20 transition-all;
+    }
     
     /* Action button (neutral default, primary on hover) */
     .theme-btn-action {

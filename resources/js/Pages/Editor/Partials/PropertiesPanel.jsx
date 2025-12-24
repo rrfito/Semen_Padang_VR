@@ -11,6 +11,7 @@ export default function PropertiesPanel({
     activeNode,
     onUpdate,
     onDelete,
+    showStatusLabels, // Passed from parent (Audit Mode), though Properties Panel is implicitly "Focus Mode" so labels always show
 }) {
     // Show loading placeholder when scene is selected but data not yet loaded
     if (selection && selection.type === "scene" && !activeNode) {
@@ -161,52 +162,68 @@ export default function PropertiesPanel({
     // Map picker modal state
     const [showMapPicker, setShowMapPicker] = useState(false);
 
+    // Helper to calculate deletion impact client-side (Instant)
+    const calculateImpact = (node) => {
+        let count = { areas: 0, scenes: 0, area_names: [] };
+
+        const traverse = (n) => {
+            // Explicitly skip if marked for deletion
+            if (n.marked_for_deletion) return;
+
+            count.areas++;
+
+            if (n.scenes) {
+                // Filter scenes that are marked for deletion
+                const validScenes = n.scenes.filter(
+                    (s) => !s.marked_for_deletion
+                );
+                count.scenes += validScenes.length;
+            }
+
+            if (n.children) {
+                n.children.forEach((child) => {
+                    traverse(child);
+                    // Collect names of direct children for display
+                    // Only if child wasn't skipped inside traverse (traverse checks marked_for_deletion)
+                    if (n === node && !child.marked_for_deletion) {
+                        count.area_names.push(child.name);
+                    }
+                });
+            }
+        };
+
+        traverse(node);
+
+        return {
+            total_areas: count.areas, // Includes self
+            total_scenes: count.scenes,
+            area_name: node.name,
+            area_names: count.area_names.slice(0, 5), // Limit to 5 for display
+        };
+    };
+
     const handleDeleteClick = async () => {
-        // For scenes, directly show confirmation
         if (selection.type === "scene") {
+            setDeletionImpact(null);
             setShowDeleteConfirm(true);
             return;
         }
 
-        // For areas, fetch deletion impact first
-        try {
-            const response = await axios.get(
-                route("admin.editor.area.deletion-impact", selection.id)
-            );
-
-            // Show confirmation modal with impact data
-            setDeletionImpact(response.data);
-            setShowDeleteConfirm(true);
-        } catch (error) {
-            console.error("Failed to fetch deletion impact:", error);
-            alert("Failed to fetch deletion information. Please try again.");
-        }
+        // For Areas: Calculate impact instantly
+        const impact = calculateImpact(activeNode);
+        setDeletionImpact({
+            ...impact,
+            warning:
+                "All sub-areas and scenes inside will be permanently deleted.",
+        });
+        setShowDeleteConfirm(true);
     };
 
     const handleDelete = async () => {
-        if (selection.type === "area" && deletionImpact) {
-            // Cascade delete with force parameter
-            try {
-                await axios.delete(
-                    route("admin.editor.area.destroy", selection.id) +
-                        "?force=true"
-                );
-                setShowDeleteConfirm(false);
-                setDeletionImpact(null);
-
-                // Reload page to refresh hierarchy after cascade deletion
-                window.location.href = route("admin.editor.index");
-            } catch (error) {
-                console.error("Delete failed:", error);
-                alert("Failed to delete area. Please try again.");
-                setShowDeleteConfirm(false);
-                setDeletionImpact(null);
-            }
-        } else {
-            // Normal delete for scenes or empty areas (handled by parent)
-            onDelete(selection.id, selection.type);
-            setShowDeleteConfirm(false);
-        }
+        // Use the unified parent handler (optimistic)
+        onDelete(selection.id, selection.type);
+        setShowDeleteConfirm(false);
+        setDeletionImpact(null);
     };
 
     return (
@@ -219,8 +236,7 @@ export default function PropertiesPanel({
                             ? "bg-purple-500 text-white"
                             : activeNode.level === 1
                             ? "bg-amber-500 text-white"
-                            : activeNode.level === 2 &&
-                              activeNode.children?.length > 0
+                            : activeNode.level === 2 && activeNode.is_container
                             ? "bg-blue-500 text-white"
                             : "bg-teal-500 text-white"
                     }`}
@@ -230,15 +246,33 @@ export default function PropertiesPanel({
                             ? "360"
                             : activeNode.level === 1
                             ? "domain"
-                            : activeNode.level === 2
+                            : activeNode.level === 2 && activeNode.is_container
                             ? "layers"
                             : "meeting_room"}
                     </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold theme-text leading-tight truncate">
-                        {activeNode.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold theme-text leading-tight truncate">
+                            {activeNode.name}
+                        </h2>
+                        {/* Status Badges */}
+                        {showStatusLabels && (
+                            <>
+                                {activeNode.status === "new" && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20 shrink-0">
+                                        NEW
+                                    </span>
+                                )}
+                                {activeNode.status === "modified" && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                                        MODIFIED
+                                    </span>
+                                )}
+                            </>
+                        )}
+                        {/* Live badge removed as per request */}
+                    </div>
                     <p className="text-xs font-bold theme-text-muted uppercase tracking-wider mt-1">
                         {selection.type === "area"
                             ? "Area Properties"
@@ -440,39 +474,11 @@ export default function PropertiesPanel({
 
                 {/* ========== AREA-SPECIFIC PROPERTIES ========== */}
                 {/* Priority Input - only for areas */}
-                {selection.type === "area" && (
-                    <div className="space-y-3 pt-4 border-t theme-border">
-                        <SectionHeader>Priority Order</SectionHeader>
-                        <FormInput
-                            type="number"
-                            value={
-                                activeNode.priority !== undefined
-                                    ? activeNode.priority
-                                    : 10
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    "priority",
-                                    parseInt(e.target.value) || 0
-                                )
-                            }
-                            placeholder="10"
-                        />
-                        <p className="text-xs theme-text-muted">
-                            Smaller numbers will appear first. Default: 10
-                        </p>
-                    </div>
-                )}
 
                 {/* Settings Section - Restricted Access (Areas Only) - Lower visual weight */}
                 {selection.type === "area" && (
-                    <div className="space-y-3 pt-5 mt-2 border-t-2 border-dashed theme-border bg-slate-50/50 dark:bg-slate-900/30 -mx-6 px-6 pb-4">
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider theme-text-muted">
-                            <span className="material-symbols-outlined text-[14px]">
-                                settings
-                            </span>
-                            Settings
-                        </div>
+                    <div className="space-y-3">
+                        <SectionHeader>Setting</SectionHeader>
 
                         <label
                             className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
