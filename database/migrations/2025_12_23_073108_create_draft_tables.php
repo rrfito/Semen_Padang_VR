@@ -35,6 +35,7 @@ return new class extends Migration {
             $table->foreignId('published_id')->nullable()->constrained('scenes')->nullOnDelete(); // Link to Live
             $table->foreignId('area_id')->constrained('area_drafts')->cascadeOnDelete(); // Parent Draft
             $table->string('name')->nullable();
+            $table->integer('priority')->default(0);
             $table->string('image_path');
             $table->float('heading')->default(0);
             $table->boolean('can_be_gateway')->default(false);

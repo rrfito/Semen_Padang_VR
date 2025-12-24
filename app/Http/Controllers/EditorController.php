@@ -581,6 +581,13 @@ class EditorController extends Controller
                         // Determine Type
                         $type = ($source->area_id === $target->area_id) ? 'navigasi' : 'gateway';
 
+                        // Check Gateway Logic
+                        if ($type === 'gateway') {
+                            if (!$source->can_be_gateway || !$target->can_be_gateway) {
+                                continue;
+                            }
+                        }
+
                         // Check if link exists (if not replacing)
                         if (!$replaceExisting) {
                             $exists = LinkDraft::where('source_scene_id', $source->id)

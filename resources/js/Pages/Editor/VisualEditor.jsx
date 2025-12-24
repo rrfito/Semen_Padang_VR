@@ -19,6 +19,9 @@ import CreateAreaModal from "./Modals/CreateAreaModal";
 import LinkTargetModal from "./Modals/LinkTargetModal";
 import PendingChangesModal from "./Modals/PendingChangesModal";
 
+// Components
+import NotificationModal from "@/Components/Editor/NotificationModal";
+
 // Theme
 import { ThemeProvider } from "@/Contexts/ThemeContext";
 
@@ -105,11 +108,27 @@ export default function VisualEditor({
         isOpen: false,
         parentArea: null,
     });
-    // Link Target Modal State
     const [linkTargetModal, setLinkTargetModal] = useState({
         isOpen: false,
         data: null,
     });
+
+    // Notification State
+    const [notification, setNotification] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        variant: "info",
+    });
+
+    const showNotification = (title, message, variant = "info") => {
+        setNotification({
+            isOpen: true,
+            title,
+            message,
+            variant,
+        });
+    };
 
     const fetchPendingCount = async () => {
         try {
@@ -328,7 +347,11 @@ export default function VisualEditor({
                         "[Area Save] Failed to auto-save area:",
                         error
                     );
-                    alert("Failed to save changes. Please try again.");
+                    showNotification(
+                        "Auto-Save Failed",
+                        "Failed to save changes. Please try again.",
+                        "error"
+                    );
                 }
             }, 1000); // 1 second debounce
         } else if (type === "scene") {
@@ -354,7 +377,11 @@ export default function VisualEditor({
                         "[Scene Save] Failed to auto-save scene:",
                         error
                     );
-                    alert("Failed to save scene changes. Please try again.");
+                    showNotification(
+                        "Auto-Save Failed",
+                        "Failed to save scene changes. Please try again.",
+                        "error"
+                    );
                 }
             }, 1000); // 1 second debounce
         }
@@ -446,10 +473,14 @@ export default function VisualEditor({
             // Auto-select the new area (Redirect view)
             handleSelect(newArea);
 
-            // alert("Area created successfully!"); // Removed alert for smoother flow
+            // Notification removed for smoother flow equivalent to previous commented out code
         } catch (e) {
             console.error(e);
-            alert("Failed to create area. Please try again.");
+            showNotification(
+                "Creation Failed",
+                "Failed to create area. Please try again.",
+                "error"
+            );
             throw e; // Modal will catch this
         }
     };
@@ -459,7 +490,11 @@ export default function VisualEditor({
     const handleUploadScenes = async (files, areaId = null) => {
         const targetAreaId = areaId || selection?.id;
         if (!targetAreaId) {
-            alert("Please select an area first");
+            showNotification(
+                "Selection Required",
+                "Please select an area first",
+                "warning"
+            );
             return;
         }
 
@@ -549,13 +584,19 @@ export default function VisualEditor({
                 return updateScenes(prev);
             });
 
-            alert(
-                `${response.data.scenes.length} scene(s) uploaded successfully!`
+            showNotification(
+                "Upload Successful",
+                `${response.data.scenes.length} scene(s) uploaded successfully!`,
+                "success"
             );
             fetchPendingCount();
         } catch (error) {
             console.error("Upload failed:", error);
-            alert("Failed to upload scenes. Please try again.");
+            showNotification(
+                "Upload Failed",
+                "Failed to upload scenes. Please try again.",
+                "error"
+            );
         }
     };
 
@@ -592,13 +633,19 @@ export default function VisualEditor({
                 console.log("Link deleted successfully");
                 fetchPendingCount();
             } else {
-                alert("Failed to delete link: " + response.data.message);
+                showNotification(
+                    "Delete Failed",
+                    "Failed to delete link: " + response.data.message,
+                    "error"
+                );
             }
         } catch (error) {
             console.error("Error deleting link:", error);
-            alert(
+            showNotification(
+                "Delete Failed",
                 "Error deleting link: " +
-                    (error.response?.data?.message || error.message)
+                    (error.response?.data?.message || error.message),
+                "error"
             );
         }
     };
@@ -613,9 +660,13 @@ export default function VisualEditor({
                 updates: [],
             });
             setIsDirty(false);
-            alert("Save successful (Prototype)");
+            showNotification(
+                "Save Successful",
+                "Changes saved successfully.",
+                "success"
+            );
         } catch (error) {
-            alert("Save failed");
+            showNotification("Save Failed", "Failed to save changes.", "error");
         } finally {
             setIsSaving(false);
         }
@@ -628,24 +679,33 @@ export default function VisualEditor({
                 area_id: autoLinkModal.areaId,
                 mode,
             });
-            alert(`Auto-linked ${res.data.count} connections!`);
+            showNotification(
+                "Auto-Link Complete",
+                `Auto-linked ${res.data.count} connections!`,
+                "success"
+            );
             setAutoLinkModal({ isOpen: false, areaId: null, areaName: "" });
             // Reload details if current view is affected?
             fetchPendingCount();
         } catch (e) {
-            alert("Auto-link failed");
+            showNotification(
+                "Auto-Link Failed",
+                "An error occurred while creating links.",
+                "error"
+            );
         }
     };
 
     // --- DELETE ACTION ---
     const handleDeleteNode = async (id, type) => {
-        if (
-            !confirm(
-                `Are you sure you want to delete this ${type}? This action cannot be undone.`
-            )
-        ) {
-            return;
-        }
+        // CONFIRMATION REMOVED: Managed by ConfirmModal in PropertiesPanel
+        // if (
+        //     !confirm(
+        //         `Are you sure you want to delete this ${type}? This action cannot be undone.`
+        //     )
+        // ) {
+        //     return;
+        // }
 
         const previousHierarchy = [...hierarchy];
         const previousSceneCache = { ...sceneCache };
@@ -708,9 +768,11 @@ export default function VisualEditor({
             fetchPendingCount();
         } catch (error) {
             console.error("Delete failed, reverting...", error);
-            alert(
+            showNotification(
+                "Delete Failed",
                 "Failed to delete item: " +
-                    (error.response?.data?.message || error.message)
+                    (error.response?.data?.message || error.message),
+                "error"
             );
             // Revert state
             setHierarchy(previousHierarchy);
