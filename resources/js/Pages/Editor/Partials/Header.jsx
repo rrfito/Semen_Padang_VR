@@ -1,30 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PendingChangesModal from "../Modals/PendingChangesModal";
+import ConformModal from "@/Components/Editor/ConfirmModal";
 import axios from "axios";
 import { useTheme } from "@/Contexts/ThemeContext";
+import { router } from "@inertiajs/react";
 
-export default function Header({ breadcrumbs = [], saveStatus = "idle" }) {
-    const [showPendingChanges, setShowPendingChanges] = useState(false);
-    const [pendingCount, setPendingCount] = useState(0);
+export default function Header({
+    breadcrumbs = [],
+    saveStatus = "idle",
+    pendingCount = 0,
+    onOpenReview,
+    rootId, // New Prop
+}) {
     const { theme, toggleTheme, isDark } = useTheme();
 
-    useEffect(() => {
-        // Poll for pending count
-        const fetchCount = async () => {
-            try {
-                const { data } = await axios.get(
-                    route("admin.editor.pending-changes")
-                );
-                setPendingCount(data.summary.total_changes || 0);
-            } catch (error) {
-                console.error("Failed to fetch pending count", error);
-            }
-        };
+    // Discard Logic
+    const [confirmDiscard, setConfirmDiscard] = useState({ isOpen: false });
 
-        fetchCount();
-        const interval = setInterval(fetchCount, 30000); // Every 30s
-        return () => clearInterval(interval);
-    }, []);
+    const handleDiscard = async () => {
+        if (!rootId) {
+            alert("Error: Root ID not found.");
+            return;
+        }
+
+        try {
+            await axios.post(route("admin.editor.discard-all", rootId));
+            // Reload page to fetch fresh data
+            window.location.reload();
+        } catch (error) {
+            console.error("Discard failed", error);
+            alert("Failed to discard changes. See console.");
+        } finally {
+            setConfirmDiscard({ isOpen: false });
+        }
+    };
 
     return (
         <header className="h-16 shrink-0 flex items-center justify-between border-b theme-border px-6 theme-surface z-20 font-display">
@@ -104,18 +113,15 @@ export default function Header({ breadcrumbs = [], saveStatus = "idle" }) {
                     </div>
                 )}
 
-                {/* Review Changes Button - Primary action when there are changes */}
+                {/* Review Changes Button */}
                 <button
-                    onClick={() => {
-                        setShowPendingChanges(true);
-                    }}
+                    onClick={onOpenReview}
                     className={`relative px-4 py-2 font-bold rounded-lg border transition-all flex items-center gap-2 ${
                         pendingCount > 0
                             ? "bg-primary hover:bg-primary/90 text-white border-primary shadow-lg shadow-primary/25 animate-[pulse_3s_ease-in-out_infinite]"
                             : "bg-slate-100 dark:bg-[#233648] text-text-secondary-light dark:text-text-secondary-dark border-border-light dark:border-border-dark hover:bg-slate-200 dark:hover:bg-[#2f455a]"
                     }`}
                 >
-                    {/* Pulsing dot indicator when there are changes */}
                     {pendingCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -156,28 +162,16 @@ export default function Header({ breadcrumbs = [], saveStatus = "idle" }) {
                     ></div>
                 </div>
             </div>
-
-            {/* Pending Changes Modal */}
+            {/* Pending Changes Modal passed Root ID */}
             <PendingChangesModal
-                isOpen={showPendingChanges}
-                onClose={() => setShowPendingChanges(false)}
-                onPublished={() => {
-                    // Refetch pending count after publish
-                    const fetchCount = async () => {
-                        try {
-                            const { data } = await axios.get(
-                                route("admin.editor.pending-changes")
-                            );
-                            setPendingCount(data.summary.total_changes || 0);
-                        } catch (error) {
-                            console.error(
-                                "Failed to fetch pending count",
-                                error
-                            );
-                        }
-                    };
-                    fetchCount();
-                }}
+            // Logic to handle open/close is usually here?
+            // Wait, Header logic for rendering PendingChangesModal was:
+            // <PendingChangesModal ... /> was NOT here in previous file view (Step 1849).
+            // It was imported but I didn't see it rendered in the return block in Step 1849.
+            // Ah, it WAS imported, but looking at Step 1880 (VisualEditor), VisualEditor invokes <Header /> and manages `showPendingChanges` state.
+            // VisualEditor renders `PendingChangesModal` conditionally?
+            // Let's check `VisualEditor.jsx` again.
+            // If VisualEditor renders it, then I need to update VisualEditor to pass rootId to Modal, not Header.
             />
         </header>
     );

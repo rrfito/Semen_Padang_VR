@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Scene;
+use App\Models\Drafts\SceneDraft;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -20,19 +21,22 @@ class ProcessSceneImage implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public Scene $scene
-    ) {}
+        public Scene|SceneDraft $scene
+    ) {
+    }
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        if (!$this->scene->image_path) return;
+        if (!$this->scene->image_path)
+            return;
 
         $path = Storage::disk('public')->path($this->scene->image_path);
 
-        if (!file_exists($path)) return;
+        if (!file_exists($path))
+            return;
 
         try {
             // 1. Naikkan Memory Limit (Penting untuk gambar besar)

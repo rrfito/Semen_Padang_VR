@@ -17,6 +17,7 @@ import SceneView from "./Views/SceneView";
 import AutoLinkModal from "./Modals/AutoLinkModal";
 import CreateAreaModal from "./Modals/CreateAreaModal";
 import LinkTargetModal from "./Modals/LinkTargetModal";
+import PendingChangesModal from "./Modals/PendingChangesModal";
 
 // Theme
 import { ThemeProvider } from "@/Contexts/ThemeContext";
@@ -52,6 +53,8 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+    const [pendingCount, setPendingCount] = useState(0);
+    const [showPendingChanges, setShowPendingChanges] = useState(false);
 
     // Modals
     const [autoLinkModal, setAutoLinkModal] = useState({
@@ -68,6 +71,17 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
         data: null,
     });
 
+    const fetchPendingCount = async () => {
+        try {
+            const { data } = await axios.get(
+                route("admin.editor.pending-changes")
+            );
+            setPendingCount(data.summary.total_changes || 0);
+        } catch (error) {
+            console.error("Failed to fetch pending count", error);
+        }
+    };
+
     // --- INITIALIZATION ---
     useEffect(() => {
         // Parse URL 'focus' param
@@ -83,6 +97,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                 expandToNode(found.id);
             }
         }
+        fetchPendingCount(); // Initial fetch
     }, [hierarchy]);
 
     // --- HELPERS ---
@@ -236,6 +251,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     }
 
                     setIsDirty(false); // Mark as saved
+                    fetchPendingCount(); // Refresh counter immediately
                 } catch (error) {
                     console.error(
                         "[Area Save] Failed to auto-save area:",
@@ -261,6 +277,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     });
 
                     setIsDirty(false);
+                    fetchPendingCount(); // Refresh counter immediately
                 } catch (error) {
                     console.error(
                         "[Scene Save] Failed to auto-save scene:",
@@ -315,7 +332,8 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
 
             if (!data.parent_id) {
                 // ADD TO ROOT
-                setHierarchy((prev) => [...prev, newArea]);
+                setHierarchy((prev) => [...prev, res.data.area]);
+                fetchPendingCount();
             } else {
                 // ADD TO CHILD
                 const addToParent = (nodes) => {
@@ -421,6 +439,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             alert(
                 `${response.data.scenes.length} scene(s) uploaded successfully!`
             );
+            fetchPendingCount();
         } catch (error) {
             console.error("Upload failed:", error);
             alert("Failed to upload scenes. Please try again.");
@@ -458,6 +477,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     [response.data.scene.id]: response.data.scene,
                 }));
                 console.log("Link deleted successfully");
+                fetchPendingCount();
             } else {
                 alert("Failed to delete link: " + response.data.message);
             }
@@ -498,6 +518,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             alert(`Auto-linked ${res.data.count} connections!`);
             setAutoLinkModal({ isOpen: false, areaId: null, areaName: "" });
             // Reload details if current view is affected?
+            fetchPendingCount();
         } catch (e) {
             alert("Auto-link failed");
         }
@@ -558,6 +579,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
             alert(
                 `${type === "area" ? "Area" : "Scene"} deleted successfully.`
             );
+            fetchPendingCount();
         } catch (error) {
             console.error(error);
             alert("Failed to delete item.");
@@ -737,6 +759,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                 }));
                 // No need to call handleSelect - sceneCache update will trigger re-render
                 console.log("Link created successfully");
+                fetchPendingCount();
             } else {
                 alert("Failed to create link: " + response.data.message);
             }
@@ -777,6 +800,7 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     [response.data.scene.id]: response.data.scene,
                 }));
                 console.log("Link updated successfully");
+                fetchPendingCount();
             } else {
                 alert("Failed to update link: " + response.data.message);
             }
@@ -800,6 +824,10 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     isDirty={isDirty}
                     isSaving={isSaving}
                     onSave={handleSave}
+                    pendingCount={pendingCount}
+                    onOpenReview={() => setShowPendingChanges(true)}
+                    // Pass current root ID for discard logic
+                    rootId={hierarchy?.length > 0 ? hierarchy[0].id : null}
                 />
 
                 {/* BODY */}
@@ -903,6 +931,18 @@ export default function VisualEditor({ hierarchy: initialHierarchy }) {
                     currentSceneId={selection?.id}
                     currentAreaId={selection?.parentId || null}
                     hierarchy={hierarchy}
+                />
+
+                <PendingChangesModal
+                    isOpen={showPendingChanges}
+                    onClose={() => setShowPendingChanges(false)}
+                    rootId={hierarchy?.length > 0 ? hierarchy[0].id : null}
+                    onPublished={() => {
+                        fetchPendingCount();
+                        // Ideally reload page or reset state?
+                        // Reloading is safest to clear drafts local state
+                        window.location.reload();
+                    }}
                 />
             </div>
         </ThemeProvider>

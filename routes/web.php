@@ -39,28 +39,29 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     // API Routes for Editor
     Route::prefix('visual-editor/api')->name('admin.editor.')->group(function () {
-        Route::get('/scene/{scene}', [EditorController::class, 'sceneDetails'])->name('scene.details');
-        Route::post('/sync', [EditorController::class, 'sync'])->name('sync');
-        Route::post('/upload-temp', [EditorController::class, 'uploadTemp'])->name('upload.temp');
+        // Area Management
         Route::post('/sub-area', [EditorController::class, 'createSubArea'])->name('subarea.create');
-        Route::patch('/area/{area}', [EditorController::class, 'updateArea'])->name('area.update');
-        Route::post('/autolink/execute', [EditorController::class, 'autoLinkAll'])->name('autolink.execute');
-        Route::get('/area/{area}/deletion-impact', [EditorController::class, 'getAreaDeletionImpact'])->name('area.deletion-impact');
-        Route::delete('/area/{area}', [EditorController::class, 'destroyArea'])->name('area.destroy');
-        Route::delete('/scene/{scene}', [EditorController::class, 'destroyScene'])->name('scene.destroy');
-        Route::patch('/scene/{scene}', [EditorController::class, 'updateScene'])->name('scene.update');
-        Route::post('/scene/{scene}/link', [EditorController::class, 'createLink'])->name('scene.link.create');
-        Route::patch('/scene/{scene}/link/{link}', [EditorController::class, 'updateLink'])->name('scene.link.update');
-        Route::delete('/scene/{scene}/link/{link}', [EditorController::class, 'deleteLink'])->name('scene.link.delete');
+        Route::get('/area/{id}', [EditorController::class, 'showArea'])->name('area.show');
+        Route::patch('/area/{id}', [EditorController::class, 'updateArea'])->name('area.update');
+        Route::delete('/area/{id}', [EditorController::class, 'destroyArea'])->name('area.destroy');
+        Route::get('/area/{id}/deletion-impact', [EditorController::class, 'getDeletionImpact'])->name('area.deletion-impact');
 
-        // Scene upload routes
+        // Scene Management
         Route::post('/scenes/bulk-upload', [EditorController::class, 'bulkUploadScenes'])->name('scenes.bulk-upload');
-        Route::get('/area/{area}', [EditorController::class, 'showArea'])->name('area.show');
+        Route::get('/scene/{id}', [EditorController::class, 'showScene'])->name('scene.details'); // Replaces details
+        Route::patch('/scene/{id}', [EditorController::class, 'updateScene'])->name('scene.update');
+        Route::delete('/scene/{id}', [EditorController::class, 'destroyScene'])->name('scene.destroy');
 
-        // Publish workflow routes
+        // Link Management
+        Route::post('/scene/{sceneId}/link', [EditorController::class, 'createLink'])->name('scene.link.create');
+        Route::patch('/scene/{sceneId}/link/{linkId}', [EditorController::class, 'updateLink'])->name('scene.link.update');
+        Route::delete('/scene/{sceneId}/link/{linkId}', [EditorController::class, 'deleteLink'])->name('scene.link.delete');
+
+        // Publish Workflow
         Route::get('/pending-changes', [EditorController::class, 'getPendingChanges'])->name('pending-changes');
         Route::post('/publish-all', [EditorController::class, 'publishAll'])->name('publish-all');
-        Route::post('/publish-area/{area}', [EditorController::class, 'publishArea'])->name('publish-area');
+        Route::post('/discard-all/{rootDraftId}', [EditorController::class, 'discardDrafts'])->name('discard-all');
+        Route::post('/autolink/execute', [EditorController::class, 'autoLinkExecute'])->name('autolink.execute');
     });
 
     // LEGACY REDIRECT: /admin/editor/{area} -> /admin/visual-editor?focus=area:{id}

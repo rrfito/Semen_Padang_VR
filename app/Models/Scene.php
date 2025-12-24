@@ -4,12 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
-
 class Scene extends Model
 {
-    use LogsActivity;
     protected $fillable = [
         'area_id',
         'name',
@@ -17,8 +13,7 @@ class Scene extends Model
         'heading',
         'can_be_gateway',
         'location', // PostGIS column
-        'is_published',
-        'last_published_at',
+        'location', // PostGIS column
     ];
     // protected $guarded = [];
     protected $hidden = ['location']; // Sembunyikan Alien
@@ -105,25 +100,9 @@ class Scene extends Model
         return $this->hasMany(Link::class, 'source_scene_id');
     }
 
-    // SPATIE ACTIVITY LOG CONFIGURATION
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'lat', 'lng', 'heading', 'can_be_gateway'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
-                'created' => "Created scene '{$this->name}'",
-                'updated' => "Updated scene '{$this->name}'",
-                'deleted' => "Deleted scene '{$this->name}'",
-                default => "Event {$eventName} on scene '{$this->name}'"
-            });
-    }
 
     protected $casts = [
         'heading' => 'double',
         'can_be_gateway' => 'boolean',
-        'is_published' => 'boolean',
-        'last_published_at' => 'datetime',
     ];
 }

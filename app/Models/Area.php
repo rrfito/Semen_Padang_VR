@@ -5,12 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
-
 class Area extends Model
 {
-    use LogsActivity;
     protected $fillable = [
         'name',
         'description',
@@ -21,18 +17,13 @@ class Area extends Model
         'lat',
         'lng',
         'is_restricted',
-        'is_published',
-        'last_published_at',
     ];
 
     protected $casts = [
         'is_container' => 'boolean',
         'is_restricted' => 'boolean',
-        'is_published' => 'boolean',
-        'level' => 'integer',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
-        'last_published_at' => 'datetime',
     ];
 
     public function parent(): BelongsTo
@@ -52,20 +43,6 @@ class Area extends Model
             ->orderBy('id');
     }
 
-    // SPATIE ACTIVITY LOG CONFIGURATION
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'description', 'lat', 'lng', 'is_restricted', 'priority'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
-                'created' => "Created area '{$this->name}'",
-                'updated' => "Updated area '{$this->name}'",
-                'deleted' => "Deleted area '{$this->name}'",
-                default => "Event {$eventName} on area '{$this->name}'"
-            });
-    }
 
     // SCOPES
     public function scopeContainers($query)
