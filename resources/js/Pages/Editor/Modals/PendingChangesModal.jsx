@@ -497,40 +497,31 @@ export default function PendingChangesModal({
 
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#111a22]">
-                    <div className="text-xs text-gray-500 dark:text-slate-500">
-                        {data.summary.oldest_change && (
-                            <>Oldest: {data.summary.oldest_change}</>
-                        )}
-                    </div>
-                    <div className="flex gap-3">
-                        {/* Discard Button (Left aligned in group) */}
-                        <button
-                            onClick={() => setShowDiscardConfirm(true)}
-                            disabled={data.summary.total_changes === 0}
-                            className="theme-btn-danger"
-                        >
-                            <span className="material-symbols-outlined">
-                                delete_forever
-                            </span>
-                            Discard All
-                        </button>
+                    {/* Discard Button (Far Left) */}
+                    <button
+                        onClick={() => setShowDiscardConfirm(true)}
+                        disabled={loading || data.summary.total_changes === 0}
+                        className="theme-btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span className="material-symbols-outlined">
+                            delete_forever
+                        </span>
+                        Discard All
+                    </button>
 
-                        <button
-                            onClick={onClose}
-                            className="theme-btn-secondary"
-                        >
-                            Close
-                        </button>
+                    <div className="flex gap-3">
                         <button
                             onClick={() => setShowConfirm(true)}
-                            disabled={data.summary.total_changes === 0}
+                            disabled={
+                                loading || data.summary.total_changes === 0
+                            }
                             className="theme-btn-submit flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span className="material-symbols-outlined text-[18px]">
                                 publish
                             </span>
                             <span>
-                                Publish All ({data.summary.total_changes})
+                                Publish All ({data.summary.total_changes || 0})
                             </span>
                         </button>
                     </div>

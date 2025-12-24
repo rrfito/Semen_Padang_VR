@@ -65,7 +65,13 @@ export default function VisualEditor({
     const [hierarchy, setHierarchy] = useState(
         enrichHierarchyWithStatus(initialHierarchy) || []
     );
+
+    // Sync state with props when Inertia reloads data
+    useEffect(() => {
+        setHierarchy(enrichHierarchyWithStatus(initialHierarchy) || []);
+    }, [initialHierarchy]);
     const [selection, setSelection] = useState(null); // { type, id, ...node }
+    const [isUploading, setIsUploading] = useState(false);
 
     // Visibility State (Toggle Status)
     const [showStatusLabels, setShowStatusLabels] = useState(true);
@@ -119,14 +125,21 @@ export default function VisualEditor({
         title: "",
         message: "",
         variant: "info",
+        autoClose: 5000,
     });
 
-    const showNotification = (title, message, variant = "info") => {
+    const showNotification = (
+        title,
+        message,
+        variant = "info",
+        autoClose = 5000
+    ) => {
         setNotification({
             isOpen: true,
             title,
             message,
             variant,
+            autoClose,
         });
     };
 
@@ -498,6 +511,14 @@ export default function VisualEditor({
             return;
         }
 
+        setIsUploading(true);
+        showNotification(
+            "Uploading...",
+            "Processing images and extracting GPS data. Please wait.",
+            "info",
+            0 // Disable auto-close for persistent loading state
+        );
+
         try {
             const formData = new FormData();
             Array.from(files).forEach((file) =>
@@ -510,66 +531,52 @@ export default function VisualEditor({
                 formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        showNotification(
+                            "Uploading...",
+                            percentCompleted < 100
+                                ? `Sending data: ${percentCompleted}%`
+                                : "Data sent! Now reading GPS metadata (this may take a moment)...",
+                            "info",
+                            0 // Keep persistent
+                        );
+                    },
                 }
             );
 
-            // Refresh area data to show new scenes
-            const updatedArea = await axios.get(
-                `/admin/visual-editor/api/area/${targetAreaId}`
-            );
+            // Backend returns 'scenes' with JPG paths initially.
+            // Viewer will load JPGs immediately.
+            // Background job will update DB to WebP later.
+            // URL change (WebP) will bust cache naturally.
 
-            console.log("📊 API Response:", updatedArea.data);
-            console.log("🎬 Scenes received:", updatedArea.data.scenes);
-            if (updatedArea.data.scenes?.length > 0) {
-                console.log("🔍 First scene data:", updatedArea.data.scenes[0]);
-            }
+            const uploadedScenes = response.data.scenes || [];
 
-            // Update hierarchy with new scenes AND area data
             setHierarchy((prev) => {
                 const updateScenes = (nodes) => {
                     return nodes.map((node) => {
                         if (node.id === targetAreaId && node.type === "area") {
-                            // 1. Merge Area Data
-                            // IMPORTANT: Preserve existing children!
-                            // Backend 'showArea' might return incomplete children or trigger re-render issues.
-                            // Scene upload strictly affects scenes, not sub-areas.
-                            const newAreaData = {
-                                ...node,
-                                ...updatedArea.data.area,
-                                children: node.children,
-                            };
+                            // Enrich new scenes
+                            const newEnrichedScenes = uploadedScenes.map(
+                                (scene) => ({
+                                    ...scene,
+                                    status: "new",
+                                })
+                            );
 
-                            // 2. Process Scenes - Inject Status!
-                            // Backend scenes don't have 'status'.
-                            // Newly uploaded scenes are "new" (unless they somehow existed? No, bulk upload implies new).
-                            // Existing scenes might be "live" or "modified".
-                            // We need to re-enrich them.
-
-                            const enrichedScenes = (
-                                updatedArea.data.scenes || []
-                            ).map((scene) => {
-                                let status = "live";
-                                if (!scene.published_id) {
-                                    status = "new";
-                                } else if (
-                                    modifiedNodes?.scenes?.includes(scene.id)
-                                ) {
-                                    status = "modified";
-                                }
-                                return { ...scene, status };
-                            });
+                            // Merge with existing scenes
+                            const existingScenes = node.scenes || [];
+                            const mergedScenes = [
+                                ...existingScenes,
+                                ...newEnrichedScenes,
+                            ];
 
                             return {
-                                ...newAreaData,
-                                scenes: enrichedScenes,
-                                // Area status logic:
-                                status: !newAreaData.published_id
-                                    ? "new"
-                                    : modifiedNodes?.areas?.includes(
-                                          newAreaData.id
-                                      )
-                                    ? "modified"
-                                    : "live",
+                                ...node,
+                                scenes: mergedScenes,
+                                status: !node.published_id ? "new" : "modified",
                             };
                         }
                         if (node.children) {
@@ -586,17 +593,41 @@ export default function VisualEditor({
 
             showNotification(
                 "Upload Successful",
-                `${response.data.scenes.length} scene(s) uploaded successfully!`,
+                `${uploadedScenes.length} scenes uploaded! GPS data extracted. Processing WebP in background...`,
                 "success"
             );
             fetchPendingCount();
         } catch (error) {
+            // Detailed Error Notification
             console.error("Upload failed:", error);
-            showNotification(
-                "Upload Failed",
-                "Failed to upload scenes. Please try again.",
-                "error"
-            );
+            let errorTitle = "Upload Failed";
+            let errorMessage = "Failed to upload scenes.";
+
+            if (error.response) {
+                if (error.response.status === 413) {
+                    errorTitle = "File Too Large";
+                    errorMessage = "Total upload size exceeds server limit.";
+                } else if (error.response.status === 422) {
+                    errorTitle = "Validation Error";
+                    if (error.response.data.errors) {
+                        const details = Object.values(
+                            error.response.data.errors
+                        )
+                            .flat()
+                            .join("\n");
+                        errorMessage = details;
+                    } else {
+                        errorMessage =
+                            error.response.data.message || "Invalid files.";
+                    }
+                } else {
+                    errorMessage +=
+                        ": " + (error.response.data.message || error.message);
+                }
+            }
+            showNotification(errorTitle, errorMessage, "error");
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -1106,12 +1137,32 @@ export default function VisualEditor({
                 </div>
 
                 {/* MODALS */}
+                <NotificationModal
+                    isOpen={notification.isOpen}
+                    onClose={() =>
+                        setNotification({ ...notification, isOpen: false })
+                    }
+                    title={notification.title}
+                    message={notification.message}
+                    variant={notification.variant}
+                    autoClose={notification.autoClose}
+                />
                 <AutoLinkModal
                     isOpen={autoLinkModal.isOpen}
                     onClose={() =>
                         setAutoLinkModal({ ...autoLinkModal, isOpen: false })
                     }
                     area={autoLinkModal.area}
+                    onSuccess={() => {
+                        // Reload hierarchy data from server without full page refresh
+                        router.reload({
+                            only: ["hierarchy"],
+                            onSuccess: () => {
+                                fetchPendingCount();
+                                console.log("Hierarchy reloaded via SPA");
+                            },
+                        });
+                    }}
                 />
 
                 <CreateAreaModal
@@ -1130,7 +1181,7 @@ export default function VisualEditor({
                 <input
                     id="scene-upload-input"
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png"
                     multiple
                     className="hidden"
                     onChange={(e) => {

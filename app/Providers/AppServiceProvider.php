@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
         Scene::observe(SceneObserver::class);
+        \App\Models\Drafts\SceneDraft::observe(\App\Observers\SceneDraftObserver::class);
     }
 }

@@ -41,6 +41,8 @@ class ProcessSceneImage implements ShouldQueue
         try {
             // 1. Naikkan Memory Limit (Penting untuk gambar besar)
             ini_set('memory_limit', '2048M');
+            ini_set('upload_max_filesize', '150M');
+            ini_set('post_max_size', '150M');
 
             // 2. Setup Image Manager
             $manager = new ImageManager(new Driver());
@@ -64,22 +66,45 @@ class ProcessSceneImage implements ShouldQueue
 
             file_put_contents($newAbsolutePath, (string) $encoded);
 
-            // 6. Update Database (PENTING: saveQuietly agar tidak trigger Observer lagi/Looping)
-            if ($this->scene->image_path !== $newRelativePath) {
+            // 6. Update Database using DB Transaction to ensure consistency
+            \Illuminate\Support\Facades\DB::transaction(function () use ($newRelativePath, $oldPath) {
+                $originalImagePassed = $this->scene->image_path;
+
+                // A. Update the Job's Scene (Draft)
                 $this->scene->image_path = $newRelativePath;
                 $this->scene->saveQuietly();
 
-                // 7. Hapus file lama (JPG)
-                if (file_exists($oldPath)) {
+                // B. Check for Live Counterpart (Race Condition Fix)
+                // If user Published while job was running, the Live scene might still point to the old JPG.
+                // We must update it to the new WebP as well.
+                if ($this->scene instanceof SceneDraft && $this->scene->published_id) {
+                    $liveScene = Scene::find($this->scene->published_id);
+                    if ($liveScene && $liveScene->image_path === $originalImagePassed) {
+                        $liveScene->image_path = $newRelativePath;
+                        $liveScene->saveQuietly();
+                        \Log::info("ProcessSceneImage: Also updated Live Scene {$liveScene->id} to WebP.");
+                    }
+                }
+
+                // C. Safe Deletion Logic
+                // Only delete the old JPG if NO other scene is using it.
+                // This prevents deleting a file that might be referenced by another entity (though unlikely with unique filenames).
+                // For now, simpler approach: we just updated the known references.
+                // But let's be safe: Check if any Scene or SceneDraft still uses the old path.
+
+                $stillInUse = Scene::where('image_path', $originalImagePassed)->exists()
+                    || SceneDraft::where('image_path', $originalImagePassed)->exists();
+
+                if (!$stillInUse && file_exists($oldPath)) {
                     if (unlink($oldPath)) {
                         \Log::info("ProcessSceneImage: Successfully deleted original file: " . $oldPath);
                     } else {
                         \Log::warning("ProcessSceneImage: Failed to delete original file: " . $oldPath);
                     }
                 } else {
-                    \Log::warning("ProcessSceneImage: Original file not found for deletion: " . $oldPath);
+                    \Log::info("ProcessSceneImage: Skipped deletion, file still in use or not found: " . $originalImagePassed);
                 }
-            }
+            });
 
             // Optional: Log success
             \Log::info("Scene {$this->scene->id} converted to WebP successfully.");

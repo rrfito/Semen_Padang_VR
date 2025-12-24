@@ -4,7 +4,7 @@ import axios from "axios";
 import NotificationModal from "@/Components/Editor/NotificationModal";
 import ConfirmModal from "@/Components/Editor/ConfirmModal";
 
-export default function AutoLinkModal({ isOpen, onClose, area }) {
+export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [executing, setExecuting] = useState(false);
@@ -102,13 +102,15 @@ export default function AutoLinkModal({ isOpen, onClose, area }) {
                 setShowNotification(true);
                 setTimeout(() => {
                     onClose();
-                    window.location.reload();
+                    if (onSuccess) onSuccess(response.data);
+                    else window.location.reload();
                 }, 2500);
                 return;
             }
 
             onClose();
-            window.location.reload();
+            if (onSuccess) onSuccess(response.data);
+            else window.location.reload();
         } catch (error) {
             console.error("Auto-link failed:", error);
             setNotificationConfig({

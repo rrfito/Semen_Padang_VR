@@ -621,12 +621,24 @@ export default function Sidebar({
                                         className={`material-symbols-outlined text-[20px] shrink-0 ${
                                             result.type === "scene"
                                                 ? "text-purple-500"
-                                                : "text-amber-500"
+                                                : result.pathIds.length === 0
+                                                ? "text-amber-500"
+                                                : result.pathIds.length === 1
+                                                ? result.node.is_container
+                                                    ? "text-blue-500"
+                                                    : "text-teal-500"
+                                                : "text-teal-500"
                                         }`}
                                     >
                                         {result.type === "scene"
                                             ? "360"
-                                            : "domain"}
+                                            : result.pathIds.length === 0
+                                            ? "domain"
+                                            : result.pathIds.length === 1
+                                            ? result.node.is_container
+                                                ? "layers"
+                                                : "meeting_room"
+                                            : "meeting_room"}
                                     </span>
 
                                     {/* Text */}

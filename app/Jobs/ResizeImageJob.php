@@ -23,17 +23,19 @@ class ResizeImageJob implements ShouldQueue
 
     public function handle()
     {
-        ini_set('memory_limit', '512M'); // Increase memory for large panoramas
-
+        ini_set('memory_limit', '512M');
+        ini_set('upload_max_filesize', '150M');
+        ini_set('post_max_size', '150M');
         $path = storage_path('app/public/' . $this->scene->image_path);
-        
-        if (!file_exists($path)) return;
+
+        if (!file_exists($path))
+            return;
 
         try {
             // Resize logic for Mobile Optimization
             // Max width 4096px, Quality 80%
             $image = Image::read($path);
-            
+
             if ($image->width() > 4096) {
                 $image->scale(width: 4096);
                 $image->save($path, quality: 80);

@@ -37,6 +37,8 @@ class SceneObserver
             if ($oldImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldImage)) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($oldImage);
             }
+            // Hapus thumbnail lama juga
+            $this->deleteThumbnails($oldImage);
         }
     }
 
@@ -49,6 +51,9 @@ class SceneObserver
         if ($scene->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($scene->image_path)) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($scene->image_path);
         }
+
+        // Hapus Thumbnails (_v.webp dan _h.webp)
+        $this->deleteThumbnails($scene->image_path);
     }
 
     /**
@@ -65,5 +70,31 @@ class SceneObserver
     public function forceDeleted(Scene $scene): void
     {
         //
+    }
+
+    /**
+     * Helper to delete image and its thumbnails
+     */
+    private function deleteThumbnails($path)
+    {
+        if (!$path)
+            return;
+
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+
+        $dir = dirname($path);
+        $filename = pathinfo($path, PATHINFO_FILENAME);
+
+        // Thumbnails
+        $vertical = $dir . '/' . $filename . '_v.webp';
+        $horizontal = $dir . '/' . $filename . '_h.webp';
+
+        if ($disk->exists($vertical)) {
+            $disk->delete($vertical);
+        }
+
+        if ($disk->exists($horizontal)) {
+            $disk->delete($horizontal);
+        }
     }
 }

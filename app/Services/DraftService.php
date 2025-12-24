@@ -185,7 +185,8 @@ class DraftService
                 // 2A. NET-ZERO: Hard Delete immediately
                 // Because no published_id exists in this branch, we can safely wipe it.
                 // Creating then Deleting = Nothing happened.
-                $node->delete(); // Database Cascade will handle children
+                // USE RECURSIVE DELETE to trigger Observers for Image Cleanup!
+                $this->forceDeleteDraftTree($node);
             } else {
                 // 2B. Standard Soft Delete (Marking)
                 // We MUST keep the drafts to signal "Deletion of Live Item" during Publish.

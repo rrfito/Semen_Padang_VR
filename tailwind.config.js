@@ -39,7 +39,7 @@ export default {
                 // Text
                 "text-light": "#1F2937",
                 "text-dark": "#E5E7EB",
-                "text-secondary-light": "#6B7280",
+                "text-secondary-light": "#40444c",
                 "text-secondary-dark": "#9CA3AF",
                 
                 // Borders

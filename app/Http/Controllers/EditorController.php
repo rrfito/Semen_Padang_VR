@@ -219,7 +219,7 @@ class EditorController extends Controller
     {
         $request->validate([
             'area_id' => 'required|exists:area_drafts,id',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:51200',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg|max:51200',
         ]);
 
         $areaId = $request->input('area_id');
@@ -265,6 +265,8 @@ class EditorController extends Controller
                 $uploadedScenes[] = $scene;
 
                 // Dispatch Job to optimize image (Resize/WebP)
+                // ASYNC MODE: Returns immediately (fast)
+                // Job will update DB from .jpg to .webp later
                 ProcessSceneImage::dispatch($scene);
             }
 
