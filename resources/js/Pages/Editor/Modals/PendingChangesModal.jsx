@@ -114,7 +114,17 @@ export default function PendingChangesModal({
     const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
     useEffect(() => {
-        if (isOpen) fetchChanges();
+        if (isOpen) {
+            fetchChanges();
+        } else {
+            // Reset Notification on Close
+            setNotification({
+                isOpen: false,
+                type: "success",
+                message: "",
+            });
+            setIsPublishing(false);
+        }
     }, [isOpen]);
 
     const fetchChanges = async () => {

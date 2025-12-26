@@ -29,6 +29,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
     useEffect(() => {
         if (isOpen) {
             fetchPreview();
+        } else {
+            // Reset Notification on Close
+            setShowNotification(false);
+            setNotificationConfig({
+                variant: "success",
+                title: "",
+                message: "",
+            });
+            setLoading(false);
         }
     }, [isOpen, replaceMode, linkAllAreas]); // Removed radius - no auto refresh on radius change
 

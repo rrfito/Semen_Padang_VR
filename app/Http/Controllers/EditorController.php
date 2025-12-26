@@ -541,10 +541,20 @@ class EditorController extends Controller
         $scenes = $query->get();
 
         // Stats
+        $scenesWithoutGpsQuery = SceneDraft::query()
+            ->where(function ($q) {
+                $q->whereNull('lat')->orWhereNull('lng');
+            })
+            ->where('marked_for_deletion', false);
+
+        if ($areaId && isset($areaIds)) {
+            $scenesWithoutGpsQuery->whereIn('area_id', $areaIds);
+        }
+
         $stats = [
             'existing_links' => 0,
             'target_areas' => [],
-            'scenes_without_gps' => SceneDraft::whereNull('lat')->orWhereNull('lng')->count(), // Global or scoped? simplistic count
+            'scenes_without_gps' => $scenesWithoutGpsQuery->count(),
             'gateway_scenes' => $scenes->where('can_be_gateway', true)->count(),
             'total_scenes' => $scenes->count(),
             'deleted_links' => 0,

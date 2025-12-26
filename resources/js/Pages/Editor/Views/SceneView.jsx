@@ -14,10 +14,8 @@ export default function SceneView({
     const viewerRef = useRef(null);
     const currentSceneRef = useRef(null);
     const hotspotElementsRef = useRef([]);
-
     // --- NEW STATE: Add Mode ---
     const [isAdding, setIsAdding] = useState(false);
-
     // --- EDIT MODE STATE ---
     const [selectedHotspot, setSelectedHotspot] = useState(null);
     const [isRepositioning, setIsRepositioning] = useState(false);
@@ -292,65 +290,62 @@ export default function SceneView({
                     <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
 
                     {/* Radial Container */}
-                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200">
-                        {/* Center Icon (Chevron) - Visual Anchor */}
+                    {/* Center Anchor & Buttons Container */}
+                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200 flex flex-col items-center gap-6">
+                        {/* Center Icon (Target Style) - Visual Anchor */}
                         <div className="relative z-20 flex items-center justify-center">
-                            <div className="size-12 rounded-full bg-slate-700/80 backdrop-blur-md border-2 border-white/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.4)]">
-                                <span className="material-symbols-outlined text-2xl text-white font-bold drop-shadow-md">
-                                    expand_less
+                            {/* Uses style similar to Update Position mode */}
+                            <div className="size-14 rounded-full bg-slate-700/80 backdrop-blur-md border-[3px] border-white/50 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                                <span className="material-symbols-outlined text-3xl text-white font-bold drop-shadow-md">
+                                    my_location
                                 </span>
                             </div>
                         </div>
 
-                        {/* Curved Left Side Buttons - Marzipano style */}
-                        {/* Button: Navigation (Top Left - curved) */}
-                        <button
-                            onClick={() => handleTriggerAdd("navigasi")}
-                            className="absolute bg-blue-500 hover:bg-blue-600 border-2 border-white/20 hover:border-white text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
-                            style={{ left: "-1.5rem", top: "-2.5rem" }}
-                            title="Link to Scene in Same Area"
-                        >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="white"
-                                className="w-4 h-4"
-                                style={{ transform: "rotate(-90deg)" }}
+                        {/* Action Buttons Row (Below Center) */}
+                        <div className="flex items-center gap-4">
+                            {/* Button: Navigation */}
+                            <button
+                                onClick={() => handleTriggerAdd("navigasi")}
+                                className="bg-blue-500 hover:bg-blue-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+                                title="Link to Scene in Same Area"
                             >
-                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
-                            </svg>
-                        </button>
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="white"
+                                    className="w-6 h-6"
+                                    style={{ transform: "rotate(-90deg)" }}
+                                >
+                                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
+                                </svg>
+                            </button>
 
-                        {/* Button: Gateway (Middle Left - curved) */}
-                        <button
-                            onClick={() => handleTriggerAdd("gateway")}
-                            className="absolute bg-purple-500 hover:bg-purple-600 border-2 border-white/20 hover:border-white text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
-                            style={{
-                                left: "-3rem",
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                            }}
-                            title="Link to Different Area (Gateway)"
-                        >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="white"
-                                className="w-5 h-5"
+                            {/* Button: Gateway */}
+                            <button
+                                onClick={() => handleTriggerAdd("gateway")}
+                                className="bg-purple-500 hover:bg-purple-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+                                title="Link to Different Area (Gateway)"
                             >
-                                <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z" />
-                            </svg>
-                        </button>
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="white"
+                                    className="w-6 h-6"
+                                >
+                                    <path d="M6 2v20h12V2H6zm10 16H8V4h8v14zm-4-6h2v2h-2v-2z" />
+                                </svg>
+                            </button>
 
-                        {/* Button: Cancel (Bottom Left - curved) */}
-                        <button
-                            onClick={() => setIsAdding(false)}
-                            className="absolute bg-red-500/80 hover:bg-red-600 text-white size-9 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group border-2 border-white/20"
-                            style={{ left: "-1.5rem", bottom: "-2.5rem" }}
-                            title="Cancel"
-                        >
-                            <span className="material-symbols-outlined text-lg">
-                                close
-                            </span>
-                        </button>
+                            {/* Button: Cancel */}
+                            <button
+                                onClick={() => setIsAdding(false)}
+                                className="bg-red-500/80 hover:bg-red-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
+                                title="Cancel"
+                            >
+                                <span className="material-symbols-outlined text-2xl">
+                                    close
+                                </span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Helper Text */}

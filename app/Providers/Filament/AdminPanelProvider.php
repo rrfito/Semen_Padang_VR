@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Semen Padang VR')
+            ->brandName('Semen Padang VrR')
             ->brandLogo(asset('image/LOGO PT SEMEN PADANG.png'))
             ->brandLogoHeight('3rem')
             ->favicon(asset('image/LOGO PT SEMEN PADANG.png'))
