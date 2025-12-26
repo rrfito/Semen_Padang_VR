@@ -37,8 +37,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Main Global Route
     Route::get('/visual-editor', [EditorController::class, 'index'])->name('admin.editor.index');
 
+    // Admin User Management
+    Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
+        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::put('/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.update-role');
+    });
+
     // API Routes for Editor
-    Route::prefix('visual-editor/api')->name('admin.editor.')->group(function () {
+    Route::prefix('visual-editor/api')->middleware('auth')->name('admin.editor.')->group(function () {
         // Area Management
         Route::post('/sub-area', [EditorController::class, 'createSubArea'])->name('subarea.create');
         Route::get('/area/{id}', [EditorController::class, 'showArea'])->name('area.show');
