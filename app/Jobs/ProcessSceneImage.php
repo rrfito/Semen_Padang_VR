@@ -96,11 +96,10 @@ class ProcessSceneImage implements ShouldQueue
                     || SceneDraft::where('image_path', $originalImagePassed)->exists();
 
                 if (!$stillInUse && file_exists($oldPath)) {
-                    if (unlink($oldPath)) {
-                        \Log::info("ProcessSceneImage: Successfully deleted original file: " . $oldPath);
-                    } else {
-                        \Log::warning("ProcessSceneImage: Failed to delete original file: " . $oldPath);
-                    }
+                    // DELAYED DELETION (1 Hour)
+                    // Allows frontend to heal independently without 404 errors.
+                    DeleteSceneFile::dispatch($oldPath)->delay(now()->addHour());
+                    \Log::info("ProcessSceneImage: Scheduled original file deletion in 1 hour: " . $oldPath);
                 } else {
                     \Log::info("ProcessSceneImage: Skipped deletion, file still in use or not found: " . $originalImagePassed);
                 }

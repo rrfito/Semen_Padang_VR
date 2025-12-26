@@ -59,7 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 'panels::auth.login.form.after',
-                fn () => view('filament.login-extra')
+                fn() => view('filament.login-extra')
             );
     }
 }

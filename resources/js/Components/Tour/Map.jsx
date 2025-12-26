@@ -137,14 +137,14 @@ export default function Map({
                 {showPolyline &&
                     selectedArea &&
                     (() => {
-                        console.log(
-                            "[POLYLINE DEBUG] showPolyline:",
-                            showPolyline
-                        );
-                        console.log(
-                            "[POLYLINE DEBUG] selectedArea:",
-                            selectedArea
-                        );
+                        // console.log(
+                        //     "[POLYLINE DEBUG] showPolyline:",
+                        //     showPolyline
+                        // );
+                        // console.log(
+                        //     "[POLYLINE DEBUG] selectedArea:",
+                        //     selectedArea
+                        // );
 
                         // Get polyline-ready scenes from either container or leaf area
                         let polylineScenes = [];
@@ -155,20 +155,20 @@ export default function Map({
                             selectedArea.all_child_scenes.length > 0
                         ) {
                             polylineScenes = selectedArea.all_child_scenes;
-                            console.log(
-                                "[POLYLINE DEBUG] Using all_child_scenes:",
-                                polylineScenes
-                            );
+                            // console.log(
+                            //     "[POLYLINE DEBUG] Using all_child_scenes:",
+                            //     polylineScenes
+                            // );
                         }
                         // Leaf area: use scenes with GPS coordinates
                         else if (
                             selectedArea.scenes &&
                             selectedArea.scenes.length > 0
                         ) {
-                            console.log(
-                                "[POLYLINE DEBUG] Leaf area scenes:",
-                                selectedArea.scenes
-                            );
+                            // console.log(
+                            //     "[POLYLINE DEBUG] Leaf area scenes:",
+                            //     selectedArea.scenes
+                            // );
 
                             // Helper to get GPS coordinates from either format
                             const getSceneGPS = (s) => {
@@ -212,30 +212,30 @@ export default function Map({
                                 })
                                 .filter(Boolean);
 
-                            console.log(
-                                "[POLYLINE DEBUG] Filtered polylineScenes:",
-                                polylineScenes
-                            );
+                            // console.log(
+                            //     "[POLYLINE DEBUG] Filtered polylineScenes:",
+                            //     polylineScenes
+                            // );
                         }
 
-                        console.log(
-                            "[POLYLINE DEBUG] Final polylineScenes count:",
-                            polylineScenes.length
-                        );
+                        // console.log(
+                        //     "[POLYLINE DEBUG] Final polylineScenes count:",
+                        //     polylineScenes.length
+                        // );
 
                         // Only render if we have at least 2 points for a line
                         if (polylineScenes.length < 2) {
-                            console.log(
-                                "[POLYLINE DEBUG] Not enough scenes for polyline (need >= 2)"
-                            );
+                            // console.log(
+                            //     "[POLYLINE DEBUG] Not enough scenes for polyline (need >= 2)"
+                            // );
                             return null;
                         }
 
-                        console.log(
-                            "[POLYLINE DEBUG] Rendering polyline with",
-                            polylineScenes.length,
-                            "scenes"
-                        );
+                        // console.log(
+                        //     "[POLYLINE DEBUG] Rendering polyline with",
+                        //     polylineScenes.length,
+                        //     "scenes"
+                        // );
 
                         return (
                             <>
@@ -291,6 +291,16 @@ export default function Map({
                 {/* 2. Render Markers (Areas) */}
                 {markers.map((marker) => {
                     // LOGIC: Sembunyikan marker utama jika ini adalah area yang dipilih DAN showPolyline aktif
+                    // FIX: Filter hanya tampilkan marker untuk Root Area (Level 1)
+                    // Asumsi: Root area memiliki parent_id === null atau level === 1.
+                    // Kita cek properti yang tersedia. Biasanya marker berisi data area ringan.
+
+                    // Filter: Hanya tampilkan jika Level 1 (Root)
+                    // Jika data marker tidak punya info level, kita perlu pastikan di controller/parent component.
+                    // Tapi berdasarkan chat sebelumnya, area punya 'level'.
+                    if (marker.level !== 1 && marker.parent_id !== null)
+                        return null;
+
                     const isHidden =
                         showPolyline &&
                         selectedArea &&

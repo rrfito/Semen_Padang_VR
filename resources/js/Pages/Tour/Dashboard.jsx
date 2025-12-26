@@ -27,13 +27,13 @@ export default function Dashboard({ menuData, markers, user }) {
         // Fallback for direct map clicks or legacy calls
         const targetType = type || "child";
 
-        console.log("[SIDEBAR CLICK] item:", item);
-        console.log("[SIDEBAR CLICK] Looking for marker with id:", item.id);
-        console.log("[SIDEBAR CLICK] markers array:", markers);
+        // console.log("[SIDEBAR CLICK] item:", item);
+        // console.log("[SIDEBAR CLICK] Looking for marker with id:", item.id);
+        // console.log("[SIDEBAR CLICK] markers array:", markers);
 
         const target = markers.find((m) => m.id === item.id);
 
-        console.log("[SIDEBAR CLICK] Found target:", target);
+        // console.log("[SIDEBAR CLICK] Found target:", target);
 
         if (target) {
             // Area has coordinates - fly to it on map
@@ -57,11 +57,11 @@ export default function Dashboard({ menuData, markers, user }) {
         } else {
             // Area doesn't have coordinates (e.g. container areas)
             // Still show SecondarySidebar, but don't fly map
-            console.log("[SIDEBAR CLICK] No marker found, using menuData item");
+            // console.log("[SIDEBAR CLICK] No marker found, using menuData item");
             setSelectedArea(item); // Use original item
             setShowPolyline(false);
             setIsMobileSidebarOpen(false);
-            console.log("Area selected (no map coordinates):", item.name);
+            // console.log("Area selected (no map coordinates):", item.name);
         }
     };
 

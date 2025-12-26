@@ -209,21 +209,60 @@ export default function VisualEditor({
         url.searchParams.set("focus", `${node.type}:${node.id}`);
         window.history.replaceState({}, "", url);
 
-        // Logic: specific handling
+        // If it's a scene, fetch details if not in cache
         if (node.type === "scene") {
-            if (!sceneCache[node.id]) {
-                setIsLoadingDetails(true);
-                try {
-                    const { data } = await axios.get(
-                        route("admin.editor.scene.details", node.id)
-                    );
-                    setSceneCache((prev) => ({ ...prev, [node.id]: data }));
-                } catch (error) {
-                    console.error("Failed to load scene details", error);
-                } finally {
-                    setIsLoadingDetails(false);
-                }
+            // OPTIMIZATION: Use pre-loaded data if available (links/image_url)
+            if (node.links && node.image_url) {
+                // console.log("Using pre-loaded scene data for:", node.name);
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [node.id]: node,
+                }));
             }
+            // Fallback: Fetch if not in cache AND not pre-loaded
+            else if (!sceneCache[node.id]) {
+                fetchSceneDetails(node.id);
+            }
+        }
+    };
+
+    // New helper to fetch scene details (extracted for reuse)
+    const fetchSceneDetails = async (sceneId) => {
+        setIsLoadingDetails(true);
+        try {
+            const response = await axios.get(
+                `/admin/visual-editor/api/scene/${sceneId}`
+            );
+            if (response.data.success) {
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [sceneId]: response.data.scene,
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to fetch scene details:", error);
+            alert("Gagal memuat detail scene.");
+        } finally {
+            setIsLoadingDetails(false);
+        }
+    };
+
+    // Refetch handler for stale images (404 correction)
+    const handleRefetchScene = async (sceneId) => {
+        // console.log("Refetching stale scene:", sceneId);
+        try {
+            const response = await axios.get(
+                `/admin/visual-editor/api/scene/${sceneId}`
+            );
+            if (response.data.success) {
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [sceneId]: response.data.scene,
+                }));
+                // console.log("Scene refetched and cache updated");
+            }
+        } catch (error) {
+            console.error("Failed to refetch scene:", error);
         }
     };
 
@@ -314,11 +353,11 @@ export default function VisualEditor({
                 try {
                     const url = `/admin/visual-editor/api/area/${id}`;
                     const response = await axios.patch(url, changes);
-                    console.log("[Area Save] Area auto-saved successfully:", {
-                        areaId: id,
-                        changes,
-                        backendResponse: response.data,
-                    });
+                    // console.log("[Area Save] Area auto-saved successfully:", {
+                    //     areaId: id,
+                    //     changes,
+                    //     backendResponse: response.data,
+                    // });
 
                     // Re-sync hierarchy with backend response to ensure consistency
                     if (response.data.area) {
@@ -377,11 +416,11 @@ export default function VisualEditor({
                 try {
                     const url = `/admin/visual-editor/api/scene/${id}`;
                     const response = await axios.patch(url, changes);
-                    console.log("[Scene Save] Scene auto-saved successfully:", {
-                        sceneId: id,
-                        changes,
-                        backendResponse: response.data,
-                    });
+                    // console.log("[Scene Save] Scene auto-saved successfully:", {
+                    //     sceneId: id,
+                    //     changes,
+                    //     backendResponse: response.data,
+                    // });
 
                     setIsDirty(false);
                     fetchPendingCount(); // Refresh counter immediately
@@ -661,7 +700,7 @@ export default function VisualEditor({
                     ...prev,
                     [response.data.scene.id]: response.data.scene,
                 }));
-                console.log("Link deleted successfully");
+                // console.log("Link deleted successfully");
                 fetchPendingCount();
             } else {
                 showNotification(
@@ -717,7 +756,17 @@ export default function VisualEditor({
             );
             setAutoLinkModal({ isOpen: false, areaId: null, areaName: "" });
             // Reload details if current view is affected?
+            // reload data (SPA)
             fetchPendingCount();
+            router.reload({
+                only: ["hierarchy", "modifiedNodes"],
+                onSuccess: () => {
+                    // Optional: refresh active scene details if selected
+                    if (selection && selection.type === "scene") {
+                        handleRefetchScene(selection.id);
+                    }
+                },
+            });
         } catch (e) {
             showNotification(
                 "Auto-Link Failed",
@@ -795,8 +844,10 @@ export default function VisualEditor({
             }
 
             // Success - Silent (or Toast)
-            console.log(`${type} deleted successfully.`);
+            // console.log(`${type} deleted successfully.`);
+            // console.log(`${type} deleted successfully.`);
             fetchPendingCount();
+            router.reload({ only: ["hierarchy", "modifiedNodes"] });
         } catch (error) {
             console.error("Delete failed, reverting...", error);
             showNotification(
@@ -983,6 +1034,7 @@ export default function VisualEditor({
                     }}
                     onDeleteLink={handleDeleteLink}
                     onUpdateLink={handleUpdateLink}
+                    onRefetchScene={() => handleRefetchScene(selection.id)}
                 />
             );
         }
@@ -1002,11 +1054,11 @@ export default function VisualEditor({
             type: type,
         };
 
-        console.log("Creating link with payload:", payload);
-        console.log(
-            "POST URL:",
-            `/admin/visual-editor/api/scene/${currentSceneId}/link`
-        );
+        // console.log("Creating link with payload:", payload);
+        // console.log(
+        //     "POST URL:",
+        //     `/admin/visual-editor/api/scene/${currentSceneId}/link`
+        // );
 
         try {
             const response = await axios.post(
@@ -1021,7 +1073,7 @@ export default function VisualEditor({
                     [response.data.scene.id]: response.data.scene,
                 }));
                 // No need to call handleSelect - sceneCache update will trigger re-render
-                console.log("Link created successfully");
+                // console.log("Link created successfully");
                 fetchPendingCount();
             } else {
                 alert("Failed to create link: " + response.data.message);
@@ -1062,7 +1114,7 @@ export default function VisualEditor({
                     ...prev,
                     [response.data.scene.id]: response.data.scene,
                 }));
-                console.log("Link updated successfully");
+                // console.log("Link updated successfully");
                 fetchPendingCount();
             } else {
                 alert("Failed to update link: " + response.data.message);
@@ -1159,7 +1211,7 @@ export default function VisualEditor({
                             only: ["hierarchy"],
                             onSuccess: () => {
                                 fetchPendingCount();
-                                console.log("Hierarchy reloaded via SPA");
+                                // console.log("Hierarchy reloaded via SPA");
                             },
                         });
                     }}
@@ -1189,12 +1241,12 @@ export default function VisualEditor({
                             const areaIdStr = e.target.dataset.areaId;
                             const areaId = parseInt(areaIdStr);
 
-                            console.log("Scene Upload Debug:", {
-                                areaIdStr,
-                                areaId,
-                                isValid: !isNaN(areaId),
-                                filesCount: e.target.files.length,
-                            });
+                            // console.log("Scene Upload Debug:", {
+                            //     areaIdStr,
+                            //     areaId,
+                            //     isValid: !isNaN(areaId),
+                            //     filesCount: e.target.files.length,
+                            // });
 
                             if (!areaId || isNaN(areaId)) {
                                 alert(
@@ -1239,9 +1291,8 @@ export default function VisualEditor({
                     rootId={hierarchy?.length > 0 ? hierarchy[0].id : null}
                     onPublished={() => {
                         fetchPendingCount();
-                        // Ideally reload page or reset state?
-                        // Reloading is safest to clear drafts local state
-                        window.location.reload();
+                        // SPA Reload (Smoother than window.location.reload())
+                        router.reload();
                     }}
                 />
             </div>

@@ -8,6 +8,7 @@ export default function SceneView({
     onAddLink,
     onDeleteLink,
     onUpdateLink,
+    onRefetchScene,
 }) {
     const panoRef = useRef(null);
     const viewerRef = useRef(null);
@@ -26,6 +27,17 @@ export default function SceneView({
             console.warn("SceneView: Missing scene or image_url", scene);
             return;
         }
+
+        // NEW: Check if image exists (Race Condition Fix)
+        const checkImage = new Image();
+        checkImage.onerror = () => {
+            console.warn(
+                "SceneView: Image load failed (404), triggering refetch..."
+            );
+            if (onRefetchScene) onRefetchScene();
+        };
+        checkImage.src = scene.image_url;
+        // If image ok, continue to init
 
         let attempts = 0;
         const maxAttempts = 20;
@@ -48,10 +60,10 @@ export default function SceneView({
                 return;
             }
 
-            console.log(
-                `SceneView: Attempt ${attempts} - Dimensions: ${clientWidth}x${clientHeight}`
-            );
-            console.log("Marzipano namespace:", Marzipano);
+            // console.log(
+            //     `SceneView: Attempt ${attempts} - Dimensions: ${clientWidth}x${clientHeight}`
+            // );
+            // console.log("Marzipano namespace:", Marzipano);
 
             try {
                 if (viewerRef.current) {
@@ -68,14 +80,15 @@ export default function SceneView({
                     return;
                 }
 
-                console.log("SceneView: Creating Viewer...");
+                // console.log("SceneView: Creating Viewer...");
                 const viewer = new Marzipano.Viewer(panoRef.current);
 
                 // CRITICAL: Log domElement
-                console.log(
-                    "SceneView: viewer.domElement():",
-                    viewer.domElement()
-                );
+                // CRITICAL: Log domElement
+                // console.log(
+                //     "SceneView: viewer.domElement():",
+                //     viewer.domElement()
+                // );
 
                 if (!viewer.domElement()) {
                     console.error(
@@ -168,10 +181,10 @@ export default function SceneView({
             createHotspot(link);
         });
 
-        console.log(
-            "SceneView: Hotspots re-rendered, count:",
-            scene.links.length
-        );
+        // console.log(
+        //     "SceneView: Hotspots re-rendered, count:",
+        //     scene.links.length
+        // );
     }, [JSON.stringify(scene?.links)]); // Watch entire links array for any changes
 
     const createHotspot = (link) => {
@@ -251,14 +264,14 @@ export default function SceneView({
         const yaw = view.yaw();
         const pitch = view.pitch();
 
-        console.log(
-            "SceneView - Adding link with yaw:",
-            yaw,
-            "pitch:",
-            pitch,
-            "type:",
-            type
-        );
+        // console.log(
+        //     "SceneView - Adding link with yaw:",
+        //     yaw,
+        //     "pitch:",
+        //     pitch,
+        //     "type:",
+        //     type
+        // );
 
         // Pass 'type' (navigasi | gateway) along with coords
         onAddLink({ yaw, pitch, type });

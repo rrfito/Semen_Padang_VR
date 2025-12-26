@@ -187,7 +187,7 @@ export default function Sidebar({
         // If setHierarchy is not passed, we can't do optimistic UI.
         // Assuming setHierarchy is passed (I added it to instructions).
 
-        console.log("Drag End:", { active: active.id, over: over.id });
+        // console.log("Drag End:", { active: active.id, over: over.id });
 
         // Find group
         // This is expensive but fine for drag end

@@ -55,17 +55,17 @@ export default function Viewer({ scene, initial_heading }) {
         const marzipanoScene = viewer.createScene({ source, geometry, view });
 
         // 3. Render Hotspots
-        console.log("Viewer - Hotspots data from server:", scene.hotspots);
+        // console.log("Viewer - Hotspots data from server:", scene.hotspots);
         scene.hotspots.forEach((hotspot, index) => {
-            console.log(
-                `Hotspot ${index}:`,
-                hotspot.type,
-                hotspot.text,
-                "yaw:",
-                hotspot.yaw,
-                "pitch:",
-                hotspot.pitch
-            );
+            // console.log(
+            //     `Hotspot ${index}:`,
+            //     hotspot.type,
+            //     hotspot.text,
+            //     "yaw:",
+            //     hotspot.yaw,
+            //     "pitch:",
+            //     hotspot.pitch
+            // );
             const el = document.createElement("div");
             const isGateway = hotspot.type === "gateway";
 
@@ -117,9 +117,9 @@ export default function Viewer({ scene, initial_heading }) {
             const pitch = hotspot.pitch || 0;
             const yaw = hotspot.yaw;
 
-            console.log(
-                `Hotspot ${index} - Final position: yaw=${yaw}, pitch=${pitch}`
-            );
+            // console.log(
+            //     `Hotspot ${index} - Final position: yaw=${yaw}, pitch=${pitch}`
+            // );
 
             marzipanoScene.hotspotContainer().createHotspot(el, { yaw, pitch });
         });

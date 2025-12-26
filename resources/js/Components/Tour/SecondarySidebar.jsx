@@ -154,7 +154,14 @@ export default function SecondarySidebar({
                                             <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition-shadow bg-gray-100">
                                                 {scene.image_path ? (
                                                     <img
-                                                        src={`/storage/${scene.image_path}`}
+                                                        src={
+                                                            scene.image_path &&
+                                                            scene.image_path.startsWith(
+                                                                "http"
+                                                            )
+                                                                ? scene.image_path
+                                                                : `/storage/${scene.image_path}`
+                                                        }
                                                         alt={scene.name}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {

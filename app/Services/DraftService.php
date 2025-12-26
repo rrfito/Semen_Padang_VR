@@ -423,7 +423,7 @@ class DraftService
         if ($type === 'Link') {
             $draft->loadMissing(['sourceScene', 'targetScene']);
             $typeName = ucfirst($draft->type);
-            $name = "$typeName Link: " . ($draft->sourceScene->name ?? '?') . " → " . ($draft->targetScene->name ?? '?');
+            $name = "$typeName  " . ($draft->sourceScene->name ?? '?') . " → " . ($draft->targetScene->name ?? '?');
         } else {
             $name = $draft->name;
         }

@@ -29,19 +29,19 @@ export default function LinkTargetModal({
             effectiveAreaId = findParentAreaId(hierarchy, currentSceneId);
         }
 
-        console.log("LinkTargetModal deriveTargets:", {
-            mode,
-            currentSceneId,
-            currentAreaId,
-            effectiveAreaId,
-            excludedTargetIds,
-            hierarchyLength: hierarchy?.length,
-        });
+        // console.log("LinkTargetModal deriveTargets:", {
+        //     mode,
+        //     currentSceneId,
+        //     currentAreaId,
+        //     effectiveAreaId,
+        //     excludedTargetIds,
+        //     hierarchyLength: hierarchy?.length,
+        // });
 
         if (mode === "navigasi") {
             // Find current area in hierarchy and list its scenes (excluding current AND excluded targets)
             const area = findAreaById(hierarchy, effectiveAreaId);
-            console.log("Found area for navigasi:", area);
+            // console.log("Found area for navigasi:", area);
 
             if (area && area.scenes) {
                 candidates = area.scenes
@@ -90,7 +90,7 @@ export default function LinkTargetModal({
             candidates = collectGatewayScenes(hierarchy || [], effectiveAreaId);
         }
 
-        console.log("Derived candidates:", candidates);
+        // console.log("Derived candidates:", candidates);
         setTargets(candidates);
     };
 

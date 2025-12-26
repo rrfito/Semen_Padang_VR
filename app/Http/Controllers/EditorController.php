@@ -40,7 +40,12 @@ class EditorController extends Controller
         // We load full tree: Roots -> Children -> Scenes
         $roots = AreaDraft::whereNull('parent_id')
             ->where('marked_for_deletion', false)
-            ->with(['children.children', 'scenes', 'children.scenes', 'children.children.scenes'])
+            ->with([
+                'children.children',
+                'scenes.links.targetScene',
+                'children.scenes.links.targetScene',
+                'children.children.scenes.links.targetScene'
+            ])
             ->orderBy('priority')
             ->orderBy('name')
             ->get();
@@ -112,6 +117,18 @@ class EditorController extends Controller
                     'image_url' => asset('storage/' . $scene->image_path), // Added for consistency
                     'marked_for_deletion' => (bool) $scene->marked_for_deletion,
                     'can_be_gateway' => (bool) $scene->can_be_gateway,
+                    'heading' => $scene->heading ?? 0,
+                    'pitch' => $scene->pitch ?? 0,
+                    'lat' => $scene->lat,
+                    'lng' => $scene->lng,
+                    'links' => $scene->links->filter(fn($l) => !$l->marked_for_deletion)->map(fn($link) => [
+                        'id' => $link->id,
+                        'target_scene_id' => $link->target_scene_id,
+                        'target_name' => $link->targetScene->name ?? 'Unknown Scene',
+                        'yaw' => $link->yaw,
+                        'pitch' => $link->pitch,
+                        'type' => $link->type, // 'navigasi' or 'gateway'
+                    ])->values(),
                 ])->values(),
             'scenes_count' => $draft->scenes->filter(fn($s) => !$s->marked_for_deletion)->count(),
         ];
@@ -277,9 +294,19 @@ class EditorController extends Controller
                 'message' => count($uploadedScenes) . ' scenes uploaded successfully',
                 'scenes' => collect($uploadedScenes)->map(fn($scene) => [
                     'id' => $scene->id,
+                    'published_id' => $scene->published_id,
                     'name' => $scene->name,
                     'type' => 'scene',
+                    'is_restricted' => (bool) $scene->can_be_gateway,
+                    'can_be_gateway' => (bool) $scene->can_be_gateway,
                     'path' => asset('storage/' . $scene->image_path),
+                    'image_url' => asset('storage/' . $scene->image_path),
+                    'marked_for_deletion' => (bool) $scene->marked_for_deletion,
+                    'heading' => $scene->heading ?? 0,
+                    'pitch' => $scene->pitch ?? 0,
+                    'lat' => $scene->lat,
+                    'lng' => $scene->lng,
+                    'links' => [], // New scenes have no links
                 ])
             ]);
 
