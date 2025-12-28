@@ -44,16 +44,16 @@ export default function Sidebar() {
                             <nav className="flex flex-col gap-1">
                                 {/* Dashboard Link */}
                                 <Link
-                                    href={route("dashboard")}
+                                    href={route("admin.dashboard")}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
-                                        route().current("dashboard")
+                                        route().current("admin.dashboard")
                                             ? "bg-slate-200 dark:bg-[#233648] theme-text border-primary"
                                             : "theme-text-secondary hover:bg-slate-100 dark:hover:bg-[#233648] hover:theme-text border-transparent"
                                     }`}
                                 >
                                     <span
                                         className={`material-symbols-outlined ${
-                                            route().current("dashboard")
+                                            route().current("admin.dashboard")
                                                 ? "text-primary"
                                                 : ""
                                         }`}

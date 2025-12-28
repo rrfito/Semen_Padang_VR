@@ -19,9 +19,12 @@ Route::get('/', [TourController::class, 'index'])->name('tour.index');
 // 2. HALAMAN VIRTUAL TOUR (360 Viewer)
 Route::get('/tour/{scene}', [TourController::class, 'show'])->name('tour.show');
 
-// 3. DASHBOARD USER (Setelah Login)
+// 3. DASHBOARD USER (Pegawai / User Biasa)
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    return Inertia::render('User/Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // 4. PROFILE MANAGEMENT (Bawaan Breeze)
@@ -32,7 +35,13 @@ Route::middleware('auth')->group(function () {
 });
 
 // 5. ADMIN VISUAL EDITOR (GLOBAL WORKSPACE)
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+// Apply 'admin' middleware (EnsureUserIsAdmin)
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+
+    // Admin Dashboard
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('admin.dashboard');
 
     // Main Global Route
     Route::get('/visual-editor', [EditorController::class, 'index'])->name('admin.editor.index');
