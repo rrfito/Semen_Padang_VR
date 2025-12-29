@@ -25,10 +25,16 @@ class PublishService
             // 1. Pre-Flight Check
             $this->verifyDraftIntegrity($rootDraft);
 
-            // 2. Publish Content (Recursive)
-            $this->publishNode($rootDraft);
+            // 2. Publish Content (Pass 1: Struct & Nodes)
+            $linksToProcess = [];
+            $this->publishNode($rootDraft, $linksToProcess);
 
-            // 3. Post-Publish Integrity Check
+            // 3. Publish Links (Pass 2: Connections)
+            // Now that all scenes have Live IDs, we can safely link them.
+            foreach ($linksToProcess as $linkDraft) {
+                $this->upsertLink($linkDraft);
+            }
+            // 4. Post-Publish Integrity Check
             $liveRoot = Area::find($rootDraft->published_id);
 
             // Special Case: If Root was deleted, this is expected behavior
@@ -46,7 +52,7 @@ class PublishService
 
             $newChecksum = $this->calculateLiveChecksum($liveRoot);
 
-            // 4. Update Sync State (Post-Publish Synced State 3)
+            // 5. Update Sync State (Post-Publish Synced State 3)
             DraftSyncState::updateOrCreate(
                 ['root_draft_id' => $rootDraft->id],
                 [
@@ -60,12 +66,11 @@ class PublishService
         });
     }
 
-    private function publishNode($draft)
+    private function publishNode($draft, array &$linksToProcess)
     {
         // Recursively publish children first? Or parent first? 
         // Parent first usually needed for FKs.
 
-        // --- DELETION LOGIC ---
         // --- DELETION LOGIC ---
         if ($draft->marked_for_deletion) {
             \Illuminate\Support\Facades\Log::info("Publish: Force Deleting Node {$draft->id} Type: " . get_class($draft));
@@ -79,16 +84,26 @@ class PublishService
             $this->upsertArea($draft);
             // Process Children & Scenes
             foreach ($draft->children as $child)
-                $this->publishNode($child);
+                $this->publishNode($child, $linksToProcess);
             foreach ($draft->scenes as $scene)
-                $this->publishNode($scene);
+                $this->publishNode($scene, $linksToProcess);
         } elseif ($draft instanceof SceneDraft) {
             $this->upsertScene($draft);
-            // Process Links
-            foreach ($draft->links as $link)
-                $this->publishNode($link);
+            // Collect Links for Pass 2
+            foreach ($draft->links as $link) {
+                if ($link->marked_for_deletion) {
+                    $this->forceDeleteNode($link);
+                } else {
+                    $linksToProcess[] = $link;
+                }
+            }
         } elseif ($draft instanceof LinkDraft) {
-            $this->upsertLink($draft);
+            // Should not happen if called correctly, but consistent
+            if ($draft->marked_for_deletion) {
+                $this->forceDeleteNode($draft);
+            } else {
+                $linksToProcess[] = $draft;
+            }
         }
     }
 
@@ -113,18 +128,20 @@ class PublishService
     {
         // Hard Delete Live Record
         if ($draft->published_id) {
+            $live = null;
             if ($draft instanceof AreaDraft)
-                Area::destroy($draft->published_id);
+                $live = Area::find($draft->published_id);
             elseif ($draft instanceof SceneDraft)
-                Scene::destroy($draft->published_id);
+                $live = Scene::find($draft->published_id);
             elseif ($draft instanceof LinkDraft)
-                Link::destroy($draft->published_id);
+                $live = Link::find($draft->published_id);
+
+            if ($live) {
+                $live->delete(); // Triggers cascading DB deletes if config or Eloquent events
+            }
         }
 
-        // Remove Draft (Since it's done) or Keep as tombstone?
-        // User request: "Draft menjadi identik 100% dengan published"
-        // If Live is deleted, Draft should also be deleted to match "Nothingness"?
-        // Yes. Logic: State 3 (Synced). Live has nothing -> Draft should have nothing.
+        // Remove Draft (Since it's done)
         $draft->delete();
     }
 

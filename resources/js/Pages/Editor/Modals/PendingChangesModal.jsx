@@ -38,8 +38,6 @@ const FIELD_LABELS = {
     // Timestamps
     created_at: "Tanggal Dibuat",
     updated_at: "Tanggal Diubah",
-    is_published: "Status Publikasi",
-    last_published_at: "Terakhir Dipublikasi",
 };
 
 // Format values for better readability
@@ -57,9 +55,7 @@ const formatValue = (field, value) => {
         if (field === "is_restricted") {
             return value ? "🔒 Terbatas" : "🌐 Publik";
         }
-        if (field === "is_published") {
-            return value ? "✅ Published" : "⏳ Draft";
-        }
+
         return value ? "Ya" : "Tidak";
     }
 

@@ -272,6 +272,71 @@ class DraftService
     }
 
     /**
+     * Mark the draft tree as dirty (modified).
+     * Should be called whenever a draft item (Area/Scene/Link) is created, updated, or deleted.
+     */
+    public function markDirty(AreaDraft|SceneDraft|LinkDraft $node)
+    {
+        // 1. Find Root Draft Area
+        $root = $this->findRootDraft($node);
+
+        if ($root) {
+            // Lazy load syncState if not loaded
+            $root->loadMissing('syncState');
+
+            if ($root->syncState) {
+                // Only update if not already dirty or stale
+                if ($root->syncState->status === 'synced') {
+                    $root->syncState->update([
+                        'status' => 'dirty',
+                        'last_synced_at' => now()
+                    ]);
+                } else {
+                    $root->syncState->touch();
+                }
+            } else {
+                // If Root exists but has no SyncState (e.g. New Draft Root created in Editor), create it!
+                DraftSyncState::create([
+                    'root_draft_id' => $root->id,
+                    'status' => 'dirty',
+                    'live_checksum' => null, // No live counterpart yet
+                    'last_synced_at' => now(),
+                ]);
+            }
+        }
+    }
+
+    private function findRootDraft($node)
+    {
+        if (!$node)
+            return null;
+
+        if ($node instanceof AreaDraft) {
+            if (!$node->parent_id)
+                return $node;
+            // Ensure parent is loaded
+            if (!$node->relationLoaded('parent')) {
+                $node->load('parent');
+            }
+            return $this->findRootDraft($node->parent);
+        }
+
+        if ($node instanceof SceneDraft) {
+            if (!$node->relationLoaded('area'))
+                $node->load('area');
+            return $this->findRootDraft($node->area);
+        }
+
+        if ($node instanceof LinkDraft) {
+            if (!$node->relationLoaded('sourceScene'))
+                $node->load('sourceScene.area');
+            return $this->findRootDraft($node->sourceScene?->area);
+        }
+
+        return null;
+    }
+
+    /**
      * Discard ALL drafts in the system.
      * Use this for the "Discard All" button to ensure complete reset.
      */

@@ -90,7 +90,7 @@ export default function PropertiesPanel({
                                     Upload scenes
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
-                                    Upload 360° panoramas or splats.
+                                    Upload 360° panoramas.
                                 </p>
                             </div>
                         </li>
@@ -131,12 +131,31 @@ export default function PropertiesPanel({
                                     domain
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
-                                    <span className="font-bold">Area</span> =
-                                    Room / Location
+                                    <span className="font-bold">Main Area</span>{" "}
+                                    = Kantor Pusat / Workshop
                                 </span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="material-symbols-outlined text-action-primary text-[20px]">
+                                <span className="material-symbols-outlined text-blue-500 text-[20px]">
+                                    layers
+                                </span>
+                                <span className="text-sm text-gray-700 dark:text-slate-300">
+                                    <span className="font-bold">Zone Area</span>{" "}
+                                    = Lantai / Blok / Zona
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-teal-500 text-[20px]">
+                                    meeting_room
+                                </span>
+
+                                <span className="text-sm text-gray-700 dark:text-slate-300">
+                                    <span className="font-bold">Room</span> =
+                                    Specific Room
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-purple-500 text-[20px]">
                                     360
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">

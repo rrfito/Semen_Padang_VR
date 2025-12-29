@@ -38,8 +38,7 @@ return new class extends Migration {
             $table->boolean('is_restricted')->default(false); // Access Control
             // use_manual_linking removed as per cleanup request (unless critical? User said "hapus atribut yang tidak digunakan")
             // Assuming use_manual_linking was for old logic. New auto-link is dynamic.
-            $table->boolean('is_published')->default(false); // ADD
-            $table->timestamp('last_published_at')->nullable(); // ADD
+
             $table->timestamps();
         });
         DB::table('areas')->update(['level' => 3]); // Default all to 3
@@ -61,6 +60,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('area_id')->constrained()->cascadeOnDelete();
             $table->string('name')->nullable();
+            $table->integer('priority')->default(0);
             $table->string('image_path');
 
             // Camera settings
@@ -68,8 +68,7 @@ return new class extends Migration {
             $table->boolean('can_be_gateway')->default(false); // ADD - CRITICAL
 
             // Publishing
-            $table->boolean('is_published')->default(false); // ADD
-            $table->timestamp('last_published_at')->nullable(); // ADD
+
 
             $table->timestamps();
         });
@@ -89,8 +88,7 @@ return new class extends Migration {
             $table->string('type')->default('navigasi'); // navigasi / gateway
             $table->double('yaw')->default(0);
             $table->double('pitch')->default(0);
-            $table->boolean('is_published')->default(false); // ADD
-            $table->timestamp('last_published_at')->nullable(); // ADD
+
 
 
             $table->timestamps();

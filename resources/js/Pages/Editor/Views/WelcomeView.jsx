@@ -47,32 +47,6 @@ export default function WelcomeView({ onSelectExisting }) {
                     Select an area to start editing, or create a new location to
                     begin managing your street view scenes.
                 </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                    <button className="flex items-center justify-center h-12 px-8 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 gap-2">
-                        <span className="material-symbols-outlined">
-                            add_circle
-                        </span>
-                        Create New Area
-                    </button>
-
-                    <button
-                        onClick={onSelectExisting}
-                        className="flex items-center justify-center h-12 px-8 bg-transparent hover:bg-gray-200/50 dark:hover:bg-surface-light/5 theme-text-secondary font-bold rounded-lg border theme-border hover:border-primary/50 transition-all gap-2"
-                    >
-                        <span className="material-symbols-outlined">
-                            folder_open
-                        </span>
-                        Select Existing Area
-                    </button>
-                </div>
-
-                <button className="mt-8 text-xs font-medium theme-text-muted hover:text-action-primary transition-colors flex items-center gap-1.5 group">
-                    <span className="material-symbols-outlined text-[16px]">
-                        help
-                    </span>
-                    <span>What is an Area?</span>
-                </button>
             </div>
         </main>
     );

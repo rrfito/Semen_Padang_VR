@@ -38,19 +38,19 @@ Route::middleware('auth')->group(function () {
 // Apply 'admin' middleware (EnsureUserIsAdmin)
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
+    // Redirect /admin to /admin/dashboard
+    Route::get('/', function () {
+        return redirect()->route('admin.dashboard');
+    });
+
     // Admin Dashboard
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/UserManagement', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('admin.user-management');
+    Route::put('/UserManagement/{user}/role', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRole'])->name('admin.users.update-role');
 
     // Main Global Route
     Route::get('/visual-editor', [EditorController::class, 'index'])->name('admin.editor.index');
 
-    // Admin User Management
-    Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
-        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-        Route::put('/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.update-role');
-    });
 
     // API Routes for Editor
     Route::prefix('visual-editor/api')->middleware('auth')->name('admin.editor.')->group(function () {

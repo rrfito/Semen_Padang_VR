@@ -70,7 +70,7 @@ class TourController extends Controller
                 'scenes' => function ($q) {
                     // Ambil scene dengan location data untuk path
                     $q->orderBy('created_at')->orderBy('id')
-                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
                 },
                 // Eager load children hierarchy (CRITICAL for $collectChildScenes)
                 'children' => function ($q) use ($isPegawai) {
@@ -80,7 +80,7 @@ class TourController extends Controller
                 },
                 'children.scenes' => function ($q) {
                     $q->orderBy('created_at')->orderBy('id')
-                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
                 },
                 'children.children' => function ($q) use ($isPegawai) {
                     // $q->where('is_published', true);
@@ -90,7 +90,7 @@ class TourController extends Controller
                 'children.children.scenes' => function ($q) {
                     // For 3 levels deep
                     $q->orderBy('created_at')->orderBy('id')
-                        ->select('id', 'area_id', 'name', 'image_path', 'location', 'is_published');
+                        ->select('id', 'area_id', 'name', 'image_path', 'location');
                 }
             ]);
 
@@ -362,7 +362,25 @@ class TourController extends Controller
             'lng' => $scene->location_array['lng'],
 
             'hotspots' => $scene->outgoingLinks
-                ->filter(fn($link) => !is_null($link->target_scene_id))
+                ->load(['targetScene.area.parent.parent']) // Eager load ancestry (up to 3 levels)
+                ->filter(function ($link) use ($isPegawai) {
+                    if (is_null($link->target_scene_id) || !$link->targetScene)
+                        return false;
+
+                    // If Admin/Pegawai, show everything
+                    if ($isPegawai)
+                        return true;
+
+                    // Cascading Restriction Check
+                    $area = $link->targetScene->area;
+                    while ($area) {
+                        if ($area->is_restricted)
+                            return false; // Hidden!
+                        $area = $area->parent;
+                    }
+
+                    return true;
+                })
                 ->map(function ($link) {
                     return [
                         'id' => $link->id,
@@ -374,7 +392,7 @@ class TourController extends Controller
                             ? 'Masuk: ' . ($link->targetScene->area->name ?? '-')
                             : ($link->targetScene->name ?? 'Maju'),
                     ];
-                }),
+                })->values(),
         ];
 
         return Inertia::render('Tour/Viewer', [

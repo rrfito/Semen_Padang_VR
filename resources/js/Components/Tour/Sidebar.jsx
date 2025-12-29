@@ -384,7 +384,7 @@ export default function Sidebar({
                             className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#D32F2F] text-white rounded-lg text-sm font-bold hover:bg-[#b71c1c] transition-colors shadow-lg shadow-red-200"
                         >
                             <FaSignInAlt />
-                            Login Pegawai
+                            Login
                         </Link>
                     )}
                 </div>

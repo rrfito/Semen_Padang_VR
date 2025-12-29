@@ -7,12 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// 1. IMPORT CLASS FILAMENT (Wajib)
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 
-// 2. TAMBAHKAN 'implements FilamentUser'
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -51,12 +47,5 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    // 4. LOGIC KEAMANAN FILAMENT
-    // Fungsi ini menentukan siapa yang boleh masuk ke /admin
-    public function canAccessPanel(Panel $panel): bool
-    {
-        // Hanya user dengan role 'admin' yang boleh masuk dashboard
-        // Pegawai biasa akan ditolak (Error 403 Forbidden)
-        return $this->role === 'admin';
-    }
+
 }

@@ -161,6 +161,8 @@ class EditorController extends Controller
             'published_id' => null, // Is New
         ]);
 
+        $this->draftService->markDirty($area);
+
         return response()->json([
             'success' => true,
             'area' => $this->formatAreaDraftNode($area),
@@ -180,6 +182,7 @@ class EditorController extends Controller
             'priority' => 'sometimes|integer',
         ]);
         $area->update($validated);
+        $this->draftService->markDirty($area);
         return response()->json(['success' => true, 'area' => $this->formatAreaDraftNode($area)]);
     }
 
@@ -187,6 +190,7 @@ class EditorController extends Controller
     {
         $area = AreaDraft::findOrFail($id);
         $this->draftService->markForDeletion($area);
+        $this->draftService->markDirty($area);
         return response()->json(['success' => true]);
     }
 
@@ -310,6 +314,11 @@ class EditorController extends Controller
                 ])
             ]);
 
+            // Mark root as dirty (since scenes added)
+            if (!empty($uploadedScenes)) {
+                $this->draftService->markDirty($uploadedScenes[0]);
+            }
+
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -327,6 +336,7 @@ class EditorController extends Controller
             'lng' => 'sometimes|numeric'
         ]);
         $scene->update($validated);
+        $this->draftService->markDirty($scene);
         return response()->json(['success' => true]);
     }
 
@@ -334,6 +344,7 @@ class EditorController extends Controller
     {
         $scene = SceneDraft::findOrFail($id);
         $this->draftService->markForDeletion($scene);
+        $this->draftService->markDirty($scene);
         return response()->json(['success' => true]);
     }
 
@@ -359,7 +370,7 @@ class EditorController extends Controller
             $distance = $this->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
         }
 
-        LinkDraft::create([
+        $link = LinkDraft::create([
             'source_scene_id' => $source->id,
             'target_scene_id' => $target->id,
             'type' => $request->type,
@@ -367,6 +378,8 @@ class EditorController extends Controller
             'pitch' => $request->pitch,
             'distance' => $distance
         ]);
+
+        $this->draftService->markDirty($link);
 
         return response()->json([
             'success' => true,
@@ -378,6 +391,7 @@ class EditorController extends Controller
     {
         $link = LinkDraft::where('source_scene_id', $sceneId)->findOrFail($linkId);
         $link->update($request->only(['yaw', 'pitch', 'type'])); // Removed distance update from manual edit
+        $this->draftService->markDirty($link);
 
         return response()->json([
             'success' => true,
@@ -394,6 +408,8 @@ class EditorController extends Controller
         } else {
             $link->delete();
         }
+
+        $this->draftService->markDirty($link);
 
         return response()->json([
             'success' => true,

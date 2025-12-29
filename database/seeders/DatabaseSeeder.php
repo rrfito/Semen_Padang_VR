@@ -29,6 +29,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'pegawai',
         ]);
 
-        $this->call(SemenPadangSeeder::class);
+        // $this->call(SemenPadangSeeder::class);
     }
 }

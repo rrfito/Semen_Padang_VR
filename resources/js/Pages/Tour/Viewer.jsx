@@ -56,7 +56,13 @@ export default function Viewer({ scene, initial_heading }) {
 
         // 3. Render Hotspots
         // console.log("Viewer - Hotspots data from server:", scene.hotspots);
-        scene.hotspots.forEach((hotspot, index) => {
+
+        // ROBUSTNESS: Ensure is array (handle null/undefined/object)
+        const hotspotsList = Array.isArray(scene.hotspots)
+            ? scene.hotspots
+            : Object.values(scene.hotspots || {});
+
+        hotspotsList.forEach((hotspot, index) => {
             // console.log(
             //     `Hotspot ${index}:`,
             //     hotspot.type,
@@ -157,99 +163,6 @@ export default function Viewer({ scene, initial_heading }) {
     return (
         <>
             <Head title={scene.name} />
-            <style>{`
-                /* ============================================ */
-                /* NAVIGATION HOTSPOT - Blue/White Chevron */
-                /* ============================================ */
-                .hotspot-nav {
-                    cursor: pointer;
-                }
-                .nav-btn {
-                    width: 48px;
-                    height: 48px;
-                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);
-                    animation: pulse-nav 2s infinite;
-                }
-                .nav-icon {
-                    width: 28px;
-                    height: 28px;
-                    color: white;
-                    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-                }
-                .hotspot-nav:hover {
-                    transform: scale(1.15);
-                }
-                .hotspot-nav:hover .nav-btn {
-                    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.7), 0 0 0 4px rgba(255,255,255,0.5);
-                }
-                @keyframes pulse-nav {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                }
-
-                /* ============================================ */
-                /* GATEWAY HOTSPOT - Purple/White Door */
-                /* ============================================ */
-                .hotspot-gateway {
-                    cursor: pointer;
-                }
-                .gateway-btn {
-                    width: 52px;
-                    height: 52px;
-                    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5), 0 0 0 3px rgba(255,255,255,0.3);
-                    animation: pulse-gateway 2s infinite;
-                }
-                .gateway-icon {
-                    width: 30px;
-                    height: 30px;
-                    color: white;
-                    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-                }
-                .hotspot-gateway:hover {
-                    transform: scale(1.15);
-                }
-                .hotspot-gateway:hover .gateway-btn {
-                    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.7), 0 0 0 4px rgba(255,255,255,0.5);
-                }
-                @keyframes pulse-gateway {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.08); }
-                }
-
-                /* ============================================ */
-                /* SHARED LABEL STYLE */
-                /* ============================================ */
-                .hotspot-label { 
-                    display: none; 
-                    position: absolute; 
-                    background: rgba(0,0,0,0.85); 
-                    color: white; 
-                    padding: 6px 12px; 
-                    font-size: 13px; 
-                    font-weight: 500;
-                    border-radius: 6px; 
-                    white-space: nowrap; 
-                    top: -45px; 
-                    left: 50%; 
-                    transform: translateX(-50%); 
-                    pointer-events: none;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                }
-                .hotspot-nav:hover .hotspot-label, 
-                .hotspot-gateway:hover .hotspot-label { 
-                    display: block; 
-                }
-            `}</style>
 
             <div className="w-full h-screen bg-black relative">
                 <div ref={panoRef} className="absolute inset-0 z-0"></div>

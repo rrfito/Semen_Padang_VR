@@ -1,11 +1,38 @@
 import React from "react";
 
 export default function DraftStatusBanner({
-    areaCount = 3,
-    sceneCount = 12,
-    linkCount = 21,
-    lastEdited = "2 hours ago",
+    areaCount = 0,
+    sceneCount = 0,
+    linkCount = 0,
+    isSynced = false,
+    lastEdited = "Just now",
 }) {
+    // STATE: ALL SYNCED (Clean)
+    if (isSynced) {
+        return (
+            <div className="rounded-xl theme-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden group font-display border-l-4 border-emerald-500">
+                <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none"></div>
+
+                <div className="flex items-center gap-5 z-10">
+                    <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-3 rounded-lg border border-emerald-500/20">
+                        <span className="material-symbols-outlined text-[28px]">
+                            check_circle
+                        </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <h3 className="theme-text text-lg font-bold flex items-center gap-2">
+                            All Data Synced
+                        </h3>
+                        <p className="theme-text-secondary text-sm font-medium">
+                            Production is up to date. No pending drafts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // STATE: PENDING CHANGES (Dirty)
     return (
         <div className="rounded-xl theme-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg relative overflow-hidden group font-display">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>

@@ -67,9 +67,9 @@ export default function Sidebar() {
 
                                 {/* User Link */}
                                 <Link
-                                    href={route("admin.users.index")}
+                                    href={route("admin.user-management")}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
-                                        route().current("admin.users.*")
+                                        route().current("admin.user-management")
                                             ? "bg-slate-200 dark:bg-[#233648] theme-text border-primary"
                                             : "theme-text-secondary hover:bg-slate-100 dark:hover:bg-[#233648] hover:theme-text border-transparent"
                                     }`}
