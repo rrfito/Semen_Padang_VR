@@ -54,18 +54,16 @@ export default function PropertiesPanel({
                     </div>
                     <div className="flex-1 min-w-0">
                         <h2 className="text-lg font-bold theme-text leading-tight">
-                            Getting Started
+                            Memulai
                         </h2>
                         <p className="text-xs font-medium theme-text-muted mt-0.5">
-                            Quick Start Guide
+                            Panduan Memulai Cepat
                         </p>
                     </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                    <h3 className="theme-section-header mb-4">
-                        Workflow Steps
-                    </h3>
+                    <h3 className="theme-section-header mb-4">Langkah Kerja</h3>
                     <ul className="space-y-6 relative">
                         <div className="absolute left-[11px] top-2 bottom-4 w-px theme-border -z-10"></div>
                         <li className="flex gap-4 items-start">
@@ -74,10 +72,10 @@ export default function PropertiesPanel({
                             </span>
                             <div className="pt-0.5">
                                 <p className="text-sm font-medium theme-text-secondary">
-                                    Create or select an Area
+                                    Buat atau pilih Area
                                 </p>
                                 <p className="text-xs theme-text-muted mt-1">
-                                    Define the structure of your location.
+                                    Tentukan struktur lokasi Anda.
                                 </p>
                             </div>
                         </li>
@@ -87,10 +85,10 @@ export default function PropertiesPanel({
                             </span>
                             <div className="pt-0.5">
                                 <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
-                                    Upload scenes
+                                    Unggah scene
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
-                                    Upload 360° panoramas.
+                                    Unggah panorama 360°.
                                 </p>
                             </div>
                         </li>
@@ -100,10 +98,11 @@ export default function PropertiesPanel({
                             </span>
                             <div className="pt-0.5">
                                 <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
-                                    Link scenes
+                                    Hubungkan scene
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
-                                    Use auto-link to connect viewpoints.
+                                    Gunakan link otomatis untuk menghubungkan
+                                    sudut pandang.
                                 </p>
                             </div>
                         </li>
@@ -113,17 +112,18 @@ export default function PropertiesPanel({
                             </span>
                             <div className="pt-0.5">
                                 <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
-                                    Review and publish
+                                    Tinjau dan terbitkan
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
-                                    Make your tour live for users.
+                                    Terbitkan data agar dapat diakses oleh
+                                    pengguna.
                                 </p>
                             </div>
                         </li>
                     </ul>
                     <div className="mt-8 pt-6 border-t border-gray-200 dark:border-border-dark">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-3">
-                            Legend
+                            Legenda
                         </h3>
                         <div className="bg-gray-100 dark:bg-[#111a22] rounded-lg p-3 space-y-2 border border-gray-200 dark:border-border-dark">
                             <div className="flex items-center gap-3">
@@ -131,7 +131,9 @@ export default function PropertiesPanel({
                                     domain
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
-                                    <span className="font-bold">Main Area</span>{" "}
+                                    <span className="font-bold">
+                                        Area Utama
+                                    </span>{" "}
                                     = Kantor Pusat / Workshop
                                 </span>
                             </div>
@@ -140,7 +142,7 @@ export default function PropertiesPanel({
                                     layers
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
-                                    <span className="font-bold">Zone Area</span>{" "}
+                                    <span className="font-bold">Area Zona</span>{" "}
                                     = Lantai / Blok / Zona
                                 </span>
                             </div>
@@ -150,8 +152,8 @@ export default function PropertiesPanel({
                                 </span>
 
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
-                                    <span className="font-bold">Room</span> =
-                                    Specific Room
+                                    <span className="font-bold">Ruangan</span> =
+                                    Ruangan Spesifik
                                 </span>
                             </div>
                             <div className="flex items-center gap-3">
@@ -160,7 +162,7 @@ export default function PropertiesPanel({
                                 </span>
                                 <span className="text-sm text-gray-700 dark:text-slate-300">
                                     <span className="font-bold">Scene</span> =
-                                    Viewpoint inside
+                                    Titik Pandang di Dalam
                                 </span>
                             </div>
                         </div>
@@ -233,7 +235,7 @@ export default function PropertiesPanel({
         setDeletionImpact({
             ...impact,
             warning:
-                "All sub-areas and scenes inside will be permanently deleted.",
+                "Semua area turunan dan scene di dalamnya akan dihapus secara permanen.",
         });
         setShowDeleteConfirm(true);
     };
@@ -294,8 +296,8 @@ export default function PropertiesPanel({
                     </div>
                     <p className="text-xs font-bold theme-text-muted uppercase tracking-wider mt-1">
                         {selection.type === "area"
-                            ? "Area Properties"
-                            : "Scene Properties"}
+                            ? "Properti Area"
+                            : "Properti Scene"}
                     </p>
                 </div>
             </div>
@@ -305,15 +307,15 @@ export default function PropertiesPanel({
                 {/* 1. Scene/Area Name */}
                 <div className="space-y-3">
                     <SectionHeader>
-                        {selection.type === "area" ? "Area Name" : "Scene Name"}
+                        {selection.type === "area" ? "Nama Area" : "Nama Scene"}
                     </SectionHeader>
                     <FormInput
                         value={activeNode.name || ""}
                         onChange={(e) => handleChange("name", e.target.value)}
                         placeholder={
                             selection.type === "area"
-                                ? "Enter area name"
-                                : "Enter scene name"
+                                ? "Masukkan nama area"
+                                : "Masukkan nama scene"
                         }
                     />
                 </div>
@@ -321,13 +323,13 @@ export default function PropertiesPanel({
                 {/* 2. Description - ONLY for Areas */}
                 {selection.type === "area" && (
                     <div className="space-y-3">
-                        <SectionHeader>Description</SectionHeader>
+                        <SectionHeader>Deskripsi</SectionHeader>
                         <FormTextarea
                             value={activeNode.description || ""}
                             onChange={(e) =>
                                 handleChange("description", e.target.value)
                             }
-                            placeholder="Add a description..."
+                            placeholder="Tambahkan deskripsi..."
                         />
                     </div>
                 )}
@@ -338,12 +340,12 @@ export default function PropertiesPanel({
                         {/* GPS Location */}
                         <div className="space-y-3 pt-4 border-t theme-border">
                             <SectionHeader>
-                                Optional GPS Reference
+                                Referensi GPS Opsional
                             </SectionHeader>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
-                                        Latitude
+                                        Lintang
                                     </label>
                                     <FormInput
                                         type="number"
@@ -360,7 +362,7 @@ export default function PropertiesPanel({
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
-                                        Longitude
+                                        Bujur
                                     </label>
                                     <FormInput
                                         type="number"
@@ -384,13 +386,13 @@ export default function PropertiesPanel({
                                 <span className="material-symbols-outlined text-[16px]">
                                     explore
                                 </span>
-                                Location from Map
+                                Lokasi dari Peta
                             </button>
                         </div>
 
                         {/* Gateway Toggle */}
                         <div className="space-y-3 pt-4 border-t theme-border">
-                            <SectionHeader>Gateway Connection</SectionHeader>
+                            <SectionHeader>Koneksi Gerbang</SectionHeader>
                             <label className="flex items-start gap-3 p-4 bg-gray-100 dark:bg-slate-800/50 rounded-lg border theme-border-subtle cursor-pointer hover:border-primary/30 transition-colors">
                                 <div className="flex items-center h-6">
                                     <input
@@ -410,12 +412,12 @@ export default function PropertiesPanel({
                                 </div>
                                 <div className="flex-1">
                                     <div className="text-sm font-medium theme-text">
-                                        Allow connecting to different areas
+                                        Izinkan koneksi ke area berbeda
                                     </div>
                                     <p className="text-xs theme-text-muted mt-1">
-                                        Enable this if the scene serves as a
-                                        gateway or entrance point between
-                                        different areas
+                                        Aktifkan jika scene berfungsi sebagai
+                                        gerbang atau titik masuk antara area
+                                        berbeda
                                     </p>
                                 </div>
                             </label>
@@ -423,7 +425,7 @@ export default function PropertiesPanel({
 
                         {/* Active Links */}
                         <div className="space-y-3 pt-4 border-t theme-border">
-                            <SectionHeader>Active Links</SectionHeader>
+                            <SectionHeader>Link Aktif</SectionHeader>
                             {activeNode.links && activeNode.links.length > 0 ? (
                                 <div className="space-y-2">
                                     {activeNode.links.map((link) => (
@@ -461,7 +463,7 @@ export default function PropertiesPanel({
                                                             : "NAVIGASI: "}
                                                         <span className="theme-text">
                                                             {link.target_name ||
-                                                                "Unknown"}
+                                                                "Tidak Diketahui"}
                                                         </span>
                                                     </div>
                                                     <div className="text-[10px] theme-text-muted mt-1 font-mono">
@@ -480,10 +482,11 @@ export default function PropertiesPanel({
                                         link_off
                                     </span>
                                     <p className="text-xs theme-text-muted">
-                                        No links yet
+                                        Belum ada link
                                     </p>
                                     <p className="text-[10px] theme-text-subtle mt-1">
-                                        Use the canvas to add navigation links
+                                        Gunakan kanvas untuk menambahkan link
+                                        navigasi
                                     </p>
                                 </div>
                             )}
@@ -497,7 +500,7 @@ export default function PropertiesPanel({
                 {/* Settings Section - Restricted Access (Areas Only) - Lower visual weight */}
                 {selection.type === "area" && (
                     <div className="space-y-3">
-                        <SectionHeader>Setting</SectionHeader>
+                        <SectionHeader>Pengaturan</SectionHeader>
 
                         <label
                             className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
@@ -530,11 +533,11 @@ export default function PropertiesPanel({
                                     >
                                         lock
                                     </span>
-                                    Restricted Access
+                                    Akses Terbatas
                                 </div>
                                 <p className="text-[10px] theme-text-muted leading-snug">
-                                    If checked, only authorized personnel can
-                                    view this item in the public tour.
+                                    Jika dicentang, hanya personel berwenang
+                                    yang dapat melihat item ini di tur publik.
                                 </p>
                             </div>
                         </label>
@@ -548,7 +551,7 @@ export default function PropertiesPanel({
                             <span className="material-symbols-outlined text-[14px]">
                                 warning
                             </span>
-                            Danger Zone
+                            Zona Bahaya
                         </h4>
                         <button
                             onClick={handleDeleteClick}
@@ -557,11 +560,10 @@ export default function PropertiesPanel({
                             <span className="material-symbols-outlined text-[18px]">
                                 delete
                             </span>
-                            Delete{" "}
-                            {selection.type === "area" ? "Area" : "Scene"}
+                            Hapus {selection.type === "area" ? "Area" : "Scene"}
                         </button>
                         <p className="text-[10px] text-red-500/70 dark:text-red-400/50 text-center mt-2">
-                            This action cannot be undone.
+                            Tindakan ini tidak dapat dibatalkan.
                         </p>
                     </div>
                 </div>
@@ -575,14 +577,12 @@ export default function PropertiesPanel({
                     setDeletionImpact(null);
                 }}
                 onConfirm={handleDelete}
-                title={`Delete ${
-                    selection.type === "area" ? "Area" : "Scene"
-                }?`}
+                title={`Hapus ${selection.type === "area" ? "Area" : "Scene"}?`}
                 message={
                     deletionImpact ? (
                         <div className="space-y-4">
                             <p className="text-sm theme-text-secondary">
-                                You are about to delete{" "}
+                                Anda akan menghapus{" "}
                                 <span className="font-bold theme-text">
                                     "{deletionImpact.area_name}"
                                 </span>
@@ -595,7 +595,7 @@ export default function PropertiesPanel({
                                     </span>
                                     <div className="flex-1">
                                         <p className="text-sm font-bold text-amber-500 dark:text-amber-400 mb-1">
-                                            Cascade Deletion Warning
+                                            Peringatan Penghapusan Bertingkat
                                         </p>
                                         <p className="text-xs theme-text-secondary">
                                             {deletionImpact.warning}
@@ -614,9 +614,9 @@ export default function PropertiesPanel({
                                             </span>{" "}
                                             area
                                             {deletionImpact.total_areas > 1
-                                                ? "s"
+                                                ? ""
                                                 : ""}{" "}
-                                            will be deleted
+                                            akan dihapus
                                         </span>
                                     </div>
 
@@ -630,9 +630,9 @@ export default function PropertiesPanel({
                                             </span>{" "}
                                             scene
                                             {deletionImpact.total_scenes > 1
-                                                ? "s"
+                                                ? ""
                                                 : ""}{" "}
-                                            will be deleted
+                                            akan dihapus
                                         </span>
                                     </div>
                                 </div>
@@ -641,7 +641,7 @@ export default function PropertiesPanel({
                                     deletionImpact.area_names.length > 0 && (
                                         <div className="mt-3 pt-3 border-t border-amber-500/20">
                                             <p className="text-xs font-bold text-slate-400 mb-2">
-                                                Affected child areas:
+                                                Area turunan yang terdampak:
                                             </p>
                                             <div className="max-h-24 overflow-y-auto custom-scrollbar">
                                                 <ul className="text-xs text-slate-400 space-y-1">
@@ -666,24 +666,24 @@ export default function PropertiesPanel({
 
                             <p className="text-xs theme-text-muted bg-gray-200 dark:bg-slate-800/50 p-3 rounded border theme-border-subtle">
                                 <span className="font-bold theme-text">
-                                    Warning:
+                                    Peringatan:
                                 </span>{" "}
-                                This action cannot be undone. All data and files
-                                will be permanently removed.
+                                Tindakan ini tidak dapat dibatalkan. Semua data
+                                dan file akan dihapus secara permanen.
                             </p>
                         </div>
                     ) : (
-                        `Are you sure you want to delete "${
+                        `Apakah Anda yakin ingin menghapus "${
                             activeNode.name
-                        }"? This will also delete all related ${
+                        }"? Ini juga akan menghapus semua ${
                             selection.type === "area"
-                                ? "scenes and links"
-                                : "links"
-                        }. This action cannot be undone.`
+                                ? "scene dan link"
+                                : "link"
+                        } terkait. Tindakan ini tidak dapat dibatalkan.`
                     )
                 }
-                confirmText={deletionImpact ? "Delete All" : "Delete"}
-                cancelText="Cancel"
+                confirmText={deletionImpact ? "Hapus Semua" : "Hapus"}
+                cancelText="Batal"
                 variant="danger"
             />
 

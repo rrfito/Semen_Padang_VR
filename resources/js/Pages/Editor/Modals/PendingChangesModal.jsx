@@ -28,6 +28,7 @@ const FIELD_LABELS = {
     image_path: "Path Gambar",
     heading: "Arah Pandang",
     fov: "Field of View",
+    can_be_gateway: "Bisa Jadi Gerbang",
 
     // Link fields
     source_scene_id: "Scene Asal",
@@ -135,7 +136,7 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "error",
-                message: "Failed to load pending changes",
+                message: "Gagal memuat perubahan tertunda",
             });
         } finally {
             setLoading(false);
@@ -147,8 +148,9 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "error",
-                title: "Error",
-                message: "Root ID not found. Cannot discard.",
+                title: "Galat",
+                message:
+                    "ID Root tidak ditemukan. Tidak dapat membuang perubahan.",
             });
             setShowDiscardConfirm(false);
             return;
@@ -160,8 +162,8 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "success",
-                title: "Discarded Successfully",
-                message: "All drafts have been reset to Live state.",
+                title: "Jalan Dibuang",
+                message: "Semua draf telah diatur ulang ke keadaan Live.",
             });
             setShowDiscardConfirm(false);
 
@@ -174,8 +176,8 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "error",
-                title: "Discard Failed",
-                message: "Failed to discard changes.",
+                title: "Gagal Membuang",
+                message: "Gagal membuang perubahan.",
             });
             setShowDiscardConfirm(false);
         }
@@ -189,8 +191,8 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "success",
-                title: "Published Successfully!",
-                message: "All changes are now live on the public tour",
+                title: "Berhasil Diterbitkan!",
+                message: "Semua perubahan sekarang aktif di tur publik",
             });
 
             // Close confirm modal immediately
@@ -206,8 +208,8 @@ export default function PendingChangesModal({
             setNotification({
                 isOpen: true,
                 type: "error",
-                title: "Publish Failed",
-                message: "Failed to publish changes. Please try again.",
+                title: "Gagal Menerbitkan",
+                message: "Gagal menerbitkan perubahan. Silakan coba lagi.",
             });
             setShowConfirm(false);
         } finally {
@@ -274,10 +276,11 @@ export default function PendingChangesModal({
                 <div className="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#15202b]">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                            📋 Pending Changes
+                            📋 Perubahan Tertunda
                         </h2>
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-                            Review unpublished changes before making them live
+                            Tinjau perubahan yang belum diterbitkan sebelum
+                            membuatnya aktif
                         </p>
                     </div>
                     <button
@@ -297,7 +300,7 @@ export default function PendingChangesModal({
                                 {data.summary.total_changes || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
-                                Total Changes
+                                Total Perubahan
                             </div>
                         </div>
                         <div className="text-center">
@@ -305,7 +308,7 @@ export default function PendingChangesModal({
                                 {data.summary.areas_count || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
-                                Areas
+                                Area
                             </div>
                         </div>
                         <div className="text-center">
@@ -313,7 +316,7 @@ export default function PendingChangesModal({
                                 {data.summary.scenes_count || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
-                                Scenes
+                                Scene
                             </div>
                         </div>
                         <div className="text-center">
@@ -321,7 +324,7 @@ export default function PendingChangesModal({
                                 {data.summary.links_count || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
-                                Links
+                                Link
                             </div>
                         </div>
                     </div>
@@ -341,10 +344,10 @@ export default function PendingChangesModal({
                                 check_circle
                             </span>
                             <p className="text-lg text-gray-500 dark:text-slate-400 font-medium">
-                                No Pending Changes
+                                Tidak Ada Perubahan Tertunda
                             </p>
                             <p className="text-sm text-gray-400 dark:text-slate-500 mt-2">
-                                All changes have been published
+                                Semua perubahan telah diterbitkan
                             </p>
                         </div>
                     ) : (
@@ -362,7 +365,7 @@ export default function PendingChangesModal({
                                                     : "link"}
                                             </span>
                                             {/* ... */}
-                                            {type}s ({changes.length} changes)
+                                            {type} ({changes.length} perubahan)
                                         </h3>
                                         <div className="space-y-3">
                                             {changes.map((change) => {
@@ -395,17 +398,18 @@ export default function PendingChangesModal({
                                                                     {change.edit_count >
                                                                     1 ? (
                                                                         <>
-                                                                            First
-                                                                            edit{" "}
+                                                                            Edit
+                                                                            pertama{" "}
                                                                             {
                                                                                 change.oldest_edit
                                                                             }{" "}
                                                                             ·
-                                                                            Latest{" "}
+                                                                            Terakhir{" "}
                                                                             {
                                                                                 change.created_at
                                                                             }{" "}
-                                                                            · by{" "}
+                                                                            ·
+                                                                            oleh{" "}
                                                                             {
                                                                                 change.causer_name
                                                                             }
@@ -415,7 +419,8 @@ export default function PendingChangesModal({
                                                                             {
                                                                                 change.created_at
                                                                             }{" "}
-                                                                            · by{" "}
+                                                                            ·
+                                                                            oleh{" "}
                                                                             {
                                                                                 change.causer_name
                                                                             }
@@ -441,8 +446,8 @@ export default function PendingChangesModal({
                                                                                 <div>
                                                                                     {/* ... */}
                                                                                     <div className="text-xs text-slate-400 font-bold mb-2">
-                                                                                        Fields
-                                                                                        changed:
+                                                                                        Bidang
+                                                                                        berubah:
                                                                                     </div>
                                                                                     <div className="space-y-2">
                                                                                         {change.change_details.map(
@@ -512,7 +517,7 @@ export default function PendingChangesModal({
                         <span className="material-symbols-outlined">
                             delete_forever
                         </span>
-                        Discard All
+                        Buang Semua
                     </button>
 
                     <div className="flex gap-3">
@@ -527,7 +532,8 @@ export default function PendingChangesModal({
                                 publish
                             </span>
                             <span>
-                                Publish All ({data.summary.total_changes || 0})
+                                Terbitkan Semua (
+                                {data.summary.total_changes || 0})
                             </span>
                         </button>
                     </div>
@@ -539,10 +545,10 @@ export default function PendingChangesModal({
                 isOpen={showConfirm}
                 onClose={() => setShowConfirm(false)}
                 onConfirm={handlePublishAll}
-                title="Publish All Changes?"
-                message={`This will publish ${data.summary.total_changes} changes to the public tour. Are you sure?`}
-                confirmText="Publish Now"
-                cancelText="Cancel"
+                title="Terbitkan Semua Perubahan?"
+                message={`Ini akan menerbitkan ${data.summary.total_changes} perubahan ke tur publik. Apakah Anda yakin?`}
+                confirmText="Terbitkan Sekarang"
+                cancelText="Batal"
                 variant="warning"
             />
 
@@ -551,10 +557,10 @@ export default function PendingChangesModal({
                 isOpen={showDiscardConfirm}
                 onClose={() => setShowDiscardConfirm(false)}
                 onConfirm={handleDiscard}
-                title="Discard All Drafts?"
-                message="Are you sure you want to discard ALL unpublished changes? This will revert everything to the Live version. This cannot be undone."
-                confirmText="Discard & Reset"
-                cancelText="Cancel"
+                title="Buang Semua Draf?"
+                message="Apakah Anda yakin ingin membuang SEMUA perubahan yang belum diterbitkan? Ini akan mengembalikan semuanya ke versi Live. Ini tidak dapat dibatalkan."
+                confirmText="Buang & Atur Ulang"
+                cancelText="Batal"
                 variant="danger"
             />
 

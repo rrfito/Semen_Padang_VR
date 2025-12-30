@@ -40,12 +40,12 @@ export default function WelcomeView({ onSelectExisting }) {
                 </div>
 
                 <h1 className="text-3xl font-bold theme-text mb-3 tracking-tight">
-                    Welcome to the Visual Editor
+                    Selamat Datang di Editor Visual
                 </h1>
 
                 <p className="theme-text-secondary text-lg mb-10 leading-relaxed">
-                    Select an area to start editing, or create a new location to
-                    begin managing your street view scenes.
+                    Pilih area untuk mulai mengedit, atau buat lokasi baru untuk
+                    mulai mengelola scene street view Anda.
                 </p>
             </div>
         </main>

@@ -487,8 +487,7 @@ class DraftService
     {
         if ($type === 'Link') {
             $draft->loadMissing(['sourceScene', 'targetScene']);
-            $typeName = ucfirst($draft->type);
-            $name = "$typeName  " . ($draft->sourceScene->name ?? '?') . " → " . ($draft->targetScene->name ?? '?');
+            $name = ($draft->sourceScene->name ?? '?') . " -> " . ($draft->targetScene->name ?? '?');
         } else {
             $name = $draft->name;
         }
@@ -505,11 +504,13 @@ class DraftService
                 'type' => $type,
                 'id' => $draft->id, // Draft ID for referencing
                 'event' => 'deleted',
-                'description' => "Deleted $type: $name",
+                'description' => $type === 'Link'
+                    ? "Link bertipe {$draft->type} dihapus : $name"
+                    : "$type Dihapus: $name",
                 'subject_id' => $draft->published_id, // Use published ID for keying if possible
                 'subject_name' => $name,
                 'causer_name' => auth()->user()?->name ?? 'System',
-                'created_at' => $draft->updated_at?->diffForHumans(),
+                'created_at' => $draft->updated_at?->locale('id')->diffForHumans(),
                 'timestamp' => $draft->updated_at,
                 'old_values' => ['name' => $name], // Show what was deleted
                 'changes' => [],
@@ -522,11 +523,13 @@ class DraftService
                 'type' => $type,
                 'id' => $draft->id,
                 'event' => 'created',
-                'description' => "Created new $type: $name",
+                'description' => $type === 'Link'
+                    ? "Link bertipe {$draft->type} dibuat : $name"
+                    : "Membuat $type Baru: $name",
                 'subject_id' => $draft->id, // Use draft ID as temp subject ID
                 'subject_name' => $name,
                 'causer_name' => auth()->user()?->name ?? 'System',
-                'created_at' => $draft->created_at?->diffForHumans(),
+                'created_at' => $draft->created_at?->locale('id')->diffForHumans(),
                 'timestamp' => $draft->created_at,
                 'changes' => $draft->toArray(), // Show all new values
                 'old_values' => [],
@@ -589,11 +592,13 @@ class DraftService
             'type' => $type,
             'id' => $draft->id,
             'event' => 'updated',
-            'description' => "Updated $type: $name",
+            'description' => $type === 'Link'
+                ? "Link bertipe {$draft->type} diperbarui : $name"
+                : "$type Diperbarui: $name",
             'subject_id' => $live->id,
             'subject_name' => $name, // Use calculated name
             'causer_name' => auth()->user()?->name ?? 'System',
-            'created_at' => $draft->updated_at->diffForHumans(),
+            'created_at' => $draft->updated_at->locale('id')->diffForHumans(),
             'timestamp' => $draft->updated_at,
             'changes' => $changes,
             'old_values' => $oldValues,

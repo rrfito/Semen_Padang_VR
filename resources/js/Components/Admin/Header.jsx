@@ -40,7 +40,9 @@ export default function Header({ title = "Street View Admin" }) {
                     onClick={toggleTheme}
                     className="size-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-[#233648] hover:bg-slate-200 dark:hover:bg-[#2f455a] text-gray-600 dark:text-slate-300 transition-all border border-gray-200 dark:border-transparent"
                     title={
-                        isDark ? "Switch to Light Mode" : "Switch to Dark Mode"
+                        isDark
+                            ? "Beralih ke Mode Terang"
+                            : "Beralih ke Mode Gelap"
                     }
                 >
                     <span className="material-symbols-outlined text-[20px]">

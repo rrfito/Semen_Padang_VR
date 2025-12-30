@@ -8,10 +8,10 @@ export default function ConfirmModal({
     isOpen,
     onClose,
     onConfirm,
-    title = "Confirm Action",
+    title = "Konfirmasi Tindakan",
     message,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText = "Konfirmasi",
+    cancelText = "Batal",
     variant = "danger", // 'danger' | 'warning' | 'info'
 }) {
     if (!isOpen) return null;

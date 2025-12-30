@@ -102,6 +102,8 @@ class EditorController extends Controller
             'parent_id' => $draft->parent_id,
             'status' => 'draft', // Identify as draft
             'marked_for_deletion' => (bool) $draft->marked_for_deletion,
+            'lat' => $draft->lat,
+            'lng' => $draft->lng,
             'children' => $draft->children
                 ->filter(fn($c) => !$c->marked_for_deletion)
                 ->map(fn($child) => $this->formatAreaDraftNode($child))

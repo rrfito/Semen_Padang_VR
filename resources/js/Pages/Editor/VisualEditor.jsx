@@ -400,8 +400,8 @@ export default function VisualEditor({
                         error
                     );
                     showNotification(
-                        "Auto-Save Failed",
-                        "Failed to save changes. Please try again.",
+                        "Penyimpanan Otomatis Gagal",
+                        "Gagal menyimpan perubahan. Silakan coba lagi.",
                         "error"
                     );
                 }
@@ -430,8 +430,8 @@ export default function VisualEditor({
                         error
                     );
                     showNotification(
-                        "Auto-Save Failed",
-                        "Failed to save scene changes. Please try again.",
+                        "Penyimpanan Otomatis Gagal",
+                        "Gagal menyimpan perubahan scene. Silakan coba lagi.",
                         "error"
                     );
                 }
@@ -529,8 +529,8 @@ export default function VisualEditor({
         } catch (e) {
             console.error(e);
             showNotification(
-                "Creation Failed",
-                "Failed to create area. Please try again.",
+                "Gagal Membuat",
+                "Gagal membuat area. Silakan coba lagi.",
                 "error"
             );
             throw e; // Modal will catch this
@@ -543,8 +543,8 @@ export default function VisualEditor({
         const targetAreaId = areaId || selection?.id;
         if (!targetAreaId) {
             showNotification(
-                "Selection Required",
-                "Please select an area first",
+                "Pilihan Diperlukan",
+                "Silakan pilih area terlebih dahulu",
                 "warning"
             );
             return;
@@ -552,8 +552,8 @@ export default function VisualEditor({
 
         setIsUploading(true);
         showNotification(
-            "Uploading...",
-            "Processing images and extracting GPS data. Please wait.",
+            "Mengunggah...",
+            "Memproses gambar dan mengekstrak data GPS. Mohon tunggu.",
             "info",
             0 // Disable auto-close for persistent loading state
         );
@@ -575,10 +575,10 @@ export default function VisualEditor({
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
                         showNotification(
-                            "Uploading...",
+                            "Mengunggah...",
                             percentCompleted < 100
-                                ? `Sending data: ${percentCompleted}%`
-                                : "Data sent! Now reading GPS metadata (this may take a moment)...",
+                                ? `Mengirim data: ${percentCompleted}%`
+                                : "Data terkirim! Sedang membaca metadata GPS (ini mungkin memakan waktu)...",
                             "info",
                             0 // Keep persistent
                         );
@@ -631,23 +631,24 @@ export default function VisualEditor({
             });
 
             showNotification(
-                "Upload Successful",
-                `${uploadedScenes.length} scenes uploaded! GPS data extracted. Processing WebP in background...`,
+                "Unggahan Berhasil",
+                `${uploadedScenes.length} scene berhasil diunggah! Data GPS diekstrak. Memproses WebP di latar belakang...`,
                 "success"
             );
             fetchPendingCount();
         } catch (error) {
             // Detailed Error Notification
             console.error("Upload failed:", error);
-            let errorTitle = "Upload Failed";
-            let errorMessage = "Failed to upload scenes.";
+            let errorTitle = "Gagal Mengunggah";
+            let errorMessage = "Gagal mengunggah scene.";
 
             if (error.response) {
                 if (error.response.status === 413) {
-                    errorTitle = "File Too Large";
-                    errorMessage = "Total upload size exceeds server limit.";
+                    errorTitle = "Berkas Terlalu Besar";
+                    errorMessage =
+                        "Total ukuran unggahan melebihi batas server.";
                 } else if (error.response.status === 422) {
-                    errorTitle = "Validation Error";
+                    errorTitle = "Kesalahan Validasi";
                     if (error.response.data.errors) {
                         const details = Object.values(
                             error.response.data.errors
@@ -657,7 +658,7 @@ export default function VisualEditor({
                         errorMessage = details;
                     } else {
                         errorMessage =
-                            error.response.data.message || "Invalid files.";
+                            error.response.data.message || "File tidak valid.";
                     }
                 } else {
                     errorMessage +=
@@ -704,16 +705,16 @@ export default function VisualEditor({
                 fetchPendingCount();
             } else {
                 showNotification(
-                    "Delete Failed",
-                    "Failed to delete link: " + response.data.message,
+                    "Gagal Menghapus",
+                    "Gagal menghapus link: " + response.data.message,
                     "error"
                 );
             }
         } catch (error) {
             console.error("Error deleting link:", error);
             showNotification(
-                "Delete Failed",
-                "Error deleting link: " +
+                "Gagal Menghapus",
+                "Error menghapus link: " +
                     (error.response?.data?.message || error.message),
                 "error"
             );
@@ -731,12 +732,16 @@ export default function VisualEditor({
             });
             setIsDirty(false);
             showNotification(
-                "Save Successful",
-                "Changes saved successfully.",
+                "Berhasil Disimpan",
+                "Perubahan berhasil disimpan.",
                 "success"
             );
         } catch (error) {
-            showNotification("Save Failed", "Failed to save changes.", "error");
+            showNotification(
+                "Gagal Menyimpan",
+                "Gagal menyimpan perubahan.",
+                "error"
+            );
         } finally {
             setIsSaving(false);
         }
@@ -750,8 +755,8 @@ export default function VisualEditor({
                 mode,
             });
             showNotification(
-                "Auto-Link Complete",
-                `Auto-linked ${res.data.count} connections!`,
+                "Tautan Otomatis Selesai",
+                `Berhasil menautkan otomatis ${res.data.count} koneksi!`,
                 "success"
             );
             setAutoLinkModal({ isOpen: false, areaId: null, areaName: "" });
@@ -769,8 +774,8 @@ export default function VisualEditor({
             });
         } catch (e) {
             showNotification(
-                "Auto-Link Failed",
-                "An error occurred while creating links.",
+                "Tautan Otomatis Gagal",
+                "Terjadi kesalahan saat membuat link.",
                 "error"
             );
         }
@@ -851,8 +856,8 @@ export default function VisualEditor({
         } catch (error) {
             console.error("Delete failed, reverting...", error);
             showNotification(
-                "Delete Failed",
-                "Failed to delete item: " +
+                "Gagal Menghapus",
+                "Gagal menghapus item: " +
                     (error.response?.data?.message || error.message),
                 "error"
             );
@@ -1076,7 +1081,7 @@ export default function VisualEditor({
                 // console.log("Link created successfully");
                 fetchPendingCount();
             } else {
-                alert("Failed to create link: " + response.data.message);
+                alert("Gagal membuat tautan: " + response.data.message);
             }
         } catch (error) {
             console.error("Error creating link:", error);
@@ -1085,11 +1090,11 @@ export default function VisualEditor({
                 const errorMessages = Object.values(error.response.data.errors)
                     .flat()
                     .join(", ");
-                alert("Validation error: " + errorMessages);
+                alert("Kesalahan validasi: " + errorMessages);
             } else if (error.response?.data?.message) {
-                alert("Error: " + error.response.data.message);
+                alert("Kesalahan: " + error.response.data.message);
             } else {
-                alert("Error creating link: " + error.message);
+                alert("Gagal membuat tautan: " + error.message);
             }
         } finally {
             setLinkTargetModal({ isOpen: false, data: null });
@@ -1117,12 +1122,12 @@ export default function VisualEditor({
                 // console.log("Link updated successfully");
                 fetchPendingCount();
             } else {
-                alert("Failed to update link: " + response.data.message);
+                alert("Gagal memperbarui tautan: " + response.data.message);
             }
         } catch (error) {
             console.error("Error updating link:", error);
             alert(
-                "Error updating link: " +
+                "Gagal memperbarui tautan: " +
                     (error.response?.data?.message || error.message)
             );
         }
@@ -1131,7 +1136,7 @@ export default function VisualEditor({
     return (
         <ThemeProvider defaultTheme="light">
             <div className="flex flex-col h-screen w-screen theme-surface theme-text font-sans overflow-hidden">
-                <Head title="Visual Editor" />
+                <Head title="Editor Visual" />
 
                 {/* HEADER */}
                 <Header
@@ -1250,7 +1255,7 @@ export default function VisualEditor({
 
                             if (!areaId || isNaN(areaId)) {
                                 alert(
-                                    "Error: No area selected. Please select an area first."
+                                    "Kesalahan: Belum ada area yang dipilih. Silakan pilih area terlebih dahulu."
                                 );
                                 return;
                             }

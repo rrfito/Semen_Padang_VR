@@ -19,7 +19,7 @@ export default function Header({
 
     const handleDiscard = async () => {
         if (!rootId) {
-            alert("Error: Root ID not found.");
+            alert("Kesalahan: Root ID tidak ditemukan.");
             return;
         }
 
@@ -29,7 +29,7 @@ export default function Header({
             window.location.reload();
         } catch (error) {
             console.error("Discard failed", error);
-            alert("Failed to discard changes. See console.");
+            alert("Gagal membuang perubahan. Lihat konsol.");
         } finally {
             setConfirmDiscard({ isOpen: false });
         }
@@ -49,7 +49,7 @@ export default function Header({
                         PT Semen Padang
                     </h2>
                     <h1 className="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
-                        Street View Admin
+                        Admin Street View
                     </h1>
                 </div>
             </div>
@@ -90,7 +90,7 @@ export default function Header({
                             <>
                                 <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
                                 <span className="text-slate-400">
-                                    💾 Saving...
+                                    💾 Menyimpan...
                                 </span>
                             </>
                         )}
@@ -98,7 +98,7 @@ export default function Header({
                             <>
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                 <span className="text-slate-400">
-                                    ✓ All changes saved
+                                    ✓ Semua perubahan disimpan
                                 </span>
                             </>
                         )}
@@ -106,7 +106,7 @@ export default function Header({
                             <>
                                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                 <span className="text-red-400">
-                                    ⚠️ Failed to save
+                                    ⚠️ Gagal menyimpan
                                 </span>
                             </>
                         )}
@@ -127,8 +127,8 @@ export default function Header({
                     </span>
                     <span>
                         {pendingCount > 0
-                            ? `Review ${pendingCount} Changes`
-                            : "All Synced"}
+                            ? `Tinjau ${pendingCount} Perubahan`
+                            : "Semua Tersinkronisasi"}
                     </span>
                 </button>
 
@@ -137,7 +137,9 @@ export default function Header({
                     onClick={toggleTheme}
                     className="size-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#2f455a] text-gray-600 dark:text-slate-300 transition-all border border-gray-200 dark:border-transparent"
                     title={
-                        isDark ? "Switch to Light Mode" : "Switch to Dark Mode"
+                        isDark
+                            ? "Beralih ke Mode Terang"
+                            : "Beralih ke Mode Gelap"
                     }
                 >
                     <span className="material-symbols-outlined text-[20px]">

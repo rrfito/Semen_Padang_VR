@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <div className="h-screen w-screen flex overflow-hidden bg-gray-900 font-sans">
-            <Head title="Log in" />
+            <Head title="Masuk" />
 
             {/* LEFT SIDE: IMAGE & BRANDING (Desktop Only) */}
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black">
@@ -52,8 +52,8 @@ export default function Login({ status, canResetPassword }) {
                     </div>
                     <div className="space-y-6">
                         <h1 className="text-6xl font-extrabold leading-tight tracking-tight drop-shadow-lg">
-                            Virtual Tour <br />
-                            <span className="text-red-600">Experience</span>
+                            Pengalaman <br />
+                            <span className="text-red-600">Tur Virtual</span>
                         </h1>
                         <p className="text-xl text-gray-200 max-w-lg drop-shadow-md">
                             Jelajahi setiap sudut fasilitas Semen Padang dengan

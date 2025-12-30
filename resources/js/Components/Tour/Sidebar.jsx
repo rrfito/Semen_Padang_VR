@@ -373,7 +373,7 @@ export default function Sidebar({
                                 method="post"
                                 as="button"
                                 className="p-2 text-gray-400 hover:text-[#D32F2F] hover:bg-white rounded-lg transition-all shadow-sm"
-                                title="Logout"
+                                title="Keluar"
                             >
                                 <FaSignOutAlt size={18} />
                             </Link>
@@ -384,7 +384,7 @@ export default function Sidebar({
                             className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#D32F2F] text-white rounded-lg text-sm font-bold hover:bg-[#b71c1c] transition-colors shadow-lg shadow-red-200"
                         >
                             <FaSignInAlt />
-                            Login
+                            Masuk
                         </Link>
                     )}
                 </div>

@@ -14,7 +14,7 @@ export default function AdminDashboard({
 }) {
     return (
         <AdminLayout>
-            <Head title="Dashboard" />
+            <Head title="Dasbor" />
 
             <div className="space-y-6">
                 {/* 1. DRAFT STATUS BANNER */}

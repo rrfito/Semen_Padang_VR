@@ -314,7 +314,7 @@ export default function Sidebar({
                 // We need to structurally revert.
                 // Simple way: We don't have previous deep copy.
                 // Ideally we should have kept a deep copy or just reload.
-                alert("Reorder failed inside server. Reloading...");
+                alert("Gagal mengurutkan ulang di server. Memuat ulang...");
                 window.location.reload();
             }
         }
@@ -512,7 +512,7 @@ export default function Sidebar({
                         </span>
                         <input
                             className="w-full theme-input text-sm theme-text rounded-lg pl-10 pr-4 py-2.5 border theme-border focus:ring-2 focus:ring-primary/50 outline-none transition-all"
-                            placeholder="Search..."
+                            placeholder="Cari..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -537,8 +537,8 @@ export default function Sidebar({
                         }`}
                         title={
                             showStatusLabels
-                                ? "Hide Status Labels (New/Mod)"
-                                : "Show Status Labels"
+                                ? "Sembunyikan Label Status"
+                                : "Tampilkan Label Status"
                         }
                     >
                         <span className="material-symbols-outlined text-[20px]">
@@ -553,14 +553,14 @@ export default function Sidebar({
                         className="flex-1 theme-btn-action"
                         title={
                             selection?.type === "scene"
-                                ? "Cannot add area to a scene (Select an area or root first)"
-                                : "Add New Area"
+                                ? "Tidak dapat menambahkan area ke scene (Pilih area atau root terlebih dahulu)"
+                                : "Buat Area Baru"
                         }
                     >
                         <span className="material-symbols-outlined text-[18px]">
                             create_new_folder
                         </span>
-                        <span>Create New Area</span>
+                        <span>Buat Area Baru</span>
                     </button>
                 </div>
                 <button
@@ -569,16 +569,16 @@ export default function Sidebar({
                     className="w-full theme-btn-action"
                     title={
                         !selection
-                            ? "Select an area first"
+                            ? "Pilih area terlebih dahulu"
                             : selection?.type === "scene"
-                            ? "Cannot auto-link a scene (Select an area)"
-                            : "Auto-link scenes in this area and its descendants"
+                            ? "Tidak dapat menautkan otomatis scene (Pilih area)"
+                            : "Tautkan otomatis scene di area ini dan turunannya"
                     }
                 >
                     <span className="material-symbols-outlined text-[18px]">
                         link
                     </span>
-                    <span>Create Auto Link Scene</span>
+                    <span>Buat Link Otomatis</span>
                 </button>
             </div>
 
@@ -587,15 +587,15 @@ export default function Sidebar({
                 <div>
                     <h3 className="theme-section-header">
                         {searchQuery
-                            ? `Search Results (${searchResults.length})`
-                            : "Areas Hierarchy"}
+                            ? `Hasil Pencarian (${searchResults.length})`
+                            : "Hierarki Area"}
                     </h3>
                     {!searchQuery && (
                         <p className="text-[10px] text-amber-600 dark:text-amber-500 flex items-center gap-1 mt-0.5">
                             <span className="material-symbols-outlined text-[10px]">
                                 lightbulb
                             </span>
-                            Tip: Drag items to reorder
+                            Tip: Tarik item untuk mengurutkan ulang
                         </p>
                     )}
                 </div>
@@ -664,7 +664,7 @@ export default function Sidebar({
                             <span className="material-symbols-outlined text-4xl mb-2 opacity-50 block mx-auto">
                                 search_off
                             </span>
-                            No results found for "{searchQuery}"
+                            Tidak ada hasil untuk "{searchQuery}"
                         </div>
                     )
                 ) : // HIERARCHY TREE MODE
@@ -690,13 +690,13 @@ export default function Sidebar({
                 ) : (
                     <div className="p-8 text-center">
                         <div className="theme-text-muted text-xs mb-2">
-                            No areas found
+                            Tidak ada area ditemukan
                         </div>
                         <button
                             onClick={onCreateArea}
                             className="text-[10px] font-bold text-action-primary border border-action-primary/30 rounded px-3 py-1 hover:bg-action-primary/10 transition-colors"
                         >
-                            Create Root Area
+                            Buat Area Utama
                         </button>
                     </div>
                 )}

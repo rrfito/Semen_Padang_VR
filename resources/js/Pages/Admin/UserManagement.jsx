@@ -80,10 +80,10 @@ export default function UserManagement({ users, filters }) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h2 className="theme-text text-xl font-bold">
-                            All Users
+                            Semua Pengguna
                         </h2>
                         <p className="theme-text-secondary text-sm">
-                            Manage user access and roles.
+                            Kelola akses pengguna dan peran.
                         </p>
                     </div>
 
@@ -92,7 +92,7 @@ export default function UserManagement({ users, filters }) {
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Search users..."
+                                placeholder="Cari pengguna..."
                                 value={search}
                                 onChange={handleSearch}
                                 className="pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#111a22] border theme-border rounded-lg focus:ring-2 focus:ring-primary/20 theme-text w-full sm:w-64"
@@ -124,7 +124,7 @@ export default function UserManagement({ users, filters }) {
                                         onClick={() => handleSort("name")}
                                     >
                                         <div className="flex items-center gap-1">
-                                            User
+                                            Pengguna
                                             <span className="material-symbols-outlined text-[16px]">
                                                 {getSortIcon("name")}
                                             </span>
@@ -135,14 +135,14 @@ export default function UserManagement({ users, filters }) {
                                         onClick={() => handleSort("role")}
                                     >
                                         <div className="flex items-center gap-1">
-                                            Role
+                                            Peran
                                             <span className="material-symbols-outlined text-[16px]">
                                                 {getSortIcon("role")}
                                             </span>
                                         </div>
                                     </th>
                                     <th className="p-4 text-xs font-semibold uppercase tracking-wider theme-text-secondary">
-                                        Last Activity
+                                        Aktivitas Terakhir
                                     </th>
                                 </tr>
                             </thead>
@@ -219,7 +219,7 @@ export default function UserManagement({ users, filters }) {
                                             colSpan="3"
                                             className="p-8 text-center theme-text-secondary"
                                         >
-                                            No users found.
+                                            Tidak ada pengguna ditemukan.
                                         </td>
                                     </tr>
                                 )}
@@ -229,23 +229,30 @@ export default function UserManagement({ users, filters }) {
                     {/* Pagination */}
                     <div className="border-t theme-border p-4 flex items-center justify-between bg-slate-50/50 dark:bg-[#1b2631]/50">
                         <div className="text-sm theme-text-secondary">
-                            Showing{" "}
+                            Menampilkan{" "}
                             <span className="font-medium theme-text">
                                 {users.from}
                             </span>{" "}
-                            to{" "}
+                            sampai{" "}
                             <span className="font-medium theme-text">
                                 {users.to}
                             </span>{" "}
-                            of{" "}
+                            dari{" "}
                             <span className="font-medium theme-text">
                                 {users.total}
                             </span>{" "}
-                            results
+                            pengguna
                         </div>
                         <div className="flex gap-1">
-                            {users.links.map((link, i) =>
-                                link.url ? (
+                            {users.links.map((link, i) => {
+                                let label = link.label;
+                                if (label.includes("Previous")) {
+                                    label = "&laquo; Sebelumnya";
+                                } else if (label.includes("Next")) {
+                                    label = "Berikutnya &raquo;";
+                                }
+
+                                return link.url ? (
                                     <Link
                                         key={i}
                                         href={link.url}
@@ -255,7 +262,7 @@ export default function UserManagement({ users, filters }) {
                                                 : "bg-white dark:bg-[#233648] theme-text border theme-border hover:bg-slate-100 dark:hover:bg-[#2a4055]"
                                         }`}
                                         dangerouslySetInnerHTML={{
-                                            __html: link.label,
+                                            __html: label,
                                         }}
                                     />
                                 ) : (
@@ -263,11 +270,11 @@ export default function UserManagement({ users, filters }) {
                                         key={i}
                                         className="px-3 py-1 text-xs rounded-md text-slate-400 border theme-border opacity-50 cursor-not-allowed"
                                         dangerouslySetInnerHTML={{
-                                            __html: link.label,
+                                            __html: label,
                                         }}
                                     />
-                                )
-                            )}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

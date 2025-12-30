@@ -206,7 +206,7 @@ export default function SceneView({
             : `<div class="w-11 h-11 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-6 h-6" style="transform: rotate(-90deg);"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg></div>`;
 
         const tooltip = document.createElement("div");
-        tooltip.innerText = link.target_name || "Unknown";
+        tooltip.innerText = link.target_name || "Tidak Diketahui";
         tooltip.classList.add(
             "hotspot-tooltip",
             "bg-black/70",
@@ -230,7 +230,7 @@ export default function SceneView({
         );
         wrapper.addEventListener("contextmenu", (e) => {
             e.preventDefault();
-            if (confirm("Delete this link?")) {
+            if (confirm("Hapus tautan ini?")) {
                 onDeleteLink(link.id);
             }
         });
@@ -308,7 +308,7 @@ export default function SceneView({
                             <button
                                 onClick={() => handleTriggerAdd("navigasi")}
                                 className="bg-blue-500 hover:bg-blue-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
-                                title="Link to Scene in Same Area"
+                                title="Tautan ke Scene di Area yang Sama"
                             >
                                 <svg
                                     viewBox="0 0 24 24"
@@ -324,7 +324,7 @@ export default function SceneView({
                             <button
                                 onClick={() => handleTriggerAdd("gateway")}
                                 className="bg-purple-500 hover:bg-purple-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
-                                title="Link to Different Area (Gateway)"
+                                title="Tautan ke Area Berbeda (Gerbang)"
                             >
                                 <svg
                                     viewBox="0 0 24 24"
@@ -339,7 +339,7 @@ export default function SceneView({
                             <button
                                 onClick={() => setIsAdding(false)}
                                 className="bg-red-500/80 hover:bg-red-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center group"
-                                title="Cancel"
+                                title="Batal"
                             >
                                 <span className="material-symbols-outlined text-2xl">
                                     close
@@ -350,7 +350,7 @@ export default function SceneView({
 
                     {/* Helper Text */}
                     <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
-                        Align center to target, then choose type
+                        Sejajarkan tengah ke target, lalu pilih tipe
                     </div>
                 </div>
             )}
@@ -390,7 +390,7 @@ export default function SceneView({
                                 setSelectedHotspot(null);
                             }}
                             className="absolute bg-emerald-500 hover:bg-emerald-600 border-2 border-white/30 hover:border-white text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -top-[3.5rem]"
-                            title="Confirm new position"
+                            title="Konfirmasi posisi baru"
                         >
                             <span className="material-symbols-outlined text-xl">
                                 check
@@ -401,7 +401,7 @@ export default function SceneView({
                         <button
                             onClick={() => setIsRepositioning(false)}
                             className="absolute bg-red-500/80 hover:bg-red-600 border-2 border-white/30 text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -bottom-[3.5rem]"
-                            title="Cancel repositioning"
+                            title="Batalkan penempatan ulang"
                         >
                             <span className="material-symbols-outlined text-xl">
                                 close
@@ -411,7 +411,7 @@ export default function SceneView({
 
                     {/* Helper Text */}
                     <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
-                        Move camera to new position, then confirm
+                        Gerakkan kamera ke posisi baru, lalu konfirmasi
                     </div>
                 </div>
             )}
@@ -452,14 +452,14 @@ export default function SceneView({
                             </p>
                             <p className="text-xs theme-text-muted">
                                 {selectedHotspot.type === "gateway"
-                                    ? "Gateway"
-                                    : "Navigation"}
+                                    ? "Gerbang"
+                                    : "Navigasi"}
                             </p>
                         </div>
                         <button
                             onClick={() => setSelectedHotspot(null)}
                             className="theme-text-muted hover:theme-text transition-colors p-1"
-                            title="Close"
+                            title="Tutup"
                         >
                             <span className="material-symbols-outlined text-lg">
                                 close
@@ -472,12 +472,12 @@ export default function SceneView({
                         <button
                             onClick={() => setIsRepositioning(true)}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-600 text-white"
-                            title="Enter repositioning mode"
+                            title="Masuk mode penempatan ulang"
                         >
                             <span className="material-symbols-outlined text-sm">
                                 my_location
                             </span>
-                            <span>Update Position</span>
+                            <span>Perbarui Posisi</span>
                         </button>
 
                         {/* Toggle Type */}
@@ -496,28 +496,28 @@ export default function SceneView({
                                 }));
                             }}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-indigo-500 hover:bg-indigo-600 text-white"
-                            title="Toggle between navigation and gateway"
+                            title="Beralih antara navigasi dan gerbang"
                         >
                             <span className="material-symbols-outlined text-sm">
                                 swap_horiz
                             </span>
                             <span>
                                 {selectedHotspot.type === "gateway"
-                                    ? "To Nav"
-                                    : "To Gateway"}
+                                    ? "Ke Nav"
+                                    : "Ke Gerbang"}
                             </span>
                         </button>
 
                         {/* Delete */}
                         <button
                             onClick={() => {
-                                if (confirm("Delete this hotspot?")) {
+                                if (confirm("Hapus hotspot ini?")) {
                                     onDeleteLink(selectedHotspot.id);
                                     setSelectedHotspot(null);
                                 }
                             }}
                             className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors bg-red-500 hover:bg-red-600 text-white"
-                            title="Delete hotspot"
+                            title="Hapus hotspot"
                         >
                             <span className="material-symbols-outlined text-sm">
                                 delete
@@ -532,7 +532,7 @@ export default function SceneView({
                 <div className="flex items-center gap-1 p-1.5 theme-toolbar">
                     <ToolbarButton
                         icon="near_me"
-                        title="Select tool"
+                        title="Pilih alat"
                         active={!isAdding}
                         onClick={() => setIsAdding(false)}
                     />
@@ -547,12 +547,12 @@ export default function SceneView({
                                 ? "bg-primary text-white"
                                 : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary"
                         }`}
-                        title="Add Link / Hotspot"
+                        title="Tambah Tautan / Hotspot"
                     >
                         <span className="material-symbols-outlined text-[20px]">
                             add_location
                         </span>
-                        <span>Add Hotspot</span>
+                        <span>Tambah Hotspot</span>
                     </button>
                 </div>
             </div>

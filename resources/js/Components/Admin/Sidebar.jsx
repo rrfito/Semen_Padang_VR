@@ -14,7 +14,7 @@ export default function Sidebar() {
                         {/* Edit Mode Section */}
                         <div className="px-2">
                             <p className="text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
-                                Edit Mode
+                                Mode Edit
                             </p>
                             <Link
                                 href={route("admin.editor.index")}
@@ -39,7 +39,7 @@ export default function Sidebar() {
                         {/* Management Section */}
                         <div className="px-2">
                             <p className="text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
-                                Management
+                                Manajemen
                             </p>
                             <nav className="flex flex-col gap-1">
                                 {/* Dashboard Link */}
@@ -61,7 +61,7 @@ export default function Sidebar() {
                                         dashboard
                                     </span>
                                     <p className="text-sm font-medium leading-normal">
-                                        Dashboard
+                                        Dasbor
                                     </p>
                                 </Link>
 
@@ -78,7 +78,7 @@ export default function Sidebar() {
                                         group
                                     </span>
                                     <p className="text-sm font-medium leading-normal">
-                                        User
+                                        Pengguna
                                     </p>
                                 </Link>
                             </nav>
@@ -98,7 +98,7 @@ export default function Sidebar() {
                             logout
                         </span>
                         <p className="text-sm font-medium leading-normal">
-                            Log Out
+                            Keluar
                         </p>
                     </Link>
                 </div>

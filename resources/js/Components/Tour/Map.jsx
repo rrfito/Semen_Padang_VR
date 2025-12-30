@@ -172,37 +172,39 @@ export default function Map({
 
                             // Helper to get GPS coordinates from either format
                             const getSceneGPS = (s) => {
+                                let lat, lng;
+
                                 // Format 1: Direct lat/lng (from markers)
                                 if (
                                     s.lat !== undefined &&
                                     s.lng !== undefined
                                 ) {
-                                    return {
-                                        lat: parseFloat(s.lat),
-                                        lng: parseFloat(s.lng),
-                                    };
+                                    lat = parseFloat(s.lat);
+                                    lng = parseFloat(s.lng);
                                 }
                                 // Format 2: location_array (from menuData/sidebar)
-                                if (
+                                else if (
                                     s.location_array &&
                                     s.location_array.lat !== undefined
                                 ) {
-                                    return {
-                                        lat: parseFloat(s.location_array.lat),
-                                        lng: parseFloat(s.location_array.lng),
-                                    };
+                                    lat = parseFloat(s.location_array.lat);
+                                    lng = parseFloat(s.location_array.lng);
+                                } else {
+                                    return null;
                                 }
-                                return null;
+
+                                // Strict Validation: Check for NaN and Invalid properties
+                                if (isNaN(lat) || isNaN(lng)) return null;
+                                if (lat === 0 && lng === 0) return null; // Filter default/empty values
+
+                                return { lat, lng };
                             };
 
                             polylineScenes = selectedArea.scenes
                                 .map((s) => {
                                     const gps = getSceneGPS(s);
-                                    if (
-                                        !gps ||
-                                        (gps.lat === 0 && gps.lng === 0)
-                                    )
-                                        return null;
+                                    if (!gps) return null;
+
                                     return {
                                         id: s.id,
                                         name: s.name,

@@ -37,8 +37,8 @@ class UserManagementController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'last_activity' => $user->last_activity
-                        ? Carbon::createFromTimestamp($user->last_activity)->diffForHumans()
-                        : 'Never',
+                        ? Carbon::createFromTimestamp($user->last_activity)->locale('id')->diffForHumans()
+                        : 'Tidak pernah aktif',
                 ];
             });
 

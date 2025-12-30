@@ -135,8 +135,8 @@ export default function LinkTargetModal({
                 <div className="theme-modal-header flex justify-between items-center">
                     <h3 className="text-lg font-bold theme-text">
                         {mode === "navigasi"
-                            ? "Select Target Scene"
-                            : "Select Gateway Scene"}
+                            ? "Pilih Scene Tujuan"
+                            : "Pilih Scene Gerbang"}
                     </h3>
                     <button
                         onClick={onClose}
@@ -151,8 +151,8 @@ export default function LinkTargetModal({
                     {targets.length === 0 ? (
                         <div className="p-8 text-center theme-text-muted">
                             {mode === "navigasi"
-                                ? "No other scenes found in this area."
-                                : "No gateway scenes found in other areas."}
+                                ? "Tidak ada scene lain di area ini."
+                                : "Tidak ada scene gerbang ditemukan di area lain."}
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1">
@@ -183,7 +183,7 @@ export default function LinkTargetModal({
                 {/* Footer */}
                 <div className="theme-modal-footer flex justify-end gap-2">
                     <button onClick={onClose} className="theme-btn-secondary">
-                        Cancel
+                        Batal
                     </button>
                     <button
                         onClick={() =>
@@ -192,7 +192,7 @@ export default function LinkTargetModal({
                         disabled={!selectedTarget}
                         className="theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Create Link
+                        Buat Tautan
                     </button>
                 </div>
             </div>

@@ -60,50 +60,50 @@ export default function ContentIntegrityStatus({ stats }) {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="theme-text text-lg font-bold">
-                        Content Integrity
+                        Integritas Konten
                     </h3>
                     <p className="theme-text-secondary text-sm">
-                        Current content health and integrity status.
+                        Status kesehatan dan integritas konten saat ini.
                     </p>
                 </div>
             </div>
 
             <div className="flex-1 space-y-3">
                 <MetricItem
-                    label="Draft Mismatch"
+                    label="Draf Tidak Cocok"
                     count={draftMismatch}
                     icon={FaSync}
                     colorClass="info"
-                    helpText="Changes pending publish"
+                    helpText="Perubahan menunggu publikasi"
                 />
 
                 <MetricItem
-                    label="Orphan Scenes"
+                    label="Scene Terisolasi"
                     count={orphanScenes}
                     icon={FaExclamationTriangle}
                     colorClass="danger"
-                    helpText="Unreachable scenes"
+                    helpText="Scene tidak dapat dijangkau"
                 />
 
                 <MetricItem
-                    label="Broken Links"
+                    label="Link Rusak"
                     count={brokenLinks}
                     icon={FaUnlink}
                     colorClass="danger"
-                    helpText="Invalid targets"
+                    helpText="Target tidak valid"
                 />
 
                 <MetricItem
-                    label="Missing GPS"
+                    label="GPS Hilang"
                     count={scenesWithoutGps}
                     icon={FaMapMarkerAlt}
                     colorClass="warning"
-                    helpText="No geolocation data"
+                    helpText="Data lokasi tidak ada"
                 />
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 text-center">
-                System Health Diagnostic • Read Only
+                Diagnostik Kesehatan Sistem • Hanya Baca
             </div>
         </div>
     );

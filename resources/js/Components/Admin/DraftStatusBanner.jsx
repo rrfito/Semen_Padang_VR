@@ -21,10 +21,10 @@ export default function DraftStatusBanner({
                     </div>
                     <div className="flex flex-col gap-1">
                         <h3 className="theme-text text-lg font-bold flex items-center gap-2">
-                            All Data Synced
+                            Semua Data Tersinkronisasi
                         </h3>
                         <p className="theme-text-secondary text-sm font-medium">
-                            Production is up to date. No pending drafts.
+                            Data live sudah terbaru. Tidak ada draf tertunda.
                         </p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ export default function DraftStatusBanner({
                 </div>
                 <div className="flex flex-col gap-1">
                     <h3 className="theme-text text-lg font-bold flex items-center gap-2">
-                        Draft Changes Pending
+                        Perubahan Draf Tertunda
                         <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
                     </h3>
                     <p className="theme-text-secondary text-sm font-medium">
@@ -60,7 +60,7 @@ export default function DraftStatusBanner({
                     schedule
                 </span>
                 <span className="text-sm font-medium theme-text-secondary">
-                    Last edited: {lastEdited}
+                    Terakhir diedit: {lastEdited}
                 </span>
             </div>
         </div>

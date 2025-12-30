@@ -7,10 +7,10 @@ export default function RestrictedAreaPanel({ areas = [] }) {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="theme-text text-lg font-bold">
-                        Restricted Areas
+                        Area Terbatas
                     </h3>
                     <p className="theme-text-secondary text-sm">
-                        Access Control &amp; Monitoring
+                        Kontrol Akses &amp; Pemantauan
                     </p>
                 </div>
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 flex items-center gap-3">
@@ -18,7 +18,7 @@ export default function RestrictedAreaPanel({ areas = [] }) {
                         lock
                     </span>
                     <span className="text-red-500 font-bold text-sm">
-                        Total: {areas.length} Areas
+                        Total: {areas.length} Area
                     </span>
                 </div>
             </div>
@@ -29,7 +29,7 @@ export default function RestrictedAreaPanel({ areas = [] }) {
                         <span className="material-symbols-outlined text-4xl mb-2 opacity-50">
                             lock_open
                         </span>
-                        <p>No restricted areas found.</p>
+                        <p>Tidak ada area terbatas ditemukan.</p>
                     </div>
                 ) : (
                     areas.map((area, index) => (
@@ -65,7 +65,7 @@ export default function RestrictedAreaPanel({ areas = [] }) {
                                     visibility
                                 </span>
                                 <span className="hidden sm:inline">
-                                    View Details
+                                    Lihat Detail
                                 </span>
                             </Link>
                         </div>
@@ -78,7 +78,7 @@ export default function RestrictedAreaPanel({ areas = [] }) {
                     href={route("admin.editor.index")}
                     className="text-primary text-sm font-medium hover:text-primary-hover flex items-center gap-1 transition-colors"
                 >
-                    View All Restricted Areas
+                    Lihat Semua Area Terbatas
                     <span className="material-symbols-outlined text-[16px]">
                         arrow_forward
                     </span>

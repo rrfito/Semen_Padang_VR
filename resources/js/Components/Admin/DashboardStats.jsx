@@ -11,7 +11,7 @@ export default function DashboardStats({
             <div className="flex flex-col gap-3 rounded-xl p-6 theme-card shadow-lg">
                 <div className="flex items-center justify-between">
                     <p className="theme-text-secondary text-sm font-medium">
-                        Total Areas
+                        Total Area
                     </p>
                     <span className="material-symbols-outlined text-primary">
                         location_on
@@ -28,7 +28,7 @@ export default function DashboardStats({
             <div className="flex flex-col gap-3 rounded-xl p-6 theme-card shadow-lg">
                 <div className="flex items-center justify-between">
                     <p className="theme-text-secondary text-sm font-medium">
-                        Total Scenes
+                        Total Scene
                     </p>
                     <span className="material-symbols-outlined text-primary">
                         panorama_photosphere
@@ -45,7 +45,7 @@ export default function DashboardStats({
             <div className="flex flex-col gap-3 rounded-xl p-6 theme-card shadow-lg">
                 <div className="flex items-center justify-between">
                     <p className="theme-text-secondary text-sm font-medium">
-                        Total Links
+                        Total Tautan
                     </p>
                     <span className="material-symbols-outlined text-primary">
                         link

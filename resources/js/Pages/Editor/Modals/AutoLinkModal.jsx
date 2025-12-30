@@ -10,7 +10,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
     const [executing, setExecuting] = useState(false);
     const [replaceMode, setReplaceMode] = useState(false);
     const [linkAllAreas, setLinkAllAreas] = useState(false);
-    const [radius, setRadius] = useState(100); // Default 100 meters
+    const [radius, setRadius] = useState(5); // Default 100 meters
 
     // Notification modals
     const [showNotification, setShowNotification] = useState(false);
@@ -58,7 +58,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             console.error("Preview failed:", error);
             setNotificationConfig({
                 variant: "error",
-                title: "Preview Failed",
+                title: "Pratinjau Gagal",
                 message: error.message,
             });
             setShowNotification(true);
@@ -70,8 +70,8 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
     const handleConfirm = async () => {
         if (replaceMode && preview?.existing_links > 0) {
             setConfirmConfig({
-                title: "Delete Existing Links?",
-                message: `This will DELETE ${preview.existing_links} existing links and recreate them. Continue?`,
+                title: "Hapus Link yang Ada?",
+                message: `Ini akan MENGHAPUS ${preview.existing_links} Link yang ada dan membuatnya ulang. Lanjutkan?`,
                 onConfirm: executeAutoLink,
             });
             setShowConfirm(true);
@@ -96,17 +96,16 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             if (response.data.async) {
                 setNotificationConfig({
                     variant: "success",
-                    title: "Processing",
-                    message: "Auto-link processing in background...",
+                    title: "Memproses",
+                    message:
+                        "Pembuatan Link otomatis sedang berjalan di latar belakang...",
                 });
                 setShowNotification(true);
             } else {
-                const title = replaceMode
-                    ? "Links Replaced!"
-                    : "Links Created!";
+                const title = replaceMode ? "Link Diganti!" : "Link Dibuat!";
                 const message = replaceMode
-                    ? `Deleted ${response.data.deleted_links} old links and created ${response.data.total_created} new links!\n\n🧭 Navigation: ${response.data.navigation_links}\n🚪 Gateway: ${response.data.gateway_links}`
-                    : `Created ${response.data.total_created} new links!\n\n🧭 Navigation: ${response.data.navigation_links}\n🚪 Gateway: ${response.data.gateway_links}`;
+                    ? `Menghapus ${response.data.deleted_links} Link lama dan membuat ${response.data.total_created} Link baru!\n\n🧭 Navigasi: ${response.data.navigation_links}\n🚪 Gerbang: ${response.data.gateway_links}`
+                    : `Membuat ${response.data.total_created} Link baru!\n\n🧭 Navigasi: ${response.data.navigation_links}\n🚪 Gerbang: ${response.data.gateway_links}`;
                 setNotificationConfig({ variant: "success", title, message });
                 setShowNotification(true);
                 setTimeout(() => {
@@ -124,7 +123,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             console.error("Auto-link failed:", error);
             setNotificationConfig({
                 variant: "error",
-                title: "Auto-Link Failed",
+                title: "Link Otomatis Gagal",
                 message: error.response?.data?.error || error.message,
             });
             setShowNotification(true);
@@ -146,15 +145,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold theme-text">
-                                Auto-Link Scenes
+                                Link Otomatis Scene
                             </h3>
                             {preview && (
                                 <p className="text-xs theme-text-muted mt-0.5">
                                     {preview.scope === "universal"
-                                        ? "🌍 All Areas"
+                                        ? "🌍 Semua Area"
                                         : "📂 " +
-                                          (area?.name || "Selected Area")}{" "}
-                                    · {preview.target_areas.length} areas
+                                          (area?.name || "Area Terpilih")}{" "}
+                                    · {preview.target_areas.length} area
                                 </p>
                             )}
                         </div>
@@ -172,7 +171,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                     {loading ? (
                         <div className="py-12 text-center theme-text-muted">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            <p className="mt-3 text-sm">Loading preview...</p>
+                            <p className="mt-3 text-sm">Memuat pratinjau...</p>
                         </div>
                     ) : preview ? (
                         <>
@@ -189,15 +188,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                     />
                                     <div className="flex-1">
                                         <div className="font-bold theme-text text-sm">
-                                            Link in all areas
+                                            Lakukan Link di semua area
                                         </div>
                                         <div className="text-xs theme-text-muted mt-1">
                                             {linkAllAreas
-                                                ? `Process all areas in the database (Universal mode)`
-                                                : `Process only "${
+                                                ? `Proses semua area di database (mode Universal)`
+                                                : `Proses hanya "${
                                                       area?.name ||
-                                                      "selected area"
-                                                  }" and its descendants (Recursive mode)`}
+                                                      "area terpilih"
+                                                  }" dan turunannya (mode Rekursif)`}
                                         </div>
                                     </div>
                                 </label>
@@ -206,7 +205,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                             {/* Mode Toggle */}
                             <div>
                                 <label className="theme-section-header block mb-3">
-                                    Link Creation Mode
+                                    Mode Pembuatan Link
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
@@ -229,11 +228,11 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                             </div>
                                             <div className="flex-1 text-left">
                                                 <div className="font-bold theme-text text-sm">
-                                                    Skip Existing
+                                                    Lewati yang Ada
                                                 </div>
                                                 <div className="text-xs theme-text-muted mt-1">
-                                                    Only create new links. Safe
-                                                    to re-run.
+                                                    Hanya buat Link baru. Aman
+                                                    untuk dijalankan ulang.
                                                 </div>
                                             </div>
                                         </div>
@@ -259,7 +258,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                             </div>
                                             <div className="flex-1 text-left">
                                                 <div className="font-bold theme-text text-sm">
-                                                    Replace All
+                                                    Ganti Semua
                                                 </div>
                                                 <div
                                                     className={`text-xs mt-1  ${
@@ -268,9 +267,9 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                                             : "theme-text-muted"
                                                     }`}
                                                 >
-                                                    Delete{" "}
+                                                    Hapus{" "}
                                                     {preview.existing_links}{" "}
-                                                    existing, then recreate.
+                                                    yang ada, lalu buat ulang.
                                                 </div>
                                             </div>
                                         </div>
@@ -281,7 +280,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                             {/* Radius Input */}
                             <div>
                                 <label className="theme-section-header block mb-2">
-                                    Link Radius (meters)
+                                    Radius Link (meter)
                                 </label>
                                 <input
                                     type="number"
@@ -295,7 +294,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                                 Math.min(
                                                     100,
                                                     parseInt(e.target.value) ||
-                                                        5
+                                                        1
                                                 )
                                             )
                                         )
@@ -304,8 +303,8 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                     placeholder="5"
                                 />
                                 <p className="theme-form-hint">
-                                    Maximum distance to create links between
-                                    scenes (1-100 meters)
+                                    Jarak maksimum untuk membuat Link antar
+                                    scene (1-100 meter)
                                 </p>
                             </div>
 
@@ -314,7 +313,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                             {/* Preview Stats */}
                             <div>
                                 <h4 className="text-sm font-bold theme-text mb-3">
-                                    Target Areas ({preview.target_areas.length})
+                                    Area Target ({preview.target_areas.length})
                                 </h4>
                                 <div className="theme-surface-elevated rounded-lg p-4 space-y-2 max-h-32 overflow-y-auto">
                                     {preview.target_areas
@@ -328,14 +327,14 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                                     ✓ {a.name}
                                                 </span>
                                                 <span className="theme-text-subtle text-xs">
-                                                    {a.scene_count} scenes
+                                                    {a.scene_count} scene
                                                 </span>
                                             </div>
                                         ))}
                                     {preview.target_areas.length > 10 && (
                                         <div className="text-xs theme-text-subtle text-center pt-2 border-t theme-border">
                                             +{preview.target_areas.length - 10}{" "}
-                                            more areas
+                                            area lainnya
                                         </div>
                                     )}
                                 </div>
@@ -349,15 +348,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                         <strong>
                                             {preview.scenes_without_gps}
                                         </strong>{" "}
-                                        scenes without GPS will be skipped
+                                        scene tanpa GPS akan dilewati
                                     </div>
                                 </div>
                             )}
 
                             {preview.gateway_scenes === 0 && (
                                 <div className="theme-alert-info text-sm theme-text-secondary">
-                                    ℹ️ No gateway scenes found - only navigation
-                                    links will be created
+                                    ℹ️ Tidak ada scene gerbang ditemukan - hanya
+                                    Link navigasi yang akan dibuat
                                 </div>
                             )}
 
@@ -365,9 +364,9 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                 <div className="theme-alert-danger flex items-start gap-3">
                                     <FaExclamationTriangle className="text-red-500 dark:text-red-400 mt-0.5" />
                                     <div className="text-sm theme-text-secondary">
-                                        <strong>Warning:</strong> This will
-                                        permanently delete{" "}
-                                        {preview.existing_links} existing links!
+                                        <strong>Peringatan:</strong> Ini akan
+                                        menghapus secara permanen{" "}
+                                        {preview.existing_links} Link yang ada!
                                     </div>
                                 </div>
                             )}
@@ -382,7 +381,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                         disabled={executing}
                         className="theme-btn-secondary disabled:opacity-50"
                     >
-                        Cancel
+                        Batal
                     </button>
                     <button
                         onClick={handleConfirm}
@@ -401,14 +400,14 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                         {executing ? (
                             <>
                                 <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                Processing...
+                                Memproses...
                             </>
                         ) : (
                             <>
                                 <FaNetworkWired size={12} />
                                 {replaceMode
-                                    ? "Delete & Recreate Links"
-                                    : "Create Links"}{" "}
+                                    ? "Hapus & Buat Ulang Link"
+                                    : "Buat Link"}{" "}
                                 →
                             </>
                         )}
@@ -433,8 +432,8 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                 title={confirmConfig.title}
                 message={confirmConfig.message}
                 variant="danger"
-                confirmText="Continue"
-                cancelText="Cancel"
+                confirmText="Lanjutkan"
+                cancelText="Batal"
             />
         </div>
     );

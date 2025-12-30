@@ -189,7 +189,7 @@ export default function AreaOverviewView({
                                     direction="right"
                                     offset={[15, -20]}
                                 >
-                                    Temp Location
+                                    Lokasi Sementara
                                 </Tooltip>
                             </Marker>
                         )}
@@ -261,7 +261,7 @@ export default function AreaOverviewView({
                             <span className="material-symbols-outlined text-[20px]">
                                 edit_location
                             </span>
-                            <span>Select Location</span>
+                            <span>Pilih Lokasi</span>
                         </button>
                     ) : (
                         <div className="flex gap-2">
@@ -275,7 +275,7 @@ export default function AreaOverviewView({
                                 <span className="material-symbols-outlined text-[20px]">
                                     close
                                 </span>
-                                <span>Cancel</span>
+                                <span>Batal</span>
                             </button>
                             <button
                                 onClick={handleSaveLocation}
@@ -285,14 +285,15 @@ export default function AreaOverviewView({
                                 <span className="material-symbols-outlined text-[20px]">
                                     save
                                 </span>
-                                <span>Save Location</span>
+                                <span>Simpan Lokasi</span>
                             </button>
                         </div>
                     )}
                     {isPickingMode && (
                         <div className="absolute top-full mt-2 right-0 theme-surface backdrop-blur-md theme-text-secondary text-xs px-4 py-2 rounded-lg max-w-[200px] text-right border border-primary/30 shadow-xl">
-                            Click on map to {hasLocation ? "move" : "place"}{" "}
-                            marker
+                            Klik pada peta untuk{" "}
+                            {hasLocation ? "memindahkan" : "menempatkan"}{" "}
+                            penanda
                         </div>
                     )}
                 </div>
@@ -313,8 +314,8 @@ export default function AreaOverviewView({
                                 ></span>
                                 <span className="text-xs font-bold theme-text-secondary uppercase tracking-wide">
                                     {hasLocation
-                                        ? "Current Location"
-                                        : "No Location Set"}
+                                        ? "Lokasi Saat Ini"
+                                        : "Lokasi Belum Diatur"}
                                 </span>
                             </div>
                             <span className="material-symbols-outlined theme-text-muted text-[16px]">
@@ -324,7 +325,7 @@ export default function AreaOverviewView({
                         <div className="p-4 grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
-                                    Latitude
+                                    Lintang
                                 </label>
                                 <input
                                     type="number"
@@ -339,7 +340,7 @@ export default function AreaOverviewView({
                             </div>
                             <div>
                                 <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
-                                    Longitude
+                                    Bujur
                                 </label>
                                 <input
                                     type="number"
@@ -386,7 +387,7 @@ export default function AreaOverviewView({
                             {area.name}
                         </h2>
                         <p className="theme-text-secondary text-lg">
-                            Manage sub-areas in this location.
+                            Kelola Ruangan di Zona ini.
                         </p>
                     </div>
                     <button
@@ -394,7 +395,7 @@ export default function AreaOverviewView({
                         className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all"
                     >
                         <span className="material-symbols-outlined">add</span>
-                        <span>Add Sub-Area</span>
+                        <span>Tambah Ruangan</span>
                     </button>
                 </div>
 
@@ -405,9 +406,9 @@ export default function AreaOverviewView({
                     </span>
                     <div>
                         <p className="text-sm theme-text-secondary">
-                            This area is a container for sub-areas, not scenes.
-                            You can create and organize child areas to build
-                            your location hierarchy.
+                            Area ini adalah wadah untuk Ruangan, bukan scene.
+                            Anda dapat membuat dan mengatur Ruangan untuk
+                            membangun hierarki lokasi Anda.
                         </p>
                     </div>
                 </div>
@@ -434,15 +435,13 @@ export default function AreaOverviewView({
                                     {child.name}
                                 </h3>
                                 <p className="text-sm theme-text-muted">
-                                    Child Area • Level {(area.level || 2) + 1}
+                                    Area Turunan • Level {(area.level || 2) + 1}
                                 </p>
                                 <div className="mt-4 flex items-center gap-2 text-xs font-medium theme-text-subtle theme-icon-bg p-2 rounded">
                                     <span className="material-symbols-outlined text-[14px]">
                                         photo_camera
                                     </span>
-                                    <span>
-                                        {child.scenes_count || 0} Scenes
-                                    </span>
+                                    <span>{child.scenes_count || 0} Scene</span>
                                 </div>
                             </div>
                         ))}

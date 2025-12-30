@@ -114,6 +114,6 @@ class AdminDashboardController extends Controller
             }
         }
 
-        return $latest ? Carbon::parse($latest)->diffForHumans() : 'No changes';
+        return $latest ? Carbon::parse($latest)->locale('id')->diffForHumans() : 'Tidak ada perubahan';
     }
 }

@@ -57,7 +57,7 @@ export default function SceneContainerView({
                             {area.name}
                         </h2>
                         <p className="theme-text-secondary text-lg">
-                            Manage 360° scenes in this area.
+                            Kelola scene di area ini.
                         </p>
                     </div>
                     <button
@@ -67,7 +67,7 @@ export default function SceneContainerView({
                         <span className="material-symbols-outlined">
                             add_a_photo
                         </span>
-                        <span>Add Scene</span>
+                        <span>Tambah Scene</span>
                     </button>
                 </div>
 
@@ -78,9 +78,9 @@ export default function SceneContainerView({
                     </span>
                     <div>
                         <p className="text-sm theme-text-secondary">
-                            This area is a container for scenes, not sub-areas.
-                            You can upload and manage 360 panorama images
-                            directly here.
+                            Area ini adalah wadah untuk scene, bukan sub-area.
+                            Anda dapat mengunggah dan mengelola gambar panorama
+                            360 secara langsung di sini.
                         </p>
                     </div>
                 </div>
@@ -116,20 +116,20 @@ export default function SceneContainerView({
                                             <>
                                                 {scene.status === "new" && (
                                                     <span className="bg-blue-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-blue-400 text-white shadow-lg">
-                                                        New
+                                                        Baru
                                                     </span>
                                                 )}
                                                 {scene.status ===
                                                     "modified" && (
                                                     <span className="bg-amber-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-amber-400 text-white shadow-lg">
-                                                        Modified
+                                                        Diubah
                                                     </span>
                                                 )}
                                             </>
                                         )}
                                         {scene.can_be_gateway && (
                                             <span className="bg-purple-600/90 backdrop-blur rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-purple-400 text-white shadow-lg">
-                                                Gateway
+                                                Gerbang
                                             </span>
                                         )}
                                     </div>

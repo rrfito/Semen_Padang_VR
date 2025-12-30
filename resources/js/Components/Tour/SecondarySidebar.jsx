@@ -135,10 +135,10 @@ export default function SecondarySidebar({
                             <>
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-xs font-bold text-gray-500 tracking-wider uppercase">
-                                        Choose a scene to start
+                                        Pilih scene untuk memulai
                                     </h3>
                                     <span className="text-xs font-semibold text-[#D32F2F] bg-red-50 px-2 py-0.5 rounded">
-                                        {sceneCount} Scenes
+                                        {sceneCount} Scene
                                     </span>
                                 </div>
 
