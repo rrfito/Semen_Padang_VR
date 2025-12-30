@@ -20,12 +20,9 @@ Route::get('/', [TourController::class, 'index'])->name('tour.index');
 Route::get('/tour/{scene}', [TourController::class, 'show'])->name('tour.show');
 
 // 3. DASHBOARD USER (Pegawai / User Biasa)
-Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
-    return Inertia::render('User/Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 // 4. PROFILE MANAGEMENT (Bawaan Breeze)
 Route::middleware('auth')->group(function () {

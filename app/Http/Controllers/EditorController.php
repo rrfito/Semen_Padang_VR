@@ -15,16 +15,30 @@ use App\Services\PublishService;
 use App\Models\Drafts\AreaDraft;
 use App\Models\Drafts\SceneDraft;
 use App\Models\Drafts\LinkDraft;
+use App\Services\GeoService;
+use App\Services\AutoLinkService;
+use App\Services\SceneImageService;
 
 class EditorController extends Controller
 {
     protected $draftService;
     protected $publishService;
+    protected $geoService;
+    protected $autoLinkService;
+    protected $sceneImageService;
 
-    public function __construct(DraftService $draftService, PublishService $publishService)
-    {
+    public function __construct(
+        DraftService $draftService,
+        PublishService $publishService,
+        GeoService $geoService,
+        AutoLinkService $autoLinkService,
+        SceneImageService $sceneImageService
+    ) {
         $this->draftService = $draftService;
         $this->publishService = $publishService;
+        $this->geoService = $geoService;
+        $this->autoLinkService = $autoLinkService;
+        $this->sceneImageService = $sceneImageService;
     }
 
     public function index(Request $request)
@@ -246,52 +260,11 @@ class EditorController extends Controller
         ]);
 
         $areaId = $request->input('area_id');
-        $uploadedScenes = [];
 
         DB::beginTransaction();
         try {
-            foreach ($request->file('images') as $file) {
-                // Store file
-                $filename = 'pano_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('panoramas', $filename, 'public');
-                $fullPath = storage_path('app/public/' . $path);
-
-                // Extract metadata
-                $lat = 0;
-                $lng = 0;
-                $heading = 0;
-
-                if (function_exists('exif_read_data') && @exif_imagetype($fullPath) !== false) {
-                    try {
-                        $exif = @exif_read_data($fullPath);
-                        if ($exif && is_array($exif)) {
-                            if (isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'])) {
-                                $lat = $this->getGps($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
-                                $lng = $this->getGps($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
-                            }
-                        }
-                    } catch (\Exception $e) {
-                    }
-                }
-
-                // Create Draft Scene
-                $scene = SceneDraft::create([
-                    'area_id' => $areaId,
-                    'image_path' => $path,
-                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-                    'heading' => $heading,
-                    'lat' => $lat != 0 ? $lat : null,
-                    'lng' => $lng != 0 ? $lng : null,
-                    'published_id' => null
-                ]);
-
-                $uploadedScenes[] = $scene;
-
-                // Dispatch Job to optimize image (Resize/WebP)
-                // ASYNC MODE: Returns immediately (fast)
-                // Job will update DB from .jpg to .webp later
-                ProcessSceneImage::dispatch($scene);
-            }
+            // Delegate logic to Service
+            $uploadedScenes = $this->sceneImageService->processUploads($request->file('images'), $areaId);
 
             DB::commit();
 
@@ -304,7 +277,7 @@ class EditorController extends Controller
                     'name' => $scene->name,
                     'type' => 'scene',
                     'is_restricted' => (bool) $scene->can_be_gateway,
-                    'can_be_gateway' => (bool) $scene->can_be_gateway,
+                    'can_be_gateway' => (bool) $scene->can_be_gateway, // Explicitly needed by frontend
                     'path' => asset('storage/' . $scene->image_path),
                     'image_url' => asset('storage/' . $scene->image_path),
                     'marked_for_deletion' => (bool) $scene->marked_for_deletion,
@@ -317,6 +290,7 @@ class EditorController extends Controller
             ]);
 
             // Mark root as dirty (since scenes added)
+            // (Assumes service created SceneDrafts)
             if (!empty($uploadedScenes)) {
                 $this->draftService->markDirty($uploadedScenes[0]);
             }
@@ -369,7 +343,7 @@ class EditorController extends Controller
         // Calculate Distance if possible
         $distance = 0;
         if ($source->lat && $source->lng && $target->lat && $target->lng) {
-            $distance = $this->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
+            $distance = $this->geoService->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
         }
 
         $link = LinkDraft::create([
@@ -537,219 +511,12 @@ class EditorController extends Controller
         $previewOnly = $request->boolean('preview_only');
         $radius = $request->input('radius', 50); // Default 50m
 
-        // 1. Fetch Candidates (Draft Scenes)
-        // 1. Fetch Candidates (Draft Scenes)
-        $query = SceneDraft::query()
-            ->whereNotNull('lat')
-            ->whereNotNull('lng')
-            ->where('marked_for_deletion', false)
-            ->whereHas('area', fn($q) => $q->where('marked_for_deletion', false));
-
-        if ($areaId) {
-            // Get all descendant scene IDs
-            $root = AreaDraft::find($areaId);
-            if (!$root)
-                return response()->json(['error' => 'Area not found'], 404);
-
-            // Helper to get recursive IDs
-            $areaIds = $this->getDescendantAreaIds($root);
-            $query->whereIn('area_id', $areaIds);
-        }
-
-        $scenes = $query->get();
-
-        // Stats
-        $scenesWithoutGpsQuery = SceneDraft::query()
-            ->where(function ($q) {
-                $q->whereNull('lat')->orWhereNull('lng');
-            })
-            ->where('marked_for_deletion', false);
-
-        if ($areaId && isset($areaIds)) {
-            $scenesWithoutGpsQuery->whereIn('area_id', $areaIds);
-        }
-
-        $stats = [
-            'existing_links' => 0,
-            'target_areas' => [],
-            'scenes_without_gps' => $scenesWithoutGpsQuery->count(),
-            'gateway_scenes' => $scenes->where('can_be_gateway', true)->count(),
-            'total_scenes' => $scenes->count(),
-            'deleted_links' => 0,
-            'total_created' => 0,
-            'navigation_links' => 0,
-            'gateway_links' => 0,
-        ];
-
-        // Group by Area for stats
-        $stats['target_areas'] = $scenes->groupBy('area_id')->map(function ($group) {
-            return [
-                'id' => $group->first()->area_id,
-                'name' => $group->first()->area->name ?? 'Unknown',
-                'scene_count' => $group->count()
-            ];
-        })->values()->toArray();
-
-        // Count existing links in scope
-        $sceneIds = $scenes->pluck('id');
-        $existingLinks = LinkDraft::whereIn('source_scene_id', $sceneIds)
-            ->where('marked_for_deletion', false)
-            ->count();
-        $stats['existing_links'] = $existingLinks;
-
-        if ($previewOnly) {
-            return response()->json($stats);
-        }
-
-        // EXECUTION
-        DB::beginTransaction();
         try {
-            if ($replaceExisting) {
-                // Dual-Entity Delete Logic
-                $oldLinks = LinkDraft::whereIn('source_scene_id', $sceneIds)
-                    ->where('marked_for_deletion', false) // Only delete active links
-                    ->get();
-
-                $deletedCount = 0;
-                foreach ($oldLinks as $link) {
-                    if ($link->published_id) {
-                        $link->update(['marked_for_deletion' => true]);
-                    } else {
-                        $link->delete();
-                    }
-                    $deletedCount++;
-                }
-                $stats['deleted_links'] = $deletedCount;
-            }
-
-            $createdCount = 0;
-            $navCount = 0;
-            $gatewayCount = 0;
-
-            foreach ($scenes as $source) {
-                foreach ($scenes as $target) {
-                    if ($source->id === $target->id)
-                        continue;
-
-                    // Distance Calc (Haversine)
-                    $dist = $this->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
-
-                    if ($dist <= $radius) {
-                        // Determine Type
-                        $type = ($source->area_id === $target->area_id) ? 'navigasi' : 'gateway';
-
-                        // Check Gateway Logic
-                        if ($type === 'gateway') {
-                            if (!$source->can_be_gateway || !$target->can_be_gateway) {
-                                continue;
-                            }
-                        }
-
-                        // Check if link exists (if not replacing)
-                        if (!$replaceExisting) {
-                            $exists = LinkDraft::where('source_scene_id', $source->id)
-                                ->where('target_scene_id', $target->id)
-                                ->where('marked_for_deletion', false)
-                                ->exists();
-                            if ($exists)
-                                continue;
-                        }
-
-                        // Calculate Yaw (Bearing)
-                        $yaw = $this->calculateBearing($source->lat, $source->lng, $target->lat, $target->lng);
-                        // Yaw needs adjustment relative to North? Marzipano uses radians.
-                        // calculateBearing returns degrees. Convert to Radians.
-                        // Marzipano 0 is North? No, usually 0 is center of image.
-                        // We must assume image heading (North Offset) is handled.
-                        // Draft model has 'heading'.
-                        // True Heading = Image Heading + View Yaw.
-                        // Desired View Yaw = Target Bearing - Source Image Heading.
-                        $bearing = deg2rad($this->calculateBearing($source->lat, $source->lng, $target->lat, $target->lng));
-
-                        // Normalized Yaw (relative to image center 0)
-                        $sourceHeading = deg2rad($source->heading ?? 0);
-                        $relativeYaw = $bearing - $sourceHeading;
-
-                        LinkDraft::create([
-                            'source_scene_id' => $source->id,
-                            'target_scene_id' => $target->id,
-                            'type' => $type,
-                            'yaw' => $relativeYaw,
-                            'pitch' => 0,
-                            'distance' => $dist
-                        ]);
-
-                        $createdCount++;
-                        if ($type === 'navigasi')
-                            $navCount++;
-                        else
-                            $gatewayCount++;
-                    }
-                }
-            }
-
-            $stats['total_created'] = $createdCount;
-            $stats['navigation_links'] = $navCount;
-            $stats['gateway_links'] = $gatewayCount;
-
-            DB::commit();
+            $stats = $this->autoLinkService->execute($areaId, $replaceExisting, $previewOnly, $radius);
             return response()->json($stats);
-
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }
-
-    private function getDescendantAreaIds($area)
-    {
-        $ids = [$area->id];
-        foreach ($area->children as $child) {
-            $ids = array_merge($ids, $this->getDescendantAreaIds($child));
-        }
-        return $ids;
-    }
-
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
-    {
-        $earthRadius = 6371000; // meters
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat / 2) * sin($dLat / 2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon / 2) * sin($dLon / 2);
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        return $earthRadius * $c;
-    }
-
-    private function calculateBearing($lat1, $lon1, $lat2, $lon2)
-    {
-        $dLon = deg2rad($lon2 - $lon1);
-        $y = sin($dLon) * cos(deg2rad($lat2));
-        $x = cos(deg2rad($lat1)) * sin(deg2rad($lat2)) -
-            sin(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos($dLon);
-        return fmod(rad2deg(atan2($y, $x)) + 360, 360);
-    }
-
-    // --- HELPERS ---
-
-    private function getGps($exifCoord, $hemi)
-    {
-        $degrees = count($exifCoord) > 0 ? $this->gps2Num($exifCoord[0]) : 0;
-        $minutes = count($exifCoord) > 1 ? $this->gps2Num($exifCoord[1]) : 0;
-        $seconds = count($exifCoord) > 2 ? $this->gps2Num($exifCoord[2]) : 0;
-        $flip = ($hemi == 'W' || $hemi == 'S') ? -1 : 1;
-        return $flip * ($degrees + $minutes / 60 + $seconds / 3600);
-    }
-
-    private function gps2Num($coordPart)
-    {
-        $parts = explode('/', $coordPart);
-        if (count($parts) <= 0)
-            return 0;
-        if (count($parts) == 1)
-            return $parts[0];
-        return floatval($parts[0]) / floatval($parts[1]);
     }
 
     public function showScene($id)
@@ -780,5 +547,4 @@ class EditorController extends Controller
             ])
         ]);
     }
-
 }

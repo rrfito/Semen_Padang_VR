@@ -55,6 +55,15 @@ class Area extends Model
         return $query->where('is_container', false);
     }
 
+    public function scopeAccessibleBy($query, $user)
+    {
+        $isPegawai = $user && ($user->role === 'pegawai' || $user->role === 'admin');
+        if (!$isPegawai) {
+            return $query->where('is_restricted', false);
+        }
+        return $query;
+    }
+
     // ACCESSORS
     public function getTypeLabelAttribute()
     {
