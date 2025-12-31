@@ -1,0 +1,28 @@
+
+> build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1343 modules transformed.
+[31mx[39m Build failed in 6.66s
+[31merror during build:
+[31mresources/js/Layouts/Editor/EditorLayout.jsx (6:7): "default" is not exported by "resources/js/Hooks/useEditorState.js", imported by "resources/js/Layouts/Editor/EditorLayout.jsx".[31m
+file: [36mE:/Tugas/Vscode/semen-padang-vr/resources/js/Layouts/Editor/EditorLayout.jsx:6:7[31m
+[33m
+4: // Context & Hooks
+5: import { useEditor } from "@/Contexts/EditorContext";
+6: import useEditorState from "@/Hooks/useEditorState";
+          ^
+7: import useEditorApi from "@/Hooks/useEditorApi";
+[31m
+    at getRollupError (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:16956:16)
+    at Module.traceVariable (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:17412:29)
+    at ModuleScope.findVariable (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:15076:39)
+    at FunctionScope.findVariable (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at FunctionBodyScope.findVariable (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at Identifier.bind (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:5423:40)
+    at CallExpression.bind (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:2813:23)
+    at CallExpression.bind (file:///E:/Tugas/Vscode/semen-padang-vr/node_modules/rollup/dist/es/shared/node-entry.js:12123:15)[39m

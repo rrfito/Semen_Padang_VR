@@ -103,7 +103,7 @@ class TourController extends Controller
         return Inertia::render('Tour/Dashboard', [
             'menuData' => $menuQuery->get(),
             'markers' => $markers,
-            'user' => $user ? ['name' => $user->name] : null
+            'user' => $user ? ['name' => $user->name, 'role' => $user->role] : null
         ]);
     }
 

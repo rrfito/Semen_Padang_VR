@@ -45,13 +45,25 @@ const FIELD_LABELS = {
 const formatValue = (field, value) => {
     if (value === null || value === undefined) return "(kosong)";
 
+    // 1. Angle Fields (Radians -> Degrees)
+    // Convert 2.48 rad -> ~142 deg
+    if (["yaw", "pitch", "heading"].includes(field)) {
+        // Ensure it's a number
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+
+        // Conversion: rad * (180/PI)
+        const deg = num * (180 / Math.PI);
+        return deg.toFixed(1) + "°";
+    }
+
     // Boolean values
     if (
         typeof value === "boolean" ||
         value === "true" ||
         value === "false" ||
-        value === 0 ||
-        value === 1
+        (value === 0 && !["yaw", "pitch", "heading"].includes(field)) || // Exclude angles from this check if somehow code falls through
+        (value === 1 && !["yaw", "pitch", "heading"].includes(field))
     ) {
         if (field === "is_restricted") {
             return value ? "🔒 Terbatas" : "🌐 Publik";

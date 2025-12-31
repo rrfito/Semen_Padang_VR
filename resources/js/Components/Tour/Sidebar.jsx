@@ -364,7 +364,7 @@ export default function Sidebar({
                                     </span>
                                     <span className="text-xs text-green-600 font-medium flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                        Pegawai
+                                        {user.role}
                                     </span>
                                 </div>
                             </div>
