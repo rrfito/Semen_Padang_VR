@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Marzipano from "marzipano";
 import ToolbarButton from "@/Components/Editor/ToolbarButton";
+import { VIEWER_CONFIG } from "@/Config/ViewerConfig";
 
 export default function SceneView({
     scene,
@@ -79,7 +80,9 @@ export default function SceneView({
                 }
 
                 // console.log("SceneView: Creating Viewer...");
-                const viewer = new Marzipano.Viewer(panoRef.current);
+                const viewer = new Marzipano.Viewer(panoRef.current, {
+                    controls: VIEWER_CONFIG.CONTROLS,
+                });
 
                 // CRITICAL: Log domElement
                 // CRITICAL: Log domElement
@@ -106,10 +109,10 @@ export default function SceneView({
 
                 // Create View
                 const geometry = new Marzipano.EquirectGeometry([
-                    { width: 4000 },
+                    { width: VIEWER_CONFIG.LIMITS.MAX_RESOLUTION },
                 ]);
                 const limiter = Marzipano.RectilinearView.limit.traditional(
-                    1024,
+                    VIEWER_CONFIG.LIMITS.MAX_RESOLUTION,
                     (100 * Math.PI) / 180
                 );
 

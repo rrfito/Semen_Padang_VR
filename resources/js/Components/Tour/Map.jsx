@@ -14,21 +14,25 @@ import {
 import MapLayerControl from "./MapLayerControl";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { MAP_CONFIG } from "@/Config/MapConfig";
 
 // Fix Icon Leaflet di React
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+const { STYLES, TILES, MIN_ZOOM, MAX_ZOOM, MAX_BOUNDS } = MAP_CONFIG;
+
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconSize: STYLES.MARKER.ICON_SIZE,
+    iconAnchor: STYLES.MARKER.ICON_ANCHOR,
 });
 let RedIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconSize: STYLES.MARKER.ICON_SIZE,
+    iconAnchor: STYLES.MARKER.ICON_ANCHOR,
     className: "marker-red",
 });
 
@@ -41,7 +45,9 @@ function MapUpdater({ center, zoom }) {
         if (center) {
             // Use provided zoom if available, otherwise default to current or 18
             const targetZoom = zoom || 18;
-            map.flyTo(center, targetZoom, { duration: 1.5 });
+            map.flyTo(center, targetZoom, {
+                duration: STYLES.ANIMATION_DURATION,
+            });
         }
     }, [center, zoom]);
     return null;
@@ -87,6 +93,9 @@ export default function Map({
                 style={{ height: "100%", width: "100%" }}
                 zoomControl={false}
                 attributionControl={false}
+                minZoom={MIN_ZOOM}
+                maxBounds={MAX_BOUNDS}
+                maxBoundsViscosity={1.0}
             >
                 <ZoomHandler setZoom={setZoomLevel} />
 
@@ -98,9 +107,9 @@ export default function Map({
                             name="Satelit"
                         >
                             <TileLayer
-                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                                attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-                                maxZoom={19}
+                                url={TILES.SATELLITE.URL}
+                                attribution={TILES.SATELLITE.ATTRIBUTION}
+                                maxZoom={MAX_ZOOM}
                             />
                         </LayersControl.BaseLayer>
                         <LayersControl.BaseLayer
@@ -108,8 +117,8 @@ export default function Map({
                             name="Peta Bersih"
                         >
                             <TileLayer
-                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                url={TILES.CLEAN.URL}
+                                attribution={TILES.CLEAN.ATTRIBUTION}
                             />
                         </LayersControl.BaseLayer>
                     </LayersControl>
@@ -118,14 +127,14 @@ export default function Map({
                     <>
                         {currentLayer === "satellite" ? (
                             <TileLayer
-                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                                attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-                                maxZoom={19}
+                                url={TILES.SATELLITE.URL}
+                                attribution={TILES.SATELLITE.ATTRIBUTION}
+                                maxZoom={MAX_ZOOM}
                             />
                         ) : (
                             <TileLayer
-                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                url={TILES.CLEAN.URL}
+                                attribution={TILES.CLEAN.ATTRIBUTION}
                             />
                         )}
                     </>
@@ -248,10 +257,10 @@ export default function Map({
                                         p.lng,
                                     ])}
                                     pathOptions={{
-                                        color: "#3b82f6",
-                                        weight: 4,
-                                        opacity: 0.6,
-                                        dashArray: "10, 10",
+                                        color: STYLES.POLYLINE.COLOR,
+                                        weight: STYLES.POLYLINE.WEIGHT,
+                                        opacity: STYLES.POLYLINE.OPACITY,
+                                        dashArray: STYLES.POLYLINE.DASH_ARRAY,
                                     }}
                                 />
 
@@ -260,10 +269,10 @@ export default function Map({
                                     <CircleMarker
                                         key={`node-${node.id}`}
                                         center={[node.lat, node.lng]}
-                                        radius={6}
+                                        radius={STYLES.NODE.RADIUS}
                                         pathOptions={{
-                                            color: "#fff",
-                                            fillColor: "#3b82f6",
+                                            color: STYLES.NODE.COLOR,
+                                            fillColor: STYLES.NODE.FILL_COLOR,
                                             fillOpacity: 1,
                                             weight: 2,
                                         }}

@@ -4,6 +4,7 @@ import ConformModal from "@/Components/Editor/ConfirmModal";
 import axios from "axios";
 import { useTheme } from "@/Contexts/ThemeContext";
 import { router } from "@inertiajs/react";
+import { APP_DEFAULTS } from "@/Config/AppDefaults";
 
 export default function Header({
     breadcrumbs = [],
@@ -40,13 +41,13 @@ export default function Header({
             {/* Logo Section */}
             <div className="flex items-center gap-4">
                 <img
-                    src="/image/LOGO PT SEMEN PADANG.png"
-                    alt="Semen Padang Logo"
+                    src={APP_DEFAULTS.LOGO_URL}
+                    alt={`${APP_DEFAULTS.NAME} Logo`}
                     className="h-10 w-auto object-contain"
                 />
                 <div>
                     <h2 className="text-sm font-bold leading-tight tracking-wide uppercase text-slate-500 dark:text-slate-400">
-                        PT Semen Padang
+                        {APP_DEFAULTS.NAME}
                     </h2>
                     <h1 className="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
                         Admin Street View

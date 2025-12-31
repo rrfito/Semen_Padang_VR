@@ -4,12 +4,11 @@ import Sidebar from "@/Components/Tour/Sidebar";
 import SecondarySidebar from "@/Components/Tour/SecondarySidebar";
 import Map from "@/Components/Tour/Map";
 import { FaBars } from "react-icons/fa";
+import { MAP_CONFIG } from "@/Config/MapConfig";
 
 export default function Dashboard({ menuData, markers, user }) {
     // Default Center: Pabrik Indarung
-    const [mapCenter, setMapCenter] = useState([
-        -0.9532459140793406, 100.46803723241885,
-    ]);
+    const [mapCenter, setMapCenter] = useState(MAP_CONFIG.DEFAULT_CENTER);
     const [selectedArea, setSelectedArea] = useState(null);
     const [showPolyline, setShowPolyline] = useState(false);
 

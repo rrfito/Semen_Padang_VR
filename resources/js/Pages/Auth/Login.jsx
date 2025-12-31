@@ -6,6 +6,7 @@ import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
+import { APP_DEFAULTS } from "@/Config/AppDefaults";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -45,8 +46,8 @@ export default function Login({ status, canResetPassword }) {
                 <div className="relative z-10 flex flex-col justify-between p-16 w-full h-full text-white">
                     <div>
                         <img
-                            src="/image/LOGO PT SEMEN PADANG.png"
-                            alt="Semen Padang"
+                            src={APP_DEFAULTS.LOGO_URL}
+                            alt={APP_DEFAULTS.NAME}
                             className="h-20 w-auto drop-shadow-2xl"
                         />
                     </div>
@@ -56,13 +57,12 @@ export default function Login({ status, canResetPassword }) {
                             <span className="text-red-600">Tur Virtual</span>
                         </h1>
                         <p className="text-xl text-gray-200 max-w-lg drop-shadow-md">
-                            Jelajahi setiap sudut fasilitas Semen Padang dengan
-                            pengalaman 360° yang imersif dan detail.
+                            Jelajahi setiap sudut fasilitas {APP_DEFAULTS.NAME}{" "}
+                            dengan pengalaman 360° yang imersif dan detail.
                         </p>
                     </div>
                     <div className="text-sm text-gray-400">
-                        &copy; {new Date().getFullYear()} PT Semen Padang. All
-                        rights reserved.
+                        {APP_DEFAULTS.COPYRIGHT}
                     </div>
                 </div>
             </div>
@@ -86,8 +86,8 @@ export default function Login({ status, canResetPassword }) {
                     <div className="text-center lg:text-left">
                         {/* Mobile Logo */}
                         <img
-                            src="/image/LOGO PT SEMEN PADANG.png"
-                            alt="Semen Padang"
+                            src={APP_DEFAULTS.LOGO_URL}
+                            alt={APP_DEFAULTS.NAME}
                             className="h-12 w-auto mx-auto lg:hidden mb-6 drop-shadow-lg"
                         />
 

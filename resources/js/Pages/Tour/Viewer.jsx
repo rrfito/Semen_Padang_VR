@@ -3,6 +3,7 @@ import { Head, Link, router } from "@inertiajs/react";
 import Marzipano from "marzipano";
 import { FaArrowLeft } from "react-icons/fa";
 import Minimap from "@/Components/Tour/Minimap";
+import { VIEWER_CONFIG } from "@/Config/ViewerConfig";
 
 export default function Viewer({ scene, initial_heading }) {
     const panoRef = useRef(null);
@@ -12,12 +13,14 @@ export default function Viewer({ scene, initial_heading }) {
 
         // 1. Init Marzipano
         const viewer = new Marzipano.Viewer(panoRef.current, {
-            controls: { mouseViewMode: "drag" },
+            controls: VIEWER_CONFIG.CONTROLS,
         });
 
         // 2. Load Source
         const source = Marzipano.ImageUrlSource.fromString(scene.image_url);
-        const geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
+        const geometry = new Marzipano.EquirectGeometry([
+            { width: VIEWER_CONFIG.LIMITS.MAX_RESOLUTION },
+        ]);
 
         // === HEADING PRESERVATION LOGIC ===
         // Ada 2 heading:
@@ -47,7 +50,7 @@ export default function Viewer({ scene, initial_heading }) {
                 fov: Math.PI / 4,
             },
             Marzipano.RectilinearView.limit.traditional(
-                1024,
+                VIEWER_CONFIG.LIMITS.MAX_RESOLUTION,
                 (100 * Math.PI) / 180
             )
         );
@@ -148,7 +151,10 @@ export default function Viewer({ scene, initial_heading }) {
         let debounceTimer;
         const onBoundsChange = () => {
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(updateUrlHeading, 300);
+            debounceTimer = setTimeout(
+                updateUrlHeading,
+                VIEWER_CONFIG.ANIMATION.DEBOUNCE_MS
+            );
         };
 
         view.addEventListener("change", onBoundsChange);

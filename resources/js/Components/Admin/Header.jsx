@@ -1,6 +1,7 @@
 import React from "react";
 import { usePage } from "@inertiajs/react";
 import { useTheme } from "@/Contexts/ThemeContext";
+import { APP_DEFAULTS } from "@/Config/AppDefaults";
 
 export default function Header({ title = "Street View Admin" }) {
     const { auth } = usePage().props;
@@ -19,13 +20,13 @@ export default function Header({ title = "Street View Admin" }) {
                 <div className="flex items-center gap-4">
                     {/* Optional: Add Logo here if needed to match Visual Editor exactly */}
                     <img
-                        src="/image/LOGO PT SEMEN PADANG.png"
+                        src={APP_DEFAULTS.LOGO_URL}
                         alt="Logo"
                         className="h-8 w-auto object-contain"
                     />
                     <div>
                         <h2 className="text-sm font-bold leading-tight tracking-wide uppercase text-slate-500 dark:text-slate-400">
-                            PT Semen Padang
+                            {APP_DEFAULTS.NAME}
                         </h2>
                         <h1 className="theme-text text-xl font-bold leading-tight tracking-[-0.015em]">
                             {title}

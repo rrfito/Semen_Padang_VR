@@ -24,6 +24,7 @@ import NotificationModal from "@/Components/Editor/NotificationModal";
 
 // Theme
 import { ThemeProvider } from "@/Contexts/ThemeContext";
+import { EDITOR_CONFIG } from "@/Config/EditorConfig";
 
 export default function VisualEditor({
     hierarchy: initialHierarchy,
@@ -405,7 +406,7 @@ export default function VisualEditor({
                         "error"
                     );
                 }
-            }, 1000); // 1 second debounce
+            }, EDITOR_CONFIG.BEHAVIOR.AUTO_SAVE_MS);
         } else if (type === "scene") {
             // Auto-save for scenes
             if (window.sceneSaveTimeout) {
@@ -435,7 +436,7 @@ export default function VisualEditor({
                         "error"
                     );
                 }
-            }, 1000); // 1 second debounce
+            }, EDITOR_CONFIG.BEHAVIOR.AUTO_SAVE_MS);
         }
     };
 

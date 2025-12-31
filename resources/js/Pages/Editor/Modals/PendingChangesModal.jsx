@@ -4,42 +4,10 @@ import ConfirmModal from "@/Components/Editor/ConfirmModal";
 import NotificationModal from "@/Components/Editor/NotificationModal";
 
 // Field name translations for admin-friendly display
-const FIELD_LABELS = {
-    // Common fields
-    name: "Nama",
-    description: "Deskripsi",
-    slug: "URL Slug",
+import { EDITOR_CONFIG } from "@/Config/EditorConfig";
 
-    // Area fields
-    parent_id: "Parent Area",
-    level: "Level Hierarki",
-    priority: "Urutan Prioritas",
-    content_type: "Tipe Konten",
-    is_restricted: "Status Akses",
-
-    // Location fields
-    lat: "Latitude (Koordinat)",
-    latitude: "Latitude (Koordinat)",
-    lng: "Longitude (Koordinat)",
-    longitude: "Longitude (Koordinat)",
-
-    // Scene fields
-    area_id: "Area",
-    image_path: "Path Gambar",
-    heading: "Arah Pandang",
-    fov: "Field of View",
-    can_be_gateway: "Bisa Jadi Gerbang",
-
-    // Link fields
-    source_scene_id: "Scene Asal",
-    target_scene_id: "Scene Tujuan",
-    yaw: "Yaw (Rotasi)",
-    pitch: "Pitch (Elevasi)",
-
-    // Timestamps
-    created_at: "Tanggal Dibuat",
-    updated_at: "Tanggal Diubah",
-};
+// Field name translations for admin-friendly display
+const FIELD_LABELS = EDITOR_CONFIG.STATIC_LABELS;
 
 // Format values for better readability
 const formatValue = (field, value) => {

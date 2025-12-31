@@ -10,6 +10,7 @@ import {
     FaCamera,
 } from "react-icons/fa";
 import { Link, router } from "@inertiajs/react";
+import { APP_DEFAULTS } from "@/Config/AppDefaults";
 
 export default function Sidebar({
     menuData,
@@ -138,16 +139,16 @@ export default function Sidebar({
                 <div className="p-6 border-b border-gray-100 bg-white shrink-0">
                     <h1 className="text-xl font-bold text-gray-900 flex items-center gap-3">
                         <img
-                            src="/image/LOGO PT SEMEN PADANG.png"
-                            alt="Semen Padang Logo"
+                            src={APP_DEFAULTS.LOGO_URL}
+                            alt={`${APP_DEFAULTS.NAME} Logo`}
                             className="h-10 w-auto object-contain"
                         />
                         <div className="flex flex-col">
                             <span className="leading-none tracking-tight">
-                                SEMEN PADANG
+                                {APP_DEFAULTS.NAME}
                             </span>
                             <span className="text-[10px] text-gray-500 font-medium tracking-widest mt-1">
-                                VIRTUAL TOUR
+                                {APP_DEFAULTS.TAGLINE.toUpperCase()}
                             </span>
                         </div>
                     </h1>

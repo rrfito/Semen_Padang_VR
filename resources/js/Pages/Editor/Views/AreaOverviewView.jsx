@@ -9,6 +9,7 @@ import {
     useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import { MAP_CONFIG } from "@/Config/MapConfig";
 
 // Fix Leaflet Icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -52,8 +53,8 @@ export default function AreaOverviewView({
     const isLevel1 = area.level === 1;
 
     // Default Map Center (Semen Padang)
-    const mapCenterLat = -0.9504728826755381;
-    const mapCenterLng = 100.46354473026528;
+    const mapCenterLat = MAP_CONFIG.DEFAULT_CENTER[0];
+    const mapCenterLng = MAP_CONFIG.DEFAULT_CENTER[1];
 
     // Current Area Location (Check if set)
     // We treat 0,0 or null as "Not Set"
@@ -162,10 +163,7 @@ export default function AreaOverviewView({
                         attributionControl={false}
                     >
                         {/* Satellite Base Layer */}
-                        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-
-                        {/* Labels Overlay */}
-                        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png" />
+                        <TileLayer url={MAP_CONFIG.TILES.SATELLITE.URL} />
 
                         <LocationPicker
                             isActive={isPickingMode}
