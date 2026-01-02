@@ -9,7 +9,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [executing, setExecuting] = useState(false);
     const [replaceMode, setReplaceMode] = useState(false);
-    const [linkAllAreas, setLinkAllAreas] = useState(false);
+    // const [linkAllAreas, setLinkAllAreas] = useState(false); // Removed feature
     const [radius, setRadius] = useState(5); // Default 100 meters
 
     // Notification modals
@@ -39,7 +39,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             });
             setLoading(false);
         }
-    }, [isOpen, replaceMode, linkAllAreas]); // Removed radius - no auto refresh on radius change
+    }, [isOpen, replaceMode]); // Removed radius - no auto refresh on radius change
 
     const fetchPreview = async () => {
         setLoading(true);
@@ -47,7 +47,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             const response = await axios.post(
                 "/admin/visual-editor/api/autolink/execute",
                 {
-                    area_id: linkAllAreas ? null : area?.id,
+                    area_id: area?.id, // Always scoped to current area
                     replace_existing: replaceMode,
                     preview_only: true,
                     radius: radius,
@@ -86,7 +86,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
             const response = await axios.post(
                 "/admin/visual-editor/api/autolink/execute",
                 {
-                    area_id: linkAllAreas ? null : area?.id,
+                    area_id: area?.id, // Always scoped to current area
                     replace_existing: replaceMode,
                     preview_only: false,
                     radius: radius,
@@ -175,31 +175,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                         </div>
                     ) : preview ? (
                         <>
-                            {/* Universal Toggle */}
-                            <div className="theme-alert-info">
-                                <label className="flex items-start gap-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={linkAllAreas}
-                                        onChange={(e) =>
-                                            setLinkAllAreas(e.target.checked)
-                                        }
-                                        className="mt-0.5 w-4 h-4 rounded border-gray-400 dark:border-gray-600 text-primary focus:ring-primary"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="font-bold theme-text text-sm">
-                                            Lakukan Link di semua area
-                                        </div>
-                                        <div className="text-xs theme-text-muted mt-1">
-                                            {linkAllAreas
-                                                ? `Proses semua area di database (mode Universal)`
-                                                : `Proses hanya "${
-                                                      area?.name ||
-                                                      "area terpilih"
-                                                  }" dan turunannya (mode Rekursif)`}
-                                        </div>
-                                    </div>
-                                </label>
+                            {/* GPS Accuracy Warning */}
+                            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 border border-blue-200 dark:border-blue-800">
+                                <span className="text-xl">ℹ️</span>
+                                <div className="text-sm leading-relaxed">
+                                    <strong>Penting:</strong> Pastikan semua
+                                    scene memiliki GPS dan posisinya akurat.
+                                    Perbedaan posisi sekitar 1-5 meter bisa
+                                    membuat posisi link berbeda jauh.
+                                </div>
                             </div>
 
                             {/* Mode Toggle */}

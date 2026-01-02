@@ -70,14 +70,6 @@ export default function ContentIntegrityStatus({ stats }) {
 
             <div className="flex-1 space-y-3">
                 <MetricItem
-                    label="Draf Tidak Cocok"
-                    count={draftMismatch}
-                    icon={FaSync}
-                    colorClass="info"
-                    helpText="Perubahan menunggu publikasi"
-                />
-
-                <MetricItem
                     label="Scene Terisolasi"
                     count={orphanScenes}
                     icon={FaExclamationTriangle}
@@ -103,7 +95,7 @@ export default function ContentIntegrityStatus({ stats }) {
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 text-center">
-                Diagnostik Kesehatan Sistem • Hanya Baca
+                Diagnostik Kesehatan Sistem
             </div>
         </div>
     );

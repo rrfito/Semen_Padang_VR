@@ -100,7 +100,7 @@ class TourController extends Controller
             ->filter() // Remove nulls
             ->values();
 
-        return Inertia::render('Tour/Dashboard', [
+        return Inertia::render('Tour/Index', [
             'menuData' => $menuQuery->get(),
             'markers' => $markers,
             'user' => $user ? ['name' => $user->name, 'role' => $user->role] : null

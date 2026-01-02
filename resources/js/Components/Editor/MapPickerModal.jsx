@@ -1,88 +1,106 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { MAP_CONFIG } from "@/Config/MapConfig";
+
+const { STYLES, TILES, MIN_ZOOM, MAX_ZOOM, MAX_BOUNDS, DEFAULT_CENTER } =
+    MAP_CONFIG;
 
 export default function MapPickerModal({
     isOpen,
     onClose,
-    initialLat = -0.9492,
-    initialLng = 100.3705,
+    initialLat,
+    initialLng,
     onConfirm,
 }) {
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const markerRef = useRef(null);
+
+    // Use passed props, or fallback to Config Default
     const [selectedCoords, setSelectedCoords] = useState({
-        lat: parseFloat(initialLat) || -0.9492,
-        lng: parseFloat(initialLng) || 100.3705,
+        lat: parseFloat(initialLat) || DEFAULT_CENTER[0],
+        lng: parseFloat(initialLng) || DEFAULT_CENTER[1],
     });
 
     useEffect(() => {
-        if (!isOpen || !mapRef.current || mapInstanceRef.current) return;
+        if (!isOpen) return;
 
-        // Initialize map
-        const map = L.map(mapRef.current).setView(
-            [selectedCoords.lat, selectedCoords.lng],
-            18
-        );
+        // Wait for portal to mount and ref to be available
+        const timer = setTimeout(() => {
+            if (!mapRef.current || mapInstanceRef.current) return;
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19,
-        }).addTo(map);
+            // Initialize map
+            const map = L.map(mapRef.current, {
+                minZoom: MIN_ZOOM,
+                maxZoom: MAX_ZOOM,
+                maxBounds: MAX_BOUNDS,
+                maxBoundsViscosity: 1.0,
+                attributionControl: false, // Hide Leaflet footer
+                zoomControl: false, // Hide Zoom buttons
+            }).setView([selectedCoords.lat, selectedCoords.lng], 18);
 
-        // Custom marker icon
-        const markerIcon = L.divIcon({
-            className: "custom-marker",
-            html: `
-                <div style="width: 40px; height: 40px; position: relative;">
-                    <div style="
-                        width: 20px; 
-                        height: 20px; 
-                        background: #3b82f6; 
-                        border: 3px solid white; 
-                        border-radius: 50%; 
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                    "></div>
-                </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20],
-        });
+            L.tileLayer(TILES.SATELLITE.URL, {
+                maxZoom: MAX_ZOOM,
+            }).addTo(map);
 
-        // Add draggable marker
-        const marker = L.marker([selectedCoords.lat, selectedCoords.lng], {
-            icon: markerIcon,
-            draggable: true,
-        }).addTo(map);
-
-        // Update coordinates when marker is dragged
-        marker.on("dragend", function (e) {
-            const pos = e.target.getLatLng();
-            setSelectedCoords({
-                lat: parseFloat(pos.lat),
-                lng: parseFloat(pos.lng),
+            // Custom marker icon
+            const markerIcon = L.divIcon({
+                className: "custom-marker",
+                html: `
+                    <div style="width: 40px; height: 40px; position: relative;">
+                        <div style="
+                            width: 20px; 
+                            height: 20px; 
+                            background: #3b82f6; 
+                            border: 3px solid white; 
+                            border-radius: 50%; 
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        "></div>
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
             });
-        });
 
-        // Click to place marker
-        map.on("click", function (e) {
-            marker.setLatLng(e.latlng);
-            setSelectedCoords({
-                lat: parseFloat(e.latlng.lat),
-                lng: parseFloat(e.latlng.lng),
+            // Add draggable marker
+            const marker = L.marker([selectedCoords.lat, selectedCoords.lng], {
+                icon: markerIcon,
+                draggable: true,
+            }).addTo(map);
+
+            // Update coordinates when marker is dragged
+            marker.on("dragend", function (e) {
+                const pos = e.target.getLatLng();
+                setSelectedCoords({
+                    lat: parseFloat(pos.lat),
+                    lng: parseFloat(pos.lng),
+                });
             });
-        });
 
-        mapInstanceRef.current = map;
-        markerRef.current = marker;
+            // Click to place marker
+            map.on("click", function (e) {
+                marker.setLatLng(e.latlng);
+                setSelectedCoords({
+                    lat: parseFloat(e.latlng.lat),
+                    lng: parseFloat(e.latlng.lng),
+                });
+            });
 
-        // Cleanup
+            mapInstanceRef.current = map;
+            markerRef.current = marker;
+        }, 100); // Small delay to ensure DOM is ready inside Portal
+
+        return () => clearTimeout(timer);
+    }, [isOpen]); // Only run on open
+
+    // Cleanup effect separate from initialization
+    useEffect(() => {
         return () => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
@@ -94,8 +112,8 @@ export default function MapPickerModal({
     // Update marker when initial coords change
     useEffect(() => {
         if (mapInstanceRef.current && markerRef.current) {
-            const lat = parseFloat(initialLat) || -0.9492;
-            const lng = parseFloat(initialLng) || 100.3705;
+            const lat = parseFloat(initialLat) || DEFAULT_CENTER[0];
+            const lng = parseFloat(initialLng) || DEFAULT_CENTER[1];
             markerRef.current.setLatLng([lat, lng]);
             mapInstanceRef.current.setView(
                 [lat, lng],
@@ -112,22 +130,22 @@ export default function MapPickerModal({
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <>
-            {/* Backdrop */}
+            {/* Backdrop in Portal - ensure high z-index at body level */}
             <div
-                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998] transition-opacity"
+                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[10049] transition-opacity"
                 onClick={onClose}
             />
 
-            {/* Modal */}
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
+            {/* Modal in Portal */}
+            <div className="fixed inset-0 z-[10050] flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
                 <div
-                    className="bg-surface-dark border border-border-dark rounded-2xl shadow-2xl w-full max-w-3xl pointer-events-auto overflow-hidden my-8"
+                    className="theme-modal w-full max-w-3xl pointer-events-auto overflow-hidden my-8"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-border-dark bg-[#15202b]">
+                    <div className="theme-modal-header">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="size-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -136,10 +154,10 @@ export default function MapPickerModal({
                                     </span>
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-white">
+                                    <h2 className="text-lg font-bold theme-text">
                                         Pilih Lokasi di Peta
                                     </h2>
-                                    <p className="text-xs text-slate-500 mt-0.5">
+                                    <p className="text-xs theme-text-muted mt-0.5">
                                         Klik atau seret penanda untuk mengatur
                                         koordinat
                                     </p>
@@ -147,7 +165,7 @@ export default function MapPickerModal({
                             </div>
                             <button
                                 onClick={onClose}
-                                className="size-8 flex items-center justify-center rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+                                className="size-8 flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10 theme-text-secondary transition-colors"
                             >
                                 <span className="material-symbols-outlined text-[20px]">
                                     close
@@ -161,20 +179,24 @@ export default function MapPickerModal({
                         <div ref={mapRef} className="w-full h-[500px]" />
 
                         {/* Coordinate Display Overlay */}
-                        <div className="absolute top-4 left-4 z-[1000] bg-black/80 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-3 shadow-xl">
-                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        <div className="absolute top-4 left-4 z-[1000] bg-white/90 dark:bg-black/80 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 shadow-xl">
+                            <div className="text-xs font-bold theme-text-secondary uppercase tracking-wider mb-1.5">
                                 Koordinat Terpilih
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 text-sm font-mono">
-                                    <span className="text-slate-500">Lat:</span>
-                                    <span className="text-white font-bold">
+                                    <span className="theme-text-muted">
+                                        Lat:
+                                    </span>
+                                    <span className="theme-text font-bold">
                                         {selectedCoords.lat.toFixed(6)}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm font-mono">
-                                    <span className="text-slate-500">Lng:</span>
-                                    <span className="text-white font-bold">
+                                    <span className="theme-text-muted">
+                                        Lng:
+                                    </span>
+                                    <span className="theme-text font-bold">
                                         {selectedCoords.lng.toFixed(6)}
                                     </span>
                                 </div>
@@ -182,8 +204,8 @@ export default function MapPickerModal({
                         </div>
 
                         {/* Instructions Overlay */}
-                        <div className="absolute bottom-4 right-4 z-[1000] bg-black/80 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-2 shadow-xl">
-                            <div className="flex items-center gap-2 text-xs text-slate-300">
+                        <div className="absolute bottom-4 right-4 z-[1000] bg-white/90 dark:bg-black/80 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 shadow-xl">
+                            <div className="flex items-center gap-2 text-xs theme-text-muted">
                                 <span className="material-symbols-outlined text-[16px] text-primary">
                                     info
                                 </span>
@@ -196,16 +218,16 @@ export default function MapPickerModal({
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="px-6 py-4 border-t border-border-dark bg-[#111a22] flex items-center justify-end gap-3">
+                    <div className="theme-modal-footer flex items-center justify-end gap-3">
                         <button
                             onClick={onClose}
-                            className="px-4 h-10 bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm rounded-lg transition-colors"
+                            className="theme-btn-danger px-6"
                         >
                             Batal
                         </button>
                         <button
                             onClick={handleConfirm}
-                            className="px-6 h-10 bg-primary hover:bg-primary/90 text-white font-bold text-sm rounded-lg transition-colors flex items-center gap-2"
+                            className="theme-btn-primary flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-[18px]">
                                 check
@@ -215,6 +237,7 @@ export default function MapPickerModal({
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }

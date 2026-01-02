@@ -550,7 +550,7 @@ export default function Sidebar({
                     <button
                         onClick={onCreateArea}
                         disabled={selection?.type === "scene"}
-                        className="flex-1 theme-btn-action"
+                        className="flex-1 theme-btn-action-primary"
                         title={
                             selection?.type === "scene"
                                 ? "Tidak dapat menambahkan area ke scene (Pilih area atau root terlebih dahulu)"
@@ -566,7 +566,7 @@ export default function Sidebar({
                 <button
                     onClick={() => onAutoLink?.(selection)}
                     disabled={!selection || selection?.type === "scene"}
-                    className="w-full theme-btn-action"
+                    className="w-full theme-btn-action-primary"
                     title={
                         !selection
                             ? "Pilih area terlebih dahulu"

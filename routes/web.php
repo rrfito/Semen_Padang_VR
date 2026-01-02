@@ -19,10 +19,6 @@ Route::get('/', [TourController::class, 'index'])->name('tour.index');
 // 2. HALAMAN VIRTUAL TOUR (360 Viewer)
 Route::get('/tour/{scene}', [TourController::class, 'show'])->name('tour.show');
 
-// 3. DASHBOARD USER (Pegawai / User Biasa)
-Route::get('/dashboard', [\App\Http\Controllers\UserDashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
 // 4. PROFILE MANAGEMENT (Bawaan Breeze)
 Route::middleware('auth')->group(function () {

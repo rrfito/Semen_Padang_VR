@@ -188,7 +188,7 @@ export default function CreateAreaModal({
                                     <p className="text-sm theme-text-secondary mt-2">
                                         Gunakan tombol{" "}
                                         <span className="theme-text font-medium">
-                                            "Add Scene"
+                                            "Tambah Scene"
                                         </span>{" "}
                                         untuk menambahkan foto.
                                     </p>
@@ -244,13 +244,13 @@ export default function CreateAreaModal({
                                                     }
                                                 />
                                                 <span className="text-xs font-bold uppercase">
-                                                    Kelompok Area
+                                                    Area Zona
                                                 </span>
                                             </div>
                                             <p className="text-[10px] leading-snug opacity-80">
                                                 Pilih ini jika area ini memiliki
-                                                ruangan-ruangan lain di dalamnya
-                                                (Contoh: Gedung, Lantai).
+                                                area-area lain di dalamnya
+                                                (Contoh: Lantai, Zona).
                                             </p>
                                         </div>
 
@@ -274,7 +274,7 @@ export default function CreateAreaModal({
                                                     }
                                                 />
                                                 <span className="text-xs font-bold uppercase">
-                                                    Ruangan Foto
+                                                    Area Ruangan
                                                 </span>
                                             </div>
                                             <p className="text-[10px] leading-snug opacity-80">

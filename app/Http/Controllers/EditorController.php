@@ -108,6 +108,7 @@ class EditorController extends Controller
             'id' => $draft->id,
             'published_id' => $draft->published_id,
             'name' => $draft->name,
+            'description' => $draft->description,
             'level' => $draft->level,
             'is_container' => (bool) $draft->is_container,
             'type' => 'area',
@@ -154,6 +155,7 @@ class EditorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:area_drafts,id',
             'level' => 'sometimes|integer',
             'is_container' => 'boolean',
@@ -170,6 +172,7 @@ class EditorController extends Controller
 
         $area = AreaDraft::create([
             'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
             'parent_id' => $parentId,
             'level' => $request->level ?? $level,
             'is_container' => $validated['is_container'] ?? false,

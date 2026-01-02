@@ -117,56 +117,93 @@ class AutoLinkService
             $navCount = 0;
             $gatewayCount = 0;
 
+
+            // GROUP BY SOURCE SCENE
             foreach ($scenes as $source) {
+                // Binning structures for this source
+                // 8 Sectors: 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW
+                // We keep track of the BEST candidate (Min Distance) per sector
+                // Structure: [sector_index => ['target' => $target, 'dist' => $dist, 'bearing' => $k]]
+                $sectorBests = [];
+
                 foreach ($scenes as $target) {
                     if ($source->id === $target->id)
                         continue;
 
-                    // Distance Calc (Haversine)
+                    // 1. Distance Calc (Haversine)
                     $dist = $this->geoService->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
 
-                    if ($dist <= $radius) {
-                        // Determine Type
-                        $type = ($source->area_id === $target->area_id) ? 'navigasi' : 'gateway';
-
-                        // Check Gateway Logic
-                        if ($type === 'gateway') {
-                            if (!$source->can_be_gateway || !$target->can_be_gateway) {
-                                continue;
-                            }
-                        }
-
-                        // Check if link exists (if not replacing)
-                        if (!$replaceExisting) {
-                            $exists = LinkDraft::where('source_scene_id', $source->id)
-                                ->where('target_scene_id', $target->id)
-                                ->where('marked_for_deletion', false)
-                                ->exists();
-                            if ($exists)
-                                continue;
-                        }
-
-                        // Calculate Yaw (Bearing)
-                        // Desired View Yaw = Target Bearing - Source Image Heading
-                        $bearing = deg2rad($this->geoService->calculateBearing($source->lat, $source->lng, $target->lat, $target->lng));
-                        $sourceHeading = deg2rad($source->heading ?? 0);
-                        $relativeYaw = $bearing - $sourceHeading;
-
-                        LinkDraft::create([
-                            'source_scene_id' => $source->id,
-                            'target_scene_id' => $target->id,
-                            'type' => $type,
-                            'yaw' => $relativeYaw,
-                            'pitch' => 0,
-                            'distance' => $dist
-                        ]);
-
-                        $createdCount++;
-                        if ($type === 'navigasi')
-                            $navCount++;
-                        else
-                            $gatewayCount++;
+                    // 2. Radius & Min Distance Check
+                    if ($dist > $radius || $dist < 1.5) { // Skip if too far or too close (< 1.5m)
+                        continue;
                     }
+
+                    // 3. Determine Type
+                    $type = ($source->area_id === $target->area_id) ? 'navigasi' : 'gateway';
+
+                    // 4. Gateway Logic Check
+                    if ($type === 'gateway') {
+                        if (!$source->can_be_gateway || !$target->can_be_gateway) {
+                            continue;
+                        }
+                    }
+
+                    // 5. Angular Sector Binning
+                    // Bearing 0-360 deg
+                    $bearing = $this->geoService->calculateBearing($source->lat, $source->lng, $target->lat, $target->lng);
+
+                    // Adjustment so Sector 0 is centered on North (337.5 - 22.5)
+                    // (Bearing + 22.5) / 45 rounded down gives 0-7
+                    $sector = floor(fmod($bearing + 22.5, 360) / 45);
+
+                    // 6. Ranking (Smart Filtering)
+                    // If this sector is empty OR this target is closer than existing best
+                    if (!isset($sectorBests[$sector]) || $dist < $sectorBests[$sector]['dist']) {
+                        $sectorBests[$sector] = [
+                            'target' => $target,
+                            'dist' => $dist,
+                            'bearing' => $bearing,
+                            'type' => $type
+                        ];
+                    }
+                }
+
+                // EXECUTE CREATION FOR SURVIVORS
+                foreach ($sectorBests as $sector => $data) {
+                    $target = $data['target'];
+                    $type = $data['type'];
+                    $dist = $data['dist'];
+                    $bearing = $data['bearing'];
+
+                    // Check if link exists (if not replacing)
+                    if (!$replaceExisting) {
+                        $exists = LinkDraft::where('source_scene_id', $source->id)
+                            ->where('target_scene_id', $target->id)
+                            ->where('marked_for_deletion', false)
+                            ->exists();
+                        if ($exists)
+                            continue;
+                    }
+
+                    // Calculate Yaw
+                    $sourceHeading = deg2rad($source->heading ?? 0);
+                    $bearingRad = deg2rad($bearing);
+                    $relativeYaw = $bearingRad - $sourceHeading;
+
+                    LinkDraft::create([
+                        'source_scene_id' => $source->id,
+                        'target_scene_id' => $target->id,
+                        'type' => $type,
+                        'yaw' => $relativeYaw,
+                        'pitch' => 0,
+                        'distance' => $dist
+                    ]);
+
+                    $createdCount++;
+                    if ($type === 'navigasi')
+                        $navCount++;
+                    else
+                        $gatewayCount++;
                 }
             }
 

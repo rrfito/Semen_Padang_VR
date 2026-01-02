@@ -536,8 +536,8 @@ export default function PropertiesPanel({
                                     Akses Terbatas
                                 </div>
                                 <p className="text-[10px] theme-text-muted leading-snug">
-                                    Jika dicentang, hanya personel berwenang
-                                    yang dapat melihat item ini di tur publik.
+                                    Jika dicentang, hanya pegawai atau admin
+                                    yang dapat melihat item ini.
                                 </p>
                             </div>
                         </label>

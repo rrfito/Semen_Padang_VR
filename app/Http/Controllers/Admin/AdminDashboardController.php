@@ -82,7 +82,7 @@ class AdminDashboardController extends Controller
 
         // Calculate Integrity Metrics (Read-Only Diagnostic)
         $integrityStats = [
-            'draftMismatch' => \App\Models\Drafts\DraftSyncState::whereIn('status', ['dirty', 'stale'])->count(),
+
             'orphanScenes' => \App\Models\Scene::doesntHave('outgoingLinks')
 
                 ->orWhereDoesntHave('area')

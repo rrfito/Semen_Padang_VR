@@ -439,7 +439,7 @@ export default function PendingChangesModal({
                                                                                                     key={
                                                                                                         idx
                                                                                                     }
-                                                                                                    className="text-xs bg-slate-900/50 rounded px-3 py-2 border border-slate-700"
+                                                                                                    className="text-xs bg-surface-light dark:bg-surface-dark rounded px-3 py-2 border border-slate-700"
                                                                                                 >
                                                                                                     <div className="text-slate-400 font-bold mb-1">
                                                                                                         {getFieldLabel(

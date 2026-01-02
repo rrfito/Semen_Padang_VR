@@ -161,7 +161,7 @@ export default function Sidebar({
                         <input
                             type="text"
                             placeholder="Cari lokasi..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#D32F2F]/20 focus:border-[#D32F2F] outline-none transition-all shadow-sm"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-[#D32F2F]/20 focus:border-[#D32F2F] outline-none transition-all shadow-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
