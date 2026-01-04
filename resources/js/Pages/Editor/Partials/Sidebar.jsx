@@ -530,18 +530,14 @@ export default function Sidebar({
                     {/* TOGGLE STATUS LABELS */}
                     <button
                         onClick={toggleStatusLabels}
-                        className={`w-10 flex items-center justify-center rounded-lg border transition-all ${
-                            showStatusLabels
-                                ? "bg-primary/20 text-primary border-primary/50"
-                                : "theme-bg-secondary theme-text-muted border-transparent hover:border-border-light dark:hover:border-border-dark"
-                        }`}
+                        className="w-10 flex items-center justify-center rounded-lg border border-transparent theme-text-muted hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
                         title={
                             showStatusLabels
                                 ? "Sembunyikan Label Status"
                                 : "Tampilkan Label Status"
                         }
                     >
-                        <span className="material-symbols-outlined text-[20px]">
+                        <span className="material-symbols-outlined text-[20px] ">
                             {showStatusLabels ? "visibility" : "visibility_off"}
                         </span>
                     </button>

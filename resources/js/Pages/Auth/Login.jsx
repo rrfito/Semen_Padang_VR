@@ -210,14 +210,14 @@ export default function Login({ status, canResetPassword }) {
                         </PrimaryButton>
                     </form>
 
-                    <div className="text-center mt-6">
+                    <div className="text-center mt-6 space-y-2">
                         <p className="text-sm text-gray-500">
-                            Bukan pegawai?{" "}
+                            Belum punya akun?{" "}
                             <Link
-                                href="/"
+                                href={route("register")}
                                 className="text-white hover:text-red-500 font-medium transition-colors"
                             >
-                                Kembali ke Beranda
+                                Daftar Sekarang
                             </Link>
                         </p>
                     </div>

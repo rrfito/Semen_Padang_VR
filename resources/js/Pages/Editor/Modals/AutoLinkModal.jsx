@@ -140,7 +140,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                 {/* Header */}
                 <div className="theme-modal-header flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                        <div className="size-10 rounded-full bg-action-primary/10 text-action-primary flex items-center justify-center">
                             <FaNetworkWired size={18} />
                         </div>
                         <div>
@@ -160,7 +160,7 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="theme-text-subtle hover:text-primary transition-colors"
+                        className="theme-text-subtle hover:text-action-primary transition-colors"
                     >
                         <FaTimes />
                     </button>
@@ -170,13 +170,13 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                 <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                     {loading ? (
                         <div className="py-12 text-center theme-text-muted">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-action-primary"></div>
                             <p className="mt-3 text-sm">Memuat pratinjau...</p>
                         </div>
                     ) : preview ? (
                         <>
                             {/* GPS Accuracy Warning */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 border border-blue-200 dark:border-blue-800">
+                            <div className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 p-4 rounded-lg flex items-start gap-3 border border-slate-200 dark:border-slate-700">
                                 <span className="text-xl">ℹ️</span>
                                 <div className="text-sm leading-relaxed">
                                     <strong>Penting:</strong> Pastikan semua
@@ -196,15 +196,15 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                         onClick={() => setReplaceMode(false)}
                                         className={`p-4 rounded-lg border-2 transition-all ${
                                             !replaceMode
-                                                ? "border-primary bg-primary/10"
-                                                : "theme-border bg-gray-100 dark:bg-gray-800 hover:border-primary/50"
+                                                ? "theme-sidebar-item-active"
+                                                : "theme-surface-elevated theme-border theme-sidebar-item"
                                         }`}
                                     >
                                         <div className="flex items-start gap-3">
                                             <div
                                                 className={`text-2xl ${
                                                     !replaceMode
-                                                        ? "text-primary"
+                                                        ? "text-action-primary"
                                                         : "theme-text-muted"
                                                 }`}
                                             >
@@ -226,8 +226,9 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
                                         onClick={() => setReplaceMode(true)}
                                         className={`p-4 rounded-lg border-2 transition-all ${
                                             replaceMode
-                                                ? "border-orange-500 bg-orange-500/10"
-                                                : "theme-border bg-gray-100 dark:bg-gray-800 hover:border-orange-300"
+                                                ? // Using orange for destructive/replace action, but keeping same style pattern
+                                                  "bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400 border-l-4 border-l-orange-500 border-y border-r border-y-orange-200 dark:border-y-orange-800 border-r-orange-200 dark:border-r-orange-800"
+                                                : "theme-surface-elevated theme-border theme-sidebar-item"
                                         }`}
                                     >
                                         <div className="flex items-start gap-3">

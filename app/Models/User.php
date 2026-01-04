@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // 3. TAMBAHKAN INI (Agar bisa simpan role admin/pegawai)
+        'status',
     ];
 
     /**

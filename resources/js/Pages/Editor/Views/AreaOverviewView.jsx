@@ -390,7 +390,7 @@ export default function AreaOverviewView({
                     </div>
                     <button
                         onClick={() => onCreateChild && onCreateChild(area.id)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all"
+                        className="flex items-center gap-2 px-5 py-2.5 theme-btn-primary"
                     >
                         <span className="material-symbols-outlined">add</span>
                         <span>Tambah Ruangan</span>

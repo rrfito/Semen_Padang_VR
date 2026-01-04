@@ -140,7 +140,7 @@ export default function LinkTargetModal({
                     </h3>
                     <button
                         onClick={onClose}
-                        className="theme-text-subtle hover:text-primary"
+                        className="theme-text-subtle hover:text-action-primary"
                     >
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -162,8 +162,8 @@ export default function LinkTargetModal({
                                     onClick={() => setSelectedTarget(target.id)}
                                     className={`flex items-center gap-3 p-3 rounded-lg transition-all text-left ${
                                         selectedTarget === target.id
-                                            ? "bg-primary text-white shadow-lg"
-                                            : "theme-text-secondary hover:bg-gray-200 dark:hover:bg-white/5 hover:text-primary"
+                                            ? "theme-sidebar-item-active"
+                                            : "theme-surface theme-border theme-sidebar-item hover:bg-slate-50 dark:hover:bg-white/5"
                                     }`}
                                 >
                                     <span className="material-symbols-outlined text-xl opacity-70">

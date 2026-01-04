@@ -20,9 +20,9 @@ export default {
             colors: {
                 // Primary actions (Semen Padang Red)
                 "primary": "#137fec",           // Blue (secondary, links in dark mode)
-                "action-primary": "#137fec",    // Main action color
-                "action-hover": "#0F6CD6",      // Hover state
-                "action-focus": "#1E88E5",
+                "action-primary": "#F33540",    // Main action color
+                "action-hover": "#D92C36",      // Hover state
+                "action-focus": "#FF5A64",
                 
                 
                 // Backgrounds

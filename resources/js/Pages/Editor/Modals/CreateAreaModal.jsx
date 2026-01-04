@@ -83,7 +83,7 @@ export default function CreateAreaModal({
                             className={`size-10 rounded-full flex items-center justify-center ${
                                 isBlocked
                                     ? "bg-red-500/10 text-red-500"
-                                    : "bg-blue-500/10 text-blue-500"
+                                    : "bg-action-primary/10 text-action-primary"
                             }`}
                         >
                             {isBlocked ? <FaBan /> : <FaFolderPlus />}
@@ -105,7 +105,7 @@ export default function CreateAreaModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="theme-text-subtle hover:text-primary transition-colors"
+                        className="theme-text-subtle hover:text-action-primary transition-colors"
                     >
                         <FaTimes />
                     </button>
@@ -123,13 +123,13 @@ export default function CreateAreaModal({
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="rounded theme-input border theme-border text-primary focus:ring-primary w-3.5 h-3.5"
+                                        className="rounded theme-input border theme-border text-action-primary focus:ring-action-primary w-3.5 h-3.5"
                                         checked={isRootOverride}
                                         onChange={(e) =>
                                             setIsRootOverride(e.target.checked)
                                         }
                                     />
-                                    <span className="text-[10px] uppercase font-bold text-primary hover:text-primary/80 transition-colors">
+                                    <span className="text-[10px] uppercase font-bold text-action-primary hover:text-action-primary/80 transition-colors">
                                         Buat di Halaman Utama
                                     </span>
                                 </label>
@@ -162,8 +162,11 @@ export default function CreateAreaModal({
                                     <span>Penuh</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border bg-primary/10 border-primary/30 text-primary font-medium">
-                                    <FaFolderPlus size={12} />
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded border border-dashed theme-border theme-text font-medium">
+                                    <FaFolderPlus
+                                        size={12}
+                                        className="theme-text-muted"
+                                    />
                                     <span>{name || "Nama Area"}</span>
                                 </div>
                             )}
@@ -239,7 +242,7 @@ export default function CreateAreaModal({
                                                 <FaLayerGroup
                                                     className={
                                                         contentType === "group"
-                                                            ? "text-primary"
+                                                            ? "text-action-primary"
                                                             : "theme-text-muted"
                                                     }
                                                 />
@@ -269,7 +272,7 @@ export default function CreateAreaModal({
                                                     className={
                                                         contentType ===
                                                         "default"
-                                                            ? "text-primary"
+                                                            ? "text-action-primary"
                                                             : "theme-text-muted"
                                                     }
                                                 />

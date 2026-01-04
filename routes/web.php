@@ -16,6 +16,10 @@ use App\Http\Controllers\EditorController;
 // 1. HALAMAN UTAMA (Peta & Sidebar)
 Route::get('/', [TourController::class, 'index'])->name('tour.index');
 
+Route::get('/approval-pending', function () {
+    return Inertia::render('Auth/ApprovalPending');
+})->name('approval.notice');
+
 // 2. HALAMAN VIRTUAL TOUR (360 Viewer)
 Route::get('/tour/{scene}', [TourController::class, 'show'])->name('tour.show');
 
@@ -40,6 +44,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/UserManagement', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('admin.user-management');
     Route::put('/UserManagement/{user}/role', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRole'])->name('admin.users.update-role');
+    Route::post('/UserManagement/{user}/approve', [\App\Http\Controllers\Admin\UserManagementController::class, 'approve'])->name('admin.users.approve');
+    Route::post('/UserManagement/{user}/reject', [\App\Http\Controllers\Admin\UserManagementController::class, 'reject'])->name('admin.users.reject');
 
     // Main Global Route
     Route::get('/visual-editor', [EditorController::class, 'index'])->name('admin.editor.index');

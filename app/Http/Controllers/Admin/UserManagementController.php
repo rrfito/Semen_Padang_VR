@@ -16,8 +16,10 @@ class UserManagementController extends Controller
         $search = $request->input('search');
         $sortField = $request->input('sort_field', 'name');
         $sortDirection = $request->input('sort_direction', 'asc');
+        $status = $request->input('status', 'active'); // Default to active users
 
         $users = User::query()
+            ->where('status', $status)
             ->leftJoin('sessions', 'users.id', '=', 'sessions.user_id')
             ->select('users.*', DB::raw('MAX(sessions.last_activity) as last_activity'))
             ->groupBy('users.id')
@@ -36,6 +38,8 @@ class UserManagementController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'status' => $user->status,
+                    'created_at' => $user->created_at->format('d M Y H:i'),
                     'last_activity' => $user->last_activity
                         ? Carbon::createFromTimestamp($user->last_activity)->locale('id')->diffForHumans()
                         : 'Tidak pernah aktif',
@@ -44,7 +48,7 @@ class UserManagementController extends Controller
 
         return Inertia::render('Admin/UserManagement', [
             'users' => $users,
-            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction', 'status']),
         ]);
     }
 
@@ -57,5 +61,30 @@ class UserManagementController extends Controller
         $user->update(['role' => $validated['role']]);
 
         return back()->with('success', 'User role updated successfully.');
+    }
+
+    public function approve(Request $request, User $user)
+    {
+        // Approve and optionally update role if sent
+        $data = $request->validate([
+            'role' => 'nullable|in:admin,pegawai,pro',
+        ]);
+
+        $updateData = ['status' => 'active'];
+        if (isset($data['role'])) {
+            $updateData['role'] = $data['role'];
+        }
+
+        $user->update($updateData);
+
+        return back()->with('success', 'User approved successfully.');
+    }
+
+    public function reject(User $user)
+    {
+        $user->update(['status' => 'rejected']);
+        // OR $user->delete(); if hard delete is preferred
+
+        return back()->with('success', 'User request rejected.');
     }
 }

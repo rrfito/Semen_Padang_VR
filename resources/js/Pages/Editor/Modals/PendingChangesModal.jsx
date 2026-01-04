@@ -284,7 +284,7 @@ export default function PendingChangesModal({
                             </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+                            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                                 {data.summary.areas_count || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
@@ -292,7 +292,7 @@ export default function PendingChangesModal({
                             </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                                 {data.summary.scenes_count || 0}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-slate-400">
