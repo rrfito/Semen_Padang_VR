@@ -18,6 +18,8 @@ export default function Sidebar({
     user,
     isOpen,
     onToggle,
+    // New optional prop for tracking expansion in tour
+    onNodeExpand,
 }) {
     const [search, setSearch] = useState("");
     const [expanded, setExpanded] = useState({});
@@ -155,7 +157,7 @@ export default function Sidebar({
                 </div>
 
                 {/* SEARCH */}
-                <div className="p-4 bg-gray-50/50 shrink-0">
+                <div id="sidebar-tools" className="p-4 bg-gray-50/50 shrink-0">
                     <div className="relative group">
                         <FaSearch className="absolute left-3 top-3 text-gray-400 group-focus-within:text-[#D32F2F] transition-colors" />
                         <input
@@ -169,7 +171,10 @@ export default function Sidebar({
                 </div>
 
                 {/* LIST UTAMA */}
-                <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 custom-scrollbar">
+                <div
+                    id="sidebar-tree"
+                    className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 custom-scrollbar"
+                >
                     {filteredData.map((root) => (
                         <div key={root.id}>
                             {/* LEVEL 1: ROOT */}
@@ -181,6 +186,7 @@ export default function Sidebar({
 
                                 return (
                                     <div
+                                        id={`sidebar-item-${root.id}`}
                                         className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                                             isSelected
                                                 ? "bg-red-50 text-[#D32F2F] border border-red-200"
@@ -199,13 +205,19 @@ export default function Sidebar({
                                         {/* Expand button or dot */}
                                         <div className="flex items-center gap-2 flex-1">
                                             <div
+                                                id={`sidebar-arrow-${root.id}`}
                                                 onClick={(e) => {
                                                     if (isFolder) {
                                                         e.stopPropagation();
                                                         toggleExpand(root.id);
+                                                        // Notify parent for Tour Logic
+                                                        if (onNodeExpand)
+                                                            onNodeExpand(
+                                                                root.id
+                                                            );
                                                     }
                                                 }}
-                                                className="w-5 h-5 flex items-center justify-center cursor-pointer"
+                                                className="w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-gray-100 rounded transition-colors"
                                             >
                                                 {isFolder ? (
                                                     <FaChevronDown
@@ -251,6 +263,7 @@ export default function Sidebar({
                                                 className="relative"
                                             >
                                                 <div
+                                                    id={`sidebar-item-${sub.id}`}
                                                     className={`flex items-center gap-2 py-2 px-3 cursor-pointer rounded-r-lg transition-colors ${
                                                         isSelected
                                                             ? "bg-red-50 text-[#D32F2F]"
@@ -316,6 +329,7 @@ export default function Sidebar({
                                                                         key={
                                                                             cucu.id
                                                                         }
+                                                                        id={`sidebar-item-${cucu.id}`}
                                                                         onClick={() =>
                                                                             handleSelect(
                                                                                 cucu,
@@ -352,7 +366,10 @@ export default function Sidebar({
                 </div>
 
                 {/* USER SECTION */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50 shrink-0">
+                <div
+                    id="user-section"
+                    className="p-4 border-t border-gray-100 bg-gray-50 shrink-0"
+                >
                     {user ? (
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">

@@ -3,6 +3,7 @@ import { Head, Link, router } from "@inertiajs/react";
 import Marzipano from "marzipano";
 import { FaArrowLeft } from "react-icons/fa";
 import Minimap from "@/Components/Tour/Minimap";
+import GestureHint from "@/Components/Tour/GestureHint";
 import { VIEWER_CONFIG } from "@/Config/ViewerConfig";
 
 export default function Viewer({ scene, initial_heading }) {
@@ -173,11 +174,14 @@ export default function Viewer({ scene, initial_heading }) {
             <div className="w-full h-screen bg-black relative">
                 <div ref={panoRef} className="absolute inset-0 z-0"></div>
 
+                {/* GESTURE HINT OVERLAY */}
+                <GestureHint />
+
                 {/* MINIMAP */}
                 <Minimap lat={scene.lat} lng={scene.lng} />
 
                 {/* HEADER OVERLAY */}
-                <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full p-6 flex flex-col items-start gap-4 md:flex-row md:justify-between md:items-start z-10 pointer-events-none">
                     <Link
                         href={route("tour.index")}
                         className="pointer-events-auto bg-white/90 text-gray-900 px-5 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-white transition font-bold"
@@ -185,7 +189,7 @@ export default function Viewer({ scene, initial_heading }) {
                         <FaArrowLeft /> Peta
                     </Link>
 
-                    <div className="bg-black/60 text-white px-6 py-3 rounded-xl backdrop-blur-md text-right min-w-[200px]">
+                    <div className="bg-black/60 text-white px-6 py-3 rounded-xl backdrop-blur-md text-left md:text-right min-w-[200px] pointer-events-auto">
                         {/* HIERARCHY DISPLAY */}
                         {scene.hierarchy && scene.hierarchy.length > 0 ? (
                             <>
@@ -196,7 +200,7 @@ export default function Viewer({ scene, initial_heading }) {
 
                                 {/* SUB-LEVELS (Breadcrumbs) */}
                                 {scene.hierarchy.length > 1 && (
-                                    <div className="flex items-center justify-end gap-2 mt-1">
+                                    <div className="flex items-center justify-start md:justify-end gap-2 mt-1">
                                         <p className="text-sm text-gray-200 font-medium uppercase tracking-wide">
                                             {scene.hierarchy
                                                 .slice(1)
@@ -211,7 +215,7 @@ export default function Viewer({ scene, initial_heading }) {
                                 <h1 className="text-xl font-extrabold uppercase tracking-widest text-white drop-shadow-md">
                                     {scene.main_title}
                                 </h1>
-                                <div className="flex items-center justify-end gap-2 mt-1">
+                                <div className="flex items-center justify-start md:justify-end gap-2 mt-1">
                                     <span className="w-8 h-[2px] bg-red-600 inline-block"></span>
                                     <p className="text-sm text-gray-200 font-medium uppercase tracking-wide">
                                         {scene.sub_title}

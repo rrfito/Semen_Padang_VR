@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Head } from "@inertiajs/react";
 import Sidebar from "@/Components/Tour/Sidebar";
 import SecondarySidebar from "@/Components/Tour/SecondarySidebar";
 import Map from "@/Components/Tour/Map";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaQuestionCircle } from "react-icons/fa";
 import { MAP_CONFIG } from "@/Config/MapConfig";
+import useTourGuide from "@/Hooks/useTourGuide";
 
 export default function Index({ menuData, markers, user }) {
     // Default Center: Pabrik Indarung
@@ -16,7 +17,7 @@ export default function Index({ menuData, markers, user }) {
     const [mapZoom, setMapZoom] = useState(MAP_CONFIG.MIN_ZOOM);
     const [markerColor, setMarkerColor] = useState(null); // 'red' | 'blue' | null (default)
 
-    // Sidebar State
+    // Sidebar State // Lifted up for Driver.js control
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
 
@@ -57,6 +58,32 @@ export default function Index({ menuData, markers, user }) {
         }
     };
 
+    // --- TOUR GUIDE HOOK ---
+    const [lastExpandedNode, setLastExpandedNode] = useState(null);
+
+    const { startTour } = useTourGuide({
+        menuData,
+        selectedArea,
+        lastExpandedNode, // Pass expansion state
+        isDesktopSidebarOpen,
+        setIsDesktopSidebarOpen,
+    });
+
+    const handleNodeExpand = (nodeId) => {
+        setLastExpandedNode(nodeId);
+    };
+
+    useEffect(() => {
+        // Check local storage on mount
+        const hasSeenTour = localStorage.getItem("tour_completed_v4");
+        if (!hasSeenTour) {
+            // Delay for DOM readiness
+            setTimeout(() => {
+                startTour();
+            }, 1000);
+        }
+    }, [menuData]); // Dep on menuData ensures we have data before starting
+
     const handleMarkerClick = (marker) => {
         setSelectedArea(marker);
         setShowPolyline(false);
@@ -78,8 +105,18 @@ export default function Index({ menuData, markers, user }) {
             <button
                 onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
                 className="absolute top-4 left-4 z-[1100] p-3 bg-white text-gray-800 rounded-full shadow-lg md:hidden hover:bg-gray-50 transition-colors"
+                aria-label="Toggle Menu"
             >
                 <FaBars size={20} />
+            </button>
+
+            {/* Help Button (Bottom Right) - Re-triggers Tour */}
+            <button
+                onClick={startTour}
+                className="absolute bottom-6 right-6 z-[1000] p-3 bg-white/90 text-gray-700 hover:text-red-600 rounded-full shadow-xl hover:bg-white hover:scale-110 transition-all duration-300"
+                title="Bantuan & Panduan"
+            >
+                <FaQuestionCircle size={24} />
             </button>
 
             {/* Sidebar Container */}
@@ -113,6 +150,7 @@ export default function Index({ menuData, markers, user }) {
                         onToggle={() =>
                             setIsDesktopSidebarOpen(!isDesktopSidebarOpen)
                         }
+                        onNodeExpand={handleNodeExpand}
                     />
                 </div>
             </div>

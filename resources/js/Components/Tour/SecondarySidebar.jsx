@@ -48,6 +48,7 @@ export default function SecondarySidebar({
 
     return (
         <div
+            id="secondary-sidebar"
             className="
             fixed bottom-0 left-0 right-0 z-[1000] 
             md:absolute md:top-4 md:right-4 md:bottom-auto md:left-auto md:w-80 
@@ -85,6 +86,7 @@ export default function SecondarySidebar({
                 {isContainer && (
                     <div className="space-y-3">
                         <button
+                            id="btn-show-polyline"
                             onClick={onTogglePolyline}
                             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-all duration-200 ${
                                 showPolyline
@@ -143,7 +145,10 @@ export default function SecondarySidebar({
                                 </div>
 
                                 {/* Scene List - Max 3 visible with scroll */}
-                                <div className="space-y-2 mb-4 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+                                <div
+                                    id="scene-list-container"
+                                    className="space-y-2 mb-4 max-h-[240px] overflow-y-auto custom-scrollbar pr-1"
+                                >
                                     {scenes.map((scene, index) => (
                                         <Link
                                             key={scene.id}

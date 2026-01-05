@@ -50,8 +50,20 @@ function MapUpdater({ center }) {
 }
 
 export default function Minimap({ lat, lng }) {
-    const [isOpen, setIsOpen] = useState(true);
+    // 1. Initialize from LocalStorage (Default: true)
+    const [isOpen, setIsOpen] = useState(() => {
+        const saved = localStorage.getItem("minimap_open");
+        return saved !== null ? saved === "true" : true;
+    });
+
     const position = [lat, lng];
+
+    // Helper: Toggle and Save
+    const toggleMinimap = () => {
+        const newState = !isOpen;
+        setIsOpen(newState);
+        localStorage.setItem("minimap_open", String(newState));
+    };
 
     // If no valid coordinates, don't render
     if (!lat || !lng) return null;
@@ -64,7 +76,7 @@ export default function Minimap({ lat, lng }) {
         >
             {/* Toggle Button */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={toggleMinimap}
                 className="absolute top-0 right-0 z-[1001] bg-white p-2 rounded-lg shadow-lg hover:bg-gray-100 transition"
                 title={isOpen ? "Minimize Map" : "Show Map"}
             >

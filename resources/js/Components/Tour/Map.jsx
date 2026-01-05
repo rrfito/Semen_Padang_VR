@@ -86,7 +86,7 @@ export default function Map({
     }, []);
 
     return (
-        <div className="relative w-full h-full">
+        <div id="map-container" className="relative w-full h-full">
             <MapContainer
                 center={center}
                 zoom={15}
