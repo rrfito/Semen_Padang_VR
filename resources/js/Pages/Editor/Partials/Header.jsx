@@ -3,7 +3,7 @@ import PendingChangesModal from "../Modals/PendingChangesModal";
 import ConformModal from "@/Components/Editor/ConfirmModal";
 import axios from "axios";
 import { useTheme } from "@/Contexts/ThemeContext";
-import { router } from "@inertiajs/react";
+import { router, Link } from "@inertiajs/react";
 import { APP_DEFAULTS } from "@/Config/AppDefaults";
 
 export default function Header({
@@ -55,31 +55,45 @@ export default function Header({
                 </div>
             </div>
 
-            {/* Breadcrumbs */}
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 theme-surface rounded-lg border theme-border">
-                <span className="material-symbols-outlined theme-text-muted text-[20px]">
-                    home
-                </span>
-                {breadcrumbs.length > 0 && (
-                    <span className="theme-text-muted">/</span>
-                )}
+            {/* Middle Section: Back Button & Breadcrumbs */}
+            <div className="hidden md:flex items-center gap-2">
+                {/* Back to Dashboard Button */}
+                <Link
+                    href={route("admin.dashboard")}
+                    className="flex items-center justify-center w-10 h-10 rounded-lg theme-btn-secondary border theme-border hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary"
+                    title="Kembali ke Dashboard"
+                >
+                    <span className="material-symbols-outlined text-[24px]">
+                        arrow_back
+                    </span>
+                </Link>
 
-                {breadcrumbs.map((crumb, index) => (
-                    <React.Fragment key={index}>
-                        <span
-                            className={`text-sm font-bold ${
-                                index === breadcrumbs.length - 1
-                                    ? "theme-text"
-                                    : "theme-text-muted hover:text-action-primary cursor-pointer transition-colors"
-                            }`}
-                        >
-                            {crumb.name}
-                        </span>
-                        {index < breadcrumbs.length - 1 && (
-                            <span className="theme-text-muted">/</span>
-                        )}
-                    </React.Fragment>
-                ))}
+                {/* Breadcrumbs */}
+                <div className="flex items-center gap-2 px-4 py-2 theme-surface rounded-lg border theme-border">
+                    <span className="material-symbols-outlined theme-text-muted text-[20px]">
+                        home
+                    </span>
+                    {breadcrumbs.length > 0 && (
+                        <span className="theme-text-muted">/</span>
+                    )}
+
+                    {breadcrumbs.map((crumb, index) => (
+                        <React.Fragment key={index}>
+                            <span
+                                className={`text-sm font-bold ${
+                                    index === breadcrumbs.length - 1
+                                        ? "theme-text"
+                                        : "theme-text-muted hover:text-action-primary cursor-pointer transition-colors"
+                                }`}
+                            >
+                                {crumb.name}
+                            </span>
+                            {index < breadcrumbs.length - 1 && (
+                                <span className="theme-text-muted">/</span>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
 
             {/* Actions */}

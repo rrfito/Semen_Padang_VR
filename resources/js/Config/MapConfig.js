@@ -2,7 +2,7 @@ export const MAP_CONFIG = {
     // Coordinates are System Rules for this specific deployment
     DEFAULT_CENTER: [-0.9532459140793406, 100.46803723241885], 
     MIN_ZOOM: 14,
-    MAX_ZOOM: 20,
+    MAX_ZOOM: 18,
     
     // Logical Bounds (System Constraint)
     MAX_BOUNDS: [

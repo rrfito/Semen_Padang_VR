@@ -6,14 +6,14 @@ import Map from "@/Components/Tour/Map";
 import { FaBars } from "react-icons/fa";
 import { MAP_CONFIG } from "@/Config/MapConfig";
 
-export default function Dashboard({ menuData, markers, user }) {
+export default function Index({ menuData, markers, user }) {
     // Default Center: Pabrik Indarung
     const [mapCenter, setMapCenter] = useState(MAP_CONFIG.DEFAULT_CENTER);
     const [selectedArea, setSelectedArea] = useState(null);
     const [showPolyline, setShowPolyline] = useState(false);
 
     // UI State for Map
-    const [mapZoom, setMapZoom] = useState(15);
+    const [mapZoom, setMapZoom] = useState(MAP_CONFIG.MIN_ZOOM);
     const [markerColor, setMarkerColor] = useState(null); // 'red' | 'blue' | null (default)
 
     // Sidebar State
@@ -43,15 +43,8 @@ export default function Dashboard({ menuData, markers, user }) {
 
             // Sequential Logic
             if (targetType === "grandparent") {
-                setMapZoom(19);
+                setMapZoom(MAP_CONFIG.MAX_ZOOM);
                 setMarkerColor("red");
-            } else if (targetType === "parent") {
-                setMapZoom(18);
-                setMarkerColor("blue");
-            } else {
-                // Child or other
-                setMapZoom(19);
-                setMarkerColor("blue"); // Default to blue/standard for specific locations
             }
         } else {
             // Area doesn't have coordinates (e.g. container areas)

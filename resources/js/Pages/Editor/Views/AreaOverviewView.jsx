@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { MAP_CONFIG } from "@/Config/MapConfig";
+import SceneMapTab from "./Tabs/SceneMapTab";
 
 // Fix Leaflet Icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -65,15 +66,37 @@ export default function AreaOverviewView({
     const currentLat = hasLocation ? parseFloat(area.lat) : null;
     const currentLng = hasLocation ? parseFloat(area.lng) : null;
 
+    // --- STATE & HOOKS (MUST BE TOP LEVEL) ---
+    // 1. Picking Mode State
     const [isPickingMode, setIsPickingMode] = useState(false);
-    const [tempLocation, setTempLocation] = useState(null); // Temp state for picked location
+    const [tempLocation, setTempLocation] = useState(null);
+    const [isLocationExpanded, setIsLocationExpanded] = useState(false); // New state for collapsible card
 
-    // Map Event Handler - ONLY set temp location, don't save yet
+    // 2. Tabs State
+    const [activeTab, setActiveTab] = useState("area_map"); // area_map, scene_map
+
+    // 3. Helper to get ALL SCENES (Recursive/Flat)
+    const allChildScenes = React.useMemo(() => {
+        if (!area.children) return [];
+        let scenes = [];
+        area.children.forEach((child) => {
+            if (child.scenes) {
+                const childScenes = child.scenes.map((s) => ({
+                    ...s,
+                    parentId: child.id,
+                }));
+                scenes = [...scenes, ...childScenes];
+            }
+        });
+        return scenes;
+    }, [area.children]);
+
+    // 4. Map Event Handler - ONLY set temp location, don't save yet
     const handleLocationSelect = (latlng) => {
         setTempLocation(latlng);
     };
 
-    // Save button handler - actually save to database
+    // 5. Save button handler - actually save to database
     const handleSaveLocation = () => {
         if (tempLocation && onUpdate) {
             onUpdate(area.id, "area", {
@@ -129,8 +152,6 @@ export default function AreaOverviewView({
             .leaflet-control-attribution {
                 display: none !important;
             }
-            
-            /* Make active marker appear red using CSS filter */
             .active-marker-icon {
                 filter: hue-rotate(120deg) saturate(3) brightness(0.9);
             }
@@ -148,217 +169,326 @@ export default function AreaOverviewView({
     if (isLevel1) {
         return (
             <div className="flex-1 relative flex flex-col theme-canvas overflow-hidden font-display">
-                {/* MAP CONTAINER - Full Screen */}
-                <div className="absolute inset-0 z-0">
-                    <MapContainer
-                        center={
-                            hasLocation
-                                ? [currentLat, currentLng]
-                                : [mapCenterLat, mapCenterLng]
-                        }
-                        zoom={hasLocation ? 16 : 14}
-                        style={{ height: "100%", width: "100%" }}
-                        className="opacity-90"
-                        zoomControl={false}
-                        attributionControl={false}
-                    >
-                        {/* Satellite Base Layer */}
-                        <TileLayer url={MAP_CONFIG.TILES.SATELLITE.URL} />
-
-                        <LocationPicker
-                            isActive={isPickingMode}
-                            onPick={handleLocationSelect}
-                        />
-
-                        {/* Only center map if we have a location AND not picking (to avoid jumping while picking) */}
-                        {hasLocation && !isPickingMode && (
-                            <MapUpdater center={[currentLat, currentLng]} />
-                        )}
-
-                        {/* Temp marker when picking */}
-                        {tempLocation && (
-                            <Marker
-                                position={[tempLocation.lat, tempLocation.lng]}
-                                icon={activeIcon}
-                                zIndexOffset={2000}
-                            >
-                                <Tooltip
-                                    permanent
-                                    direction="right"
-                                    offset={[15, -20]}
-                                >
-                                    Lokasi Sementara
-                                </Tooltip>
-                            </Marker>
-                        )}
-
-                        {/* Render All Level 1 Markers */}
-                        {allAreas
-                            .filter((a) => {
-                                // Only show Level 1 areas that have valid coordinates
-                                const isLevel1 = a.level === 1 || !a.parent_id;
-                                const hasCoords =
-                                    a.lat != null && a.lng != null;
-                                return isLevel1 && hasCoords;
-                            })
-                            .map((node) => {
-                                const nodeLat = parseFloat(
-                                    node.lat || node.latitude
-                                );
-                                const nodeLng = parseFloat(
-                                    node.lng || node.longitude
-                                );
-                                const isActive = node.id === area.id;
-
-                                // Skip if invalid coords
-                                if (!nodeLat || !nodeLng) return null;
-
-                                return (
-                                    <Marker
-                                        key={node.id}
-                                        position={[nodeLat, nodeLng]}
-                                        icon={
-                                            isActive ? activeIcon : normalIcon
-                                        }
-                                        zIndexOffset={isActive ? 1000 : 0}
-                                    >
-                                        {/* Permanent tooltip for active marker */}
-                                        {isActive && (
-                                            <Tooltip
-                                                direction="right"
-                                                offset={[15, -20]}
-                                                opacity={1}
-                                                permanent
-                                                className="custom-tooltip"
-                                            >
-                                                <span
-                                                    style={{
-                                                        fontWeight: "bold",
-                                                        fontSize: "12px",
-                                                        color: "#dc2626",
-                                                    }}
-                                                >
-                                                    {node.name}
-                                                </span>
-                                            </Tooltip>
-                                        )}
-                                        <Popup>{node.name}</Popup>
-                                    </Marker>
-                                );
-                            })}
-                    </MapContainer>
-                </div>
-
-                {/* OVERLAY: Select Location Button (Top Right) - FIXED z-index */}
-                <div className="absolute top-6 right-6 z-10">
-                    {!isPickingMode ? (
-                        <button
-                            onClick={() => setIsPickingMode(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold shadow-2xl theme-surface backdrop-blur border theme-border theme-text hover:bg-gray-200 dark:hover:bg-surface-dark transition-all"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">
-                                edit_location
-                            </span>
-                            <span>Pilih Lokasi</span>
-                        </button>
-                    ) : (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => {
-                                    setIsPickingMode(false);
-                                    setTempLocation(null);
-                                }}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold shadow-2xl bg-gray-300 dark:bg-slate-700/90 backdrop-blur border border-gray-400 dark:border-slate-600 theme-text dark:hover:bg-slate-700 transition-all"
-                            >
-                                <span className="material-symbols-outlined text-[20px]">
-                                    close
-                                </span>
-                                <span>Batal</span>
-                            </button>
-                            <button
-                                onClick={handleSaveLocation}
-                                disabled={!tempLocation}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold shadow-2xl bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <span className="material-symbols-outlined text-[20px]">
-                                    save
-                                </span>
-                                <span>Simpan Lokasi</span>
-                            </button>
-                        </div>
-                    )}
-                    {isPickingMode && (
-                        <div className="absolute top-full mt-2 right-0 theme-surface backdrop-blur-md theme-text-secondary text-xs px-4 py-2 rounded-lg max-w-[200px] text-right border border-primary/30 shadow-xl">
-                            Klik pada peta untuk{" "}
-                            {hasLocation ? "memindahkan" : "menempatkan"}{" "}
-                            penanda
-                        </div>
-                    )}
-                </div>
-
-                {/* OVERLAY: Current Location Card (Bottom Left) - FIXED z-index */}
-                <div className="absolute bottom-8 left-8 z-10 w-80">
-                    <div className="theme-surface backdrop-blur border theme-border rounded-xl overflow-hidden shadow-2xl">
-                        <div className="px-4 py-3 bg-gray-200 dark:bg-slate-800/80 border-b theme-border flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span
-                                    className={`w-2 h-2 rounded-full ${
-                                        isPickingMode
-                                            ? "bg-primary animate-pulse"
-                                            : hasLocation
-                                            ? "bg-primary"
-                                            : "bg-gray-400 dark:bg-slate-500"
-                                    }`}
-                                ></span>
-                                <span className="text-xs font-bold theme-text-secondary uppercase tracking-wide">
-                                    {hasLocation
-                                        ? "Lokasi Saat Ini"
-                                        : "Lokasi Belum Diatur"}
+                {/* HEADER & TABS */}
+                <div className="flex-none px-6 pt-6 border-b theme-border z-20 theme-canvas">
+                    <div className="flex items-start justify-between mb-6">
+                        {/* LEFT: Title & Info */}
+                        <div className="flex-1 pr-8">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-action-primary/20 text-action-primary uppercase tracking-wider">
+                                    Area Utama
                                 </span>
                             </div>
-                            <span className="material-symbols-outlined theme-text-muted text-[16px]">
-                                my_location
-                            </span>
-                        </div>
-                        <div className="p-4 grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
-                                    Lintang
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.000001"
-                                    value={currentLat || ""}
-                                    placeholder="-"
-                                    onChange={(e) =>
-                                        handleInputChange("lat", e.target.value)
-                                    }
-                                    className="w-full theme-input border theme-border rounded px-2 py-1.5 text-sm theme-text font-mono focus:border-primary focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] uppercase font-bold theme-text-muted mb-1 block">
-                                    Bujur
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.000001"
-                                    value={currentLng || ""}
-                                    placeholder="-"
-                                    onChange={(e) =>
-                                        handleInputChange("lng", e.target.value)
-                                    }
-                                    className="w-full theme-input border theme-border rounded px-2 py-1.5 text-sm theme-text font-mono focus:border-primary focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600"
-                                />
-                            </div>
+                            <h2 className="text-2xl font-bold theme-text mb-1">
+                                {area.name}
+                            </h2>
+                            <p className="theme-text-secondary text-sm max-w-xl">
+                                Kelola Posisi Area utama serta Scene yang ada di
+                                dalam Area ini.
+                            </p>
                         </div>
                     </div>
+
+                    {/* Tabs (Compact) */}
+                    <div className="flex w-full justify-start gap-6 border-b border-transparent">
+                        <button
+                            onClick={() => setActiveTab("area_map")}
+                            className={`text-sm font-bold pb-3 px-1 border-b-2 transition-all ${
+                                activeTab === "area_map"
+                                    ? "border-action-primary text-action-primary"
+                                    : "border-transparent theme-text-secondary hover:text-action-primary"
+                            }`}
+                        >
+                            Peta Area
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("scene_map")}
+                            className={`text-sm font-bold pb-3 px-1 border-b-2 transition-all ${
+                                activeTab === "scene_map"
+                                    ? "border-action-primary text-action-primary"
+                                    : "border-transparent theme-text-secondary hover:text-action-primary"
+                            }`}
+                        >
+                            Peta Scene
+                        </button>
+                    </div>
+                </div>
+
+                {/* CONTENT */}
+                <div className="flex-1 relative">
+                    {/* 1. PETA AREA (Existing MapContainer) */}
+                    {activeTab === "area_map" && (
+                        <div className="absolute inset-0 z-0">
+                            <MapContainer
+                                center={
+                                    hasLocation
+                                        ? [currentLat, currentLng]
+                                        : [mapCenterLat, mapCenterLng]
+                                }
+                                zoom={hasLocation ? 16 : 14}
+                                style={{ height: "100%", width: "100%" }}
+                                className="opacity-90"
+                                zoomControl={false}
+                                attributionControl={false}
+                            >
+                                {/* Satellite Base Layer */}
+                                <TileLayer
+                                    url={MAP_CONFIG.TILES.SATELLITE.URL}
+                                />
+
+                                <LocationPicker
+                                    isActive={isPickingMode}
+                                    onPick={handleLocationSelect}
+                                />
+
+                                {/* Only center map if we have a location AND not picking (to avoid jumping while picking) */}
+                                {hasLocation && !isPickingMode && (
+                                    <MapUpdater
+                                        center={[currentLat, currentLng]}
+                                    />
+                                )}
+
+                                {/* Temp marker when picking */}
+                                {tempLocation && (
+                                    <Marker
+                                        position={[
+                                            tempLocation.lat,
+                                            tempLocation.lng,
+                                        ]}
+                                        icon={activeIcon}
+                                        zIndexOffset={2000}
+                                    >
+                                        <Tooltip
+                                            permanent
+                                            direction="right"
+                                            offset={[15, -20]}
+                                        >
+                                            Lokasi Sementara
+                                        </Tooltip>
+                                    </Marker>
+                                )}
+
+                                {/* Render All Level 1 Markers */}
+                                {allAreas
+                                    .filter((a) => {
+                                        // Only show Level 1 areas that have valid coordinates
+                                        const isLevel1 =
+                                            a.level === 1 || !a.parent_id;
+                                        const hasCoords =
+                                            a.lat != null && a.lng != null;
+                                        return isLevel1 && hasCoords;
+                                    })
+                                    .map((node) => {
+                                        const nodeLat = parseFloat(
+                                            node.lat || node.latitude
+                                        );
+                                        const nodeLng = parseFloat(
+                                            node.lng || node.longitude
+                                        );
+                                        const isActive = node.id === area.id;
+
+                                        // Skip if invalid coords
+                                        if (!nodeLat || !nodeLng) return null;
+
+                                        return (
+                                            <Marker
+                                                key={node.id}
+                                                position={[nodeLat, nodeLng]}
+                                                icon={
+                                                    isActive
+                                                        ? activeIcon
+                                                        : normalIcon
+                                                }
+                                                zIndexOffset={
+                                                    isActive ? 1000 : 0
+                                                }
+                                            >
+                                                {isActive && (
+                                                    <Tooltip
+                                                        direction="right"
+                                                        offset={[15, -20]}
+                                                        opacity={1}
+                                                        permanent
+                                                        className="custom-tooltip"
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                fontWeight:
+                                                                    "bold",
+                                                                fontSize:
+                                                                    "12px",
+                                                                color: "#dc2626",
+                                                            }}
+                                                        >
+                                                            {node.name}
+                                                        </span>
+                                                    </Tooltip>
+                                                )}
+                                                <Popup>{node.name}</Popup>
+                                            </Marker>
+                                        );
+                                    })}
+                            </MapContainer>
+
+                            {/* COLLAPSIBLE MAP CONTROL (Top Right) */}
+                            <div className="absolute top-4 right-4 z-[400] bg-white/90 dark:bg-slate-800/90 backdrop-blur shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 transition-all duration-300 ease-in-out overflow-hidden flex flex-col items-end">
+                                {/* Toggle Header */}
+                                <div
+                                    className="px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                    onClick={() =>
+                                        setIsLocationExpanded(
+                                            !isLocationExpanded
+                                        )
+                                    }
+                                >
+                                    <div className="flex flex-col items-end">
+                                        <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                            Koordinat Area
+                                        </div>
+                                        {hasLocation ? (
+                                            <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200">
+                                                {currentLat.toFixed(6)},{" "}
+                                                {currentLng.toFixed(6)}
+                                            </div>
+                                        ) : (
+                                            <div className="text-xs font-bold text-amber-500 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[14px]">
+                                                    warning
+                                                </span>
+                                                Belum Diatur
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div
+                                        className={`p-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 transition-transform duration-300 ${
+                                            isLocationExpanded
+                                                ? "rotate-90"
+                                                : ""
+                                        }`}
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">
+                                            chevron_right
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Expanded Content */}
+                                <div
+                                    className={`w-64 transition-all duration-300 ease-in-out ${
+                                        isLocationExpanded
+                                            ? "max-h-60 opacity-100 border-t border-slate-200 dark:border-slate-700"
+                                            : "max-h-0 opacity-0"
+                                    }`}
+                                >
+                                    <div className="p-4 space-y-4">
+                                        {/* Inputs */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] uppercase font-bold text-slate-400">
+                                                    Latitude
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.000001"
+                                                    value={currentLat || ""}
+                                                    placeholder="0.0"
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            "lat",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full text-xs font-mono p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 outline-none"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] uppercase font-bold text-slate-400">
+                                                    Longitude
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.000001"
+                                                    value={currentLng || ""}
+                                                    placeholder="0.0"
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            "lng",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full text-xs font-mono p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 outline-none"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        {!isPickingMode ? (
+                                            <button
+                                                onClick={() =>
+                                                    setIsPickingMode(true)
+                                                }
+                                                className="w-full py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-2 transition-all"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">
+                                                    edit_location
+                                                </span>
+                                                Pilih di Peta
+                                            </button>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setIsPickingMode(false);
+                                                        setTempLocation(null);
+                                                    }}
+                                                    className="py-2 px-3 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold flex items-center justify-center gap-1 transition-all"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px]">
+                                                        close
+                                                    </span>
+                                                    Batal
+                                                </button>
+                                                <button
+                                                    onClick={handleSaveLocation}
+                                                    disabled={!tempLocation}
+                                                    className="py-2 px-3 rounded-lg bg-primary text-white hover:bg-primary/90 text-xs font-bold flex items-center justify-center gap-1 transition-all disabled:opacity-50"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px]">
+                                                        save
+                                                    </span>
+                                                    Simpan
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {isPickingMode && (
+                                            <div className="text-[10px] text-center text-slate-400 bg-slate-50 dark:bg-slate-900 p-2 rounded border border-dashed border-slate-200 dark:border-slate-700">
+                                                Klik pada peta untuk menandai
+                                                lokasi baru.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 2. PETA SCENE (New) */}
+                    {activeTab === "scene_map" && (
+                        <div className="absolute inset-0 bg-slate-100 dark:bg-black">
+                            <SceneMapTab
+                                area={area}
+                                allScenes={allChildScenes}
+                                onUpdateScene={onUpdate}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         );
     }
 
-    // Level 2 (Sub-Area Grid View) - and Fallback
+    // Level 2 (Sub-Area Grid View) - As requested, keeping this simple (User manual edits)
     return (
         <div className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas font-display">
             {/* Background - Clean, no grid */}
@@ -377,7 +507,7 @@ export default function AreaOverviewView({
                 <div className="w-full max-w-5xl mb-8 flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-action-primary/20 text-action-primary uppercase tracking-wider">
                                 Zona
                             </span>
                         </div>

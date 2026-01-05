@@ -49,7 +49,7 @@ export default function SceneContainerView({
                 <div className="w-full max-w-6xl mb-8 flex items-end justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-action-primary/20 text-action-primary uppercase tracking-wider">
                                 Ruangan
                             </span>
                         </div>
