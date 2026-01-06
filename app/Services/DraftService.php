@@ -71,6 +71,7 @@ class DraftService
             'lat' => $liveArea->lat,
             'lng' => $liveArea->lng,
             'is_restricted' => $liveArea->is_restricted ?? false,
+            'is_hidden' => $liveArea->is_hidden ?? false,
             'marked_for_deletion' => false,
         ]);
 
@@ -562,7 +563,7 @@ class DraftService
 
         // Define attributes to compare per type
         if ($type === 'Area')
-            $attributes = ['name', 'description', 'lat', 'lng', 'priority', 'is_restricted', 'level', 'is_container'];
+            $attributes = ['name', 'description', 'lat', 'lng', 'priority', 'is_restricted', 'is_hidden', 'level', 'is_container'];
         elseif ($type === 'Scene')
             $attributes = ['name', 'heading', 'can_be_gateway', 'lat', 'lng'];
         elseif ($type === 'Link')

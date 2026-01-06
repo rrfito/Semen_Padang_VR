@@ -156,6 +156,7 @@ class PublishService
             'lat' => $draft->lat,
             'lng' => $draft->lng,
             'is_restricted' => $draft->is_restricted,
+            'is_hidden' => $draft->is_hidden,
             'updated_at' => $draft->updated_at, // Sync timestamps?
         ];
 

@@ -541,6 +541,49 @@ export default function PropertiesPanel({
                                 </p>
                             </div>
                         </label>
+
+                        {/* Hidden Toggle */}
+                        <label
+                            className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                activeNode.is_hidden
+                                    ? "bg-purple-50 dark:bg-purple-500/5 border-purple-300 dark:border-purple-500/30"
+                                    : "theme-input theme-border hover:border-primary/30"
+                            }`}
+                        >
+                            <div className="pt-0.5">
+                                <input
+                                    type="checkbox"
+                                    className="bg-gray-200 dark:bg-[#233648] border-gray-400 dark:border-slate-600 rounded text-purple-500 focus:ring-0 focus:ring-offset-0"
+                                    checked={activeNode.is_hidden || false}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "is_hidden",
+                                            e.target.checked
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 theme-text text-xs font-bold mb-0.5">
+                                    <span
+                                        className={`material-symbols-outlined text-[16px] ${
+                                            activeNode.is_hidden
+                                                ? "text-purple-500"
+                                                : "theme-text-muted"
+                                        }`}
+                                    >
+                                        {activeNode.is_hidden
+                                            ? "visibility_off"
+                                            : "visibility"}
+                                    </span>
+                                    Sembunyikan Sementara
+                                </div>
+                                <p className="text-[10px] theme-text-muted leading-snug">
+                                    Area ini disembunyikan dari semua pengguna
+                                    di tampilan depan.
+                                </p>
+                            </div>
+                        </label>
                     </div>
                 )}
 

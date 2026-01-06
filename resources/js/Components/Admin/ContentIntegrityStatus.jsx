@@ -6,10 +6,16 @@ import {
     FaMapMarkerAlt,
     FaSync,
 } from "react-icons/fa";
+import { MdLocationOff } from "react-icons/md";
 
 export default function ContentIntegrityStatus({ stats }) {
-    const { draftMismatch, orphanScenes, brokenLinks, scenesWithoutGps } =
-        stats;
+    const {
+        draftMismatch,
+        orphanScenes,
+        brokenLinks,
+        scenesWithoutGps,
+        areasWithoutGps,
+    } = stats;
 
     const MetricItem = ({ label, count, icon: Icon, colorClass, helpText }) => {
         // Determine severity color based on count
@@ -86,11 +92,19 @@ export default function ContentIntegrityStatus({ stats }) {
                 />
 
                 <MetricItem
-                    label="GPS Hilang"
+                    label="Scene Tanpa GPS"
                     count={scenesWithoutGps}
                     icon={FaMapMarkerAlt}
                     colorClass="warning"
-                    helpText="Data lokasi tidak ada"
+                    helpText="Data lokasi scene tidak ada"
+                />
+
+                <MetricItem
+                    label="Area Tanpa GPS"
+                    count={areasWithoutGps}
+                    icon={MdLocationOff}
+                    colorClass="info"
+                    helpText="Data lokasi area tidak ada"
                 />
             </div>
 

@@ -1,23 +1,23 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 
-export default function RestrictedAreaPanel({ areas = [] }) {
+export default function VisibilityAreaPanel({ areas = [] }) {
     return (
         <div className="rounded-xl theme-card p-6 flex flex-col h-full font-display">
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <h3 className="theme-text text-lg font-bold">
-                        Akses Terbatas
+                        Disembunyikan
                     </h3>
                     <p className="theme-text-secondary text-xs">
-                        Hanya Pegawai & Admin yang dapat melihat.
+                        Tidak terlihat di tampilan depan.
                     </p>
                 </div>
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-amber-500 text-[18px]">
-                        lock
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-purple-500 text-[18px]">
+                        visibility_off
                     </span>
-                    <span className="text-amber-500 font-bold text-sm">
+                    <span className="text-purple-500 font-bold text-sm">
                         {areas.length}
                     </span>
                 </div>
@@ -26,10 +26,10 @@ export default function RestrictedAreaPanel({ areas = [] }) {
             <div className="flex flex-col gap-2 overflow-y-auto custom-scrollbar flex-1 max-h-[200px] pr-2">
                 {areas.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-24 text-center theme-text-secondary">
-                        <span className="material-symbols-outlined text-2xl mb-1 opacity-50 text-amber-500">
-                            lock_open
+                        <span className="material-symbols-outlined text-2xl mb-1 opacity-50 text-purple-500">
+                            visibility
                         </span>
-                        <p className="text-xs">Tidak ada area terbatas.</p>
+                        <p className="text-xs">Tidak ada area disembunyikan.</p>
                     </div>
                 ) : (
                     areas.map((area, index) => (
@@ -38,9 +38,9 @@ export default function RestrictedAreaPanel({ areas = [] }) {
                             className="flex items-center justify-between p-3 bg-slate-50 dark:bg-[#111a22]/50 border theme-border rounded-lg hover:bg-slate-100 dark:hover:bg-[#111a22] transition-colors"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="bg-amber-500/10 text-amber-500 p-2 rounded-lg">
+                                <div className="bg-purple-500/10 text-purple-500 p-2 rounded-lg">
                                     <span className="material-symbols-outlined text-[18px]">
-                                        lock
+                                        visibility_off
                                     </span>
                                 </div>
                                 <div className="flex flex-col">

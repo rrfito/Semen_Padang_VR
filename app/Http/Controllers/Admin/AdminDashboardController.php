@@ -70,32 +70,47 @@ class AdminDashboardController extends Controller
             ->orderBy('name')
             ->get()
             ->map(function ($area) {
+                // Get draft ID for Editor navigation
+                $draft = AreaDraft::where('published_id', $area->id)->first();
                 return [
                     'id' => $area->id,
+                    'draft_id' => $draft?->id,
                     'name' => $area->name,
-                    'icon' => 'lock',
-                    'type' => 'restricted',
-                    'action' => 'view',
-                    'description' => $area->description, // Optional
+                    'description' => $area->description,
+                ];
+            });
+
+        // 4. Hidden Areas
+        $hiddenAreas = Area::where('is_hidden', true)
+            ->select('id', 'name', 'description')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($area) {
+                // Get draft ID for Editor navigation
+                $draft = AreaDraft::where('published_id', $area->id)->first();
+                return [
+                    'id' => $area->id,
+                    'draft_id' => $draft?->id,
+                    'name' => $area->name,
+                    'description' => $area->description,
                 ];
             });
 
         // Calculate Integrity Metrics (Read-Only Diagnostic)
         $integrityStats = [
-
             'orphanScenes' => \App\Models\Scene::doesntHave('outgoingLinks')
-
                 ->orWhereDoesntHave('area')
                 ->count(),
             'brokenLinks' => \App\Models\Link::doesntHave('targetScene')->count(),
             'scenesWithoutGps' => \App\Models\Scene::whereNull('location')->count(),
+            'areasWithoutGps' => Area::whereNull('lat')->orWhereNull('lng')->count(),
         ];
-
         return Inertia::render('Admin/AdminDashboard', [
             'stats' => $stats,
             'draftStats' => $draftStats,
             'integrityStats' => $integrityStats, // New Integrity Data
             'restrictedAreas' => $restrictedAreas,
+            'hiddenAreas' => $hiddenAreas,
         ]);
     }
 

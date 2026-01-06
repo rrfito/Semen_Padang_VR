@@ -19,6 +19,7 @@ export const EDITOR_CONFIG = {
       priority: "Urutan Prioritas",
       content_type: "Tipe Konten",
       is_restricted: "Status Akses",
+      is_hidden: "Status Tampilan",
 
       // Coordinates
       lat: "Latitude (Koordinat)",

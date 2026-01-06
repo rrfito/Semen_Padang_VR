@@ -37,6 +37,10 @@ const formatValue = (field, value) => {
             return value ? "🔒 Terbatas" : "🌐 Publik";
         }
 
+        if (field === "is_hidden") {
+            return value ? "👁️‍🗨️ Disembunyikan" : "👁️ Terlihat";
+        }
+
         return value ? "Ya" : "Tidak";
     }
 

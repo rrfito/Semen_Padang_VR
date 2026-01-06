@@ -17,11 +17,13 @@ class Area extends Model
         'lat',
         'lng',
         'is_restricted',
+        'is_hidden',
     ];
 
     protected $casts = [
         'is_container' => 'boolean',
         'is_restricted' => 'boolean',
+        'is_hidden' => 'boolean',
         'lat' => 'decimal:8',
         'lng' => 'decimal:8',
     ];
@@ -53,6 +55,11 @@ class Area extends Model
     public function scopeLeafAreas($query)
     {
         return $query->where('is_container', false);
+    }
+
+    public function scopeVisible($query)
+    {
+        return $query->where('is_hidden', false);
     }
 
     public function scopeAccessibleBy($query, $user)

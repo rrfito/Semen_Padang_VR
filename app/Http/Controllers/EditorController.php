@@ -113,6 +113,7 @@ class EditorController extends Controller
             'is_container' => (bool) $draft->is_container,
             'type' => 'area',
             'is_restricted' => (bool) $draft->is_restricted,
+            'is_hidden' => (bool) $draft->is_hidden,
             'priority' => $draft->priority,
             'parent_id' => $draft->parent_id,
             'status' => 'draft', // Identify as draft
@@ -198,6 +199,7 @@ class EditorController extends Controller
             'lat' => 'nullable|numeric',
             'lng' => 'nullable|numeric',
             'is_restricted' => 'sometimes|boolean',
+            'is_hidden' => 'sometimes|boolean',
             'priority' => 'sometimes|integer',
         ]);
         $area->update($validated);

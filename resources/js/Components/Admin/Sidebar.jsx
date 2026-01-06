@@ -14,11 +14,31 @@ export default function Sidebar() {
                         {/* Edit Mode Section */}
                         <div className="px-2">
                             <p className="text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
-                                Mode Edit
+                                Akses Cepat
                             </p>
+
+                            {/* Virtual Tour Button */}
+                            <Link
+                                href={route("tour.index")}
+                                className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg mb-2  theme-btn-primary"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined">
+                                        view_in_ar
+                                    </span>
+                                    <p className="text-sm font-bold leading-normal">
+                                        Virtual Tour
+                                    </p>
+                                </div>
+                                <span className="material-symbols-outlined text-[18px] opacity-70 group-hover:translate-x-1 transition-transform">
+                                    arrow_forward
+                                </span>
+                            </Link>
+
+                            {/* Visual Editor Button */}
                             <Link
                                 href={route("admin.editor.index")}
-                                className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 transition-all group"
+                                className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg mb-2  theme-btn-primary"
                             >
                                 <div className="flex items-center gap-3">
                                     <span className="material-symbols-outlined fill-1">
@@ -47,14 +67,14 @@ export default function Sidebar() {
                                     href={route("admin.dashboard")}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
                                         route().current("admin.dashboard")
-                                            ? "bg-slate-200 dark:bg-[#233648] theme-text border-primary"
-                                            : "theme-text-secondary hover:bg-slate-100 dark:hover:bg-[#233648] hover:theme-text border-transparent"
+                                            ? "theme-sidebar-item-active"
+                                            : "theme-sidebar-item border-l-2 border-l-transparent"
                                     }`}
                                 >
                                     <span
                                         className={`material-symbols-outlined ${
                                             route().current("admin.dashboard")
-                                                ? "text-primary"
+                                                ? "text-action-primary"
                                                 : ""
                                         }`}
                                     >
@@ -70,11 +90,19 @@ export default function Sidebar() {
                                     href={route("admin.user-management")}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
                                         route().current("admin.user-management")
-                                            ? "bg-slate-200 dark:bg-[#233648] theme-text border-primary"
-                                            : "theme-text-secondary hover:bg-slate-100 dark:hover:bg-[#233648] hover:theme-text border-transparent"
+                                            ? "theme-sidebar-item-active"
+                                            : "theme-sidebar-item border-l-2 border-l-transparent"
                                     }`}
                                 >
-                                    <span className="material-symbols-outlined">
+                                    <span
+                                        className={`material-symbols-outlined ${
+                                            route().current(
+                                                "admin.user-management"
+                                            )
+                                                ? "text-action-primary"
+                                                : ""
+                                        }`}
+                                    >
                                         group
                                     </span>
                                     <p className="text-sm font-medium leading-normal">

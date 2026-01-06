@@ -27,6 +27,7 @@ class TourController extends Controller
         $menuQuery = Area::whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
+            ->visible()
             ->accessibleBy($user)
             ->with([
                 // LEVEL 2
@@ -45,6 +46,7 @@ class TourController extends Controller
         $areaQuery = Area::query()
             ->orderBy('priority')
             ->orderBy('name')
+            ->visible()
             ->accessibleBy($user)
             ->with([
                 'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
@@ -117,6 +119,7 @@ class TourController extends Controller
         $menuQuery = Area::whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
+            ->visible()
             ->accessibleBy($user)
             ->with([
                 'children' => fn($q) => $q->accessibleBy($user)->with([
@@ -135,6 +138,7 @@ class TourController extends Controller
             ->whereNotNull('lng')
             ->orderBy('priority')
             ->orderBy('name')
+            ->visible()
             ->accessibleBy($user)
             ->with([
                 'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
@@ -207,7 +211,7 @@ class TourController extends Controller
                     // Cascading Restriction Check
                     $area = $link->targetScene->area;
                     while ($area) {
-                        if ($area->is_restricted)
+                        if ($area->is_restricted || $area->is_hidden)
                             return false;
                         $area = $area->parent;
                     }

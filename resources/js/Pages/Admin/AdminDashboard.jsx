@@ -4,6 +4,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import DashboardStats from "@/Components/Admin/DashboardStats";
 import DraftStatusBanner from "@/Components/Admin/DraftStatusBanner";
 import RestrictedAreaPanel from "@/Components/Admin/RestrictedAreaPanel";
+import VisibilityAreaPanel from "@/Components/Admin/VisibilityAreaPanel";
 import ContentIntegrityStatus from "@/Components/Admin/ContentIntegrityStatus";
 
 export default function AdminDashboard({
@@ -11,6 +12,7 @@ export default function AdminDashboard({
     draftStats,
     integrityStats,
     restrictedAreas,
+    hiddenAreas,
 }) {
     return (
         <AdminLayout>
@@ -35,9 +37,13 @@ export default function AdminDashboard({
 
                 {/* 3. MAIN DASHBOARD CONTENT GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* LEFT: Restricted Areas List */}
-                    <div className="lg:col-span-2">
+                    {/* LEFT COLUMN: Visibility Panels */}
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Restricted Access Panel */}
                         <RestrictedAreaPanel areas={restrictedAreas} />
+
+                        {/* Hidden Areas Panel */}
+                        <VisibilityAreaPanel areas={hiddenAreas} />
                     </div>
 
                     {/* RIGHT: Content Integrity Status */}

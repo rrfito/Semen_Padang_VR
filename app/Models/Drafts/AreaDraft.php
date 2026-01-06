@@ -23,12 +23,14 @@ class AreaDraft extends Model
         'lat',
         'lng',
         'is_restricted',
+        'is_hidden',
         'marked_for_deletion'
     ];
 
     protected $casts = [
         'is_container' => 'boolean',
         'is_restricted' => 'boolean',
+        'is_hidden' => 'boolean',
         'marked_for_deletion' => 'boolean',
         'level' => 'integer',
         'priority' => 'integer',
