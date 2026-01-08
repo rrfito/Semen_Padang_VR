@@ -212,18 +212,21 @@ export default function VisualEditor({
 
         // If it's a scene, fetch details if not in cache
         if (node.type === "scene") {
-            // OPTIMIZATION: Use pre-loaded data if available (links/image_url)
-            if (node.links && node.image_url) {
-                // console.log("Using pre-loaded scene data for:", node.name);
-                setSceneCache((prev) => ({
-                    ...prev,
-                    [node.id]: node,
-                }));
+            // If already in cache, keep cached version (may have newer data from edits)
+            // Only use pre-loaded hierarchy data or fetch if NOT in cache
+            if (!sceneCache[node.id]) {
+                if (node.links && node.image_url) {
+                    // Use pre-loaded data from hierarchy
+                    setSceneCache((prev) => ({
+                        ...prev,
+                        [node.id]: node,
+                    }));
+                } else {
+                    // Fetch from API
+                    fetchSceneDetails(node.id);
+                }
             }
-            // Fallback: Fetch if not in cache AND not pre-loaded
-            else if (!sceneCache[node.id]) {
-                fetchSceneDetails(node.id);
-            }
+            // If in cache already, do nothing - use existing cached data
         }
     };
 
@@ -942,9 +945,8 @@ export default function VisualEditor({
                                 input.click();
                             }
                         }}
-                        onAutoLink={(area) =>
-                            setAutoLinkModal({ isOpen: true, area })
-                        }
+                        onSelectChild={(child) => handleSelect(child)}
+                        showStatusLabels={showStatusLabels}
                     />
                 );
             }
@@ -1007,6 +1009,8 @@ export default function VisualEditor({
                             input.click();
                         }
                     }}
+                    onSelectChild={(child) => handleSelect(child)}
+                    showStatusLabels={showStatusLabels}
                 />
             );
         }

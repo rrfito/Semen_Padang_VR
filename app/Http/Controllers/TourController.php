@@ -31,10 +31,10 @@ class TourController extends Controller
             ->accessibleBy($user)
             ->with([
                 // LEVEL 2
-                'children' => fn($q) => $q->accessibleBy($user)->with([
+                'children' => fn($q) => $q->visible()->accessibleBy($user)->with([
                     'scenes' => fn($q) => $q->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id'),
                     // LEVEL 3
-                    'children' => fn($q2) => $q2->accessibleBy($user)->with([
+                    'children' => fn($q2) => $q2->visible()->accessibleBy($user)->with([
                         'scenes' => fn($q) => $q->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id')
                     ])
                 ]),
@@ -51,9 +51,9 @@ class TourController extends Controller
             ->with([
                 'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
                 // Eager load hierarchy for recursive collector
-                'children' => fn($q) => $q->accessibleBy($user)->with([
+                'children' => fn($q) => $q->visible()->accessibleBy($user)->with([
                     'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
-                    'children' => fn($q2) => $q2->accessibleBy($user)->with([
+                    'children' => fn($q2) => $q2->visible()->accessibleBy($user)->with([
                         'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location')
                     ])
                 ])
@@ -122,9 +122,9 @@ class TourController extends Controller
             ->visible()
             ->accessibleBy($user)
             ->with([
-                'children' => fn($q) => $q->accessibleBy($user)->with([
+                'children' => fn($q) => $q->visible()->accessibleBy($user)->with([
                     'scenes' => fn($q) => $q->select('id', 'area_id')->orderBy('created_at')->orderBy('id'),
-                    'children' => fn($q2) => $q2->accessibleBy($user)->with([
+                    'children' => fn($q2) => $q2->visible()->accessibleBy($user)->with([
                         'scenes' => fn($q) => $q->select('id', 'area_id')->orderBy('created_at')->orderBy('id')
                     ])
                 ]),
@@ -142,9 +142,9 @@ class TourController extends Controller
             ->accessibleBy($user)
             ->with([
                 'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
-                'children' => fn($q) => $q->accessibleBy($user)->with([
+                'children' => fn($q) => $q->visible()->accessibleBy($user)->with([
                     'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
-                    'children' => fn($q2) => $q2->accessibleBy($user)->with([
+                    'children' => fn($q2) => $q2->visible()->accessibleBy($user)->with([
                         'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location')
                     ])
                 ])
@@ -205,16 +205,24 @@ class TourController extends Controller
                     if (is_null($link->target_scene_id) || !$link->targetScene)
                         return false;
 
-                    if ($isPegawai)
-                        return true;
-
-                    // Cascading Restriction Check
+                    // 1. Check is_hidden (applies to ALL users, even pegawai)
                     $area = $link->targetScene->area;
                     while ($area) {
-                        if ($area->is_restricted || $area->is_hidden)
+                        if ($area->is_hidden)
                             return false;
                         $area = $area->parent;
                     }
+
+                    // 2. Check is_restricted (only for non-pegawai)
+                    if (!$isPegawai) {
+                        $area = $link->targetScene->area;
+                        while ($area) {
+                            if ($area->is_restricted)
+                                return false;
+                            $area = $area->parent;
+                        }
+                    }
+
                     return true;
                 })
                 ->map(fn($link) => [

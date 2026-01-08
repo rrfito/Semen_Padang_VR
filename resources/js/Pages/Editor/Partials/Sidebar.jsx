@@ -443,12 +443,12 @@ export default function Sidebar({
                         <>
                             {node.status === "new" && (
                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                                    NEW
+                                    BARU
                                 </span>
                             )}
                             {node.status === "modified" && (
                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                    MOD
+                                    DIUBAH
                                 </span>
                             )}
                         </>

@@ -154,7 +154,7 @@ export default function Register() {
                                     onChange={(e) =>
                                         setData("email", e.target.value)
                                     }
-                                    placeholder="nama@semenpadang.co.id"
+                                    placeholder="nama@gmail.com"
                                     required
                                 />
                             </div>

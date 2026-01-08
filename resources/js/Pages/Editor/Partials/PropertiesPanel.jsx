@@ -282,12 +282,12 @@ export default function PropertiesPanel({
                             <>
                                 {activeNode.status === "new" && (
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20 shrink-0">
-                                        NEW
+                                        BARU
                                     </span>
                                 )}
                                 {activeNode.status === "modified" && (
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
-                                        MODIFIED
+                                        DIUBAH
                                     </span>
                                 )}
                             </>
@@ -331,6 +331,59 @@ export default function PropertiesPanel({
                             }
                             placeholder="Tambahkan deskripsi..."
                         />
+                    </div>
+                )}
+
+                {/* 3. GPS Location - ONLY for Areas */}
+                {selection.type === "area" && (
+                    <div className="space-y-3 pt-4 border-t theme-border">
+                        <SectionHeader>Lokasi Area</SectionHeader>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
+                                    Lintang
+                                </label>
+                                <FormInput
+                                    type="number"
+                                    step="any"
+                                    value={activeNode.lat || ""}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "lat",
+                                            parseFloat(e.target.value) || 0
+                                        )
+                                    }
+                                    placeholder="0.0000"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold theme-text-muted uppercase tracking-wide mb-1.5">
+                                    Bujur
+                                </label>
+                                <FormInput
+                                    type="number"
+                                    step="any"
+                                    value={activeNode.lng || ""}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "lng",
+                                            parseFloat(e.target.value) || 0
+                                        )
+                                    }
+                                    placeholder="0.0000"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowMapPicker(true)}
+                            className="w-full flex items-center justify-center gap-2 h-9 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 theme-text-secondary font-bold text-xs rounded-lg border theme-border transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">
+                                explore
+                            </span>
+                            Lokasi dari Peta
+                        </button>
                     </div>
                 )}
 
