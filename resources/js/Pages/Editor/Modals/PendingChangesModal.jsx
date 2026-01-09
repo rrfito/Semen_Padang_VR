@@ -255,7 +255,10 @@ export default function PendingChangesModal({
 
     return (
         <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-border-light dark:border-border-dark">
+            <div
+                id="modal-pending-changes"
+                className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-border-light dark:border-border-dark"
+            >
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#15202b]">
                     <div>
@@ -494,6 +497,7 @@ export default function PendingChangesModal({
                 <div className="px-6 py-4 border-t border-border-light dark:border-border-dark flex items-center justify-between bg-gray-100 dark:bg-[#111a22]">
                     {/* Discard Button (Far Left) */}
                     <button
+                        id="btn-discard-all"
                         onClick={() => setShowDiscardConfirm(true)}
                         disabled={loading || data.summary.total_changes === 0}
                         className="theme-btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
@@ -506,6 +510,7 @@ export default function PendingChangesModal({
 
                     <div className="flex gap-3">
                         <button
+                            id="btn-publish"
                             onClick={() => setShowConfirm(true)}
                             disabled={
                                 loading || data.summary.total_changes === 0

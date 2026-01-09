@@ -26,6 +26,9 @@ import NotificationModal from "@/Components/Editor/NotificationModal";
 import { ThemeProvider } from "@/Contexts/ThemeContext";
 import { EDITOR_CONFIG } from "@/Config/EditorConfig";
 
+// Onboarding Tour
+import useEditorTourGuide from "@/Hooks/useEditorTourGuide";
+
 export default function VisualEditor({
     hierarchy: initialHierarchy,
     modifiedNodes,
@@ -143,6 +146,30 @@ export default function VisualEditor({
             autoClose,
         });
     };
+
+    // --- DETERMINE CURRENT VIEW ---
+    const getCurrentViewType = () => {
+        if (!selection) return "welcome";
+        if (selection.type === "scene") return "scene";
+        if (selection.type === "area") {
+            if (selection.is_container === false) return "sceneContainer";
+            return "area";
+        }
+        return "welcome";
+    };
+
+    // --- TOUR GUIDE ---
+    const { tourActive, isPaused, startTour, resumeTour, resetTour } =
+        useEditorTourGuide({
+            currentView: getCurrentViewType(),
+            selectedArea: selection?.type === "area" ? selection : null,
+            selectedScene: selection?.type === "scene" ? selection : null,
+            isModalOpen:
+                createAreaModal.isOpen ||
+                autoLinkModal.isOpen ||
+                linkTargetModal.isOpen ||
+                showPendingChanges,
+        });
 
     const fetchPendingCount = async () => {
         try {
@@ -914,7 +941,12 @@ export default function VisualEditor({
 
     const renderMainView = () => {
         if (!selection)
-            return <WelcomeView onCreateArea={handleOpenCreateArea} />;
+            return (
+                <WelcomeView
+                    onCreateArea={handleOpenCreateArea}
+                    onStartTour={startTour}
+                />
+            );
 
         if (selection.type === "area") {
             // ROBUST CONTENT-AWARE LOGIC

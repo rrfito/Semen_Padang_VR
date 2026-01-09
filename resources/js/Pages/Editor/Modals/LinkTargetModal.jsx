@@ -130,7 +130,10 @@ export default function LinkTargetModal({
 
     return (
         <div className="theme-modal-backdrop backdrop-blur-sm">
-            <div className="theme-modal w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+            <div
+                id="modal-link-target"
+                className="theme-modal w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]"
+            >
                 {/* Header */}
                 <div className="theme-modal-header flex justify-between items-center">
                     <h3 className="text-lg font-bold theme-text">
@@ -190,6 +193,7 @@ export default function LinkTargetModal({
                             selectedTarget && onConfirm(selectedTarget)
                         }
                         disabled={!selectedTarget}
+                        id="select_target_scene_saved"
                         className="theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Buat Tautan

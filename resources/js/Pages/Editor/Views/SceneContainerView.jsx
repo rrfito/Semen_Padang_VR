@@ -22,7 +22,10 @@ export default function SceneContainerView({
     };
 
     return (
-        <div className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas font-display">
+        <div
+            id="scene-container-view"
+            className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas font-display"
+        >
             {/* Hidden Input */}
             <input
                 type="file"
@@ -61,6 +64,7 @@ export default function SceneContainerView({
                         </p>
                     </div>
                     <button
+                        id="btn-upload-scene"
                         onClick={handleUploadClick}
                         className="flex items-center gap-2 px-5 py-2.5 theme-btn-primary"
                     >
@@ -86,7 +90,10 @@ export default function SceneContainerView({
                 </div>
 
                 {/* Grid */}
-                <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div
+                    id="scene-grid"
+                    className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                >
                     {scenes.map((scene) => {
                         return (
                             <div

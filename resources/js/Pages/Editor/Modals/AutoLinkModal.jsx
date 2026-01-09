@@ -136,7 +136,10 @@ export default function AutoLinkModal({ isOpen, onClose, area, onSuccess }) {
 
     return (
         <div className="theme-modal-backdrop backdrop-blur-sm">
-            <div className="w-full max-w-2xl theme-modal overflow-hidden animate-fade-in-up">
+            <div
+                id="modal-auto-link"
+                className="w-full max-w-2xl theme-modal overflow-hidden animate-fade-in-up"
+            >
                 {/* Header */}
                 <div className="theme-modal-header flex items-center justify-between">
                     <div className="flex items-center gap-3">

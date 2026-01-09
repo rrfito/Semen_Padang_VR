@@ -64,6 +64,7 @@ export default function AreaOverviewView({
                         <div className="flex items-center gap-3">
                             {/* Scene Map Button */}
                             <button
+                                id="btn-scene-map"
                                 onClick={() => setShowSceneMapModal(true)}
                                 className="flex items-center gap-2 px-4 py-2.5 theme-btn-secondary"
                             >
@@ -74,6 +75,7 @@ export default function AreaOverviewView({
                             </button>
                             {/* Add Area Button */}
                             <button
+                                id="btn-add-sub-area"
                                 onClick={() =>
                                     onCreateChild && onCreateChild(area.id)
                                 }
@@ -104,7 +106,10 @@ export default function AreaOverviewView({
 
                     {/* Grid of Child Areas */}
                     {area.children && area.children.length > 0 ? (
-                        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div
+                            id="area-children-grid"
+                            className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        >
                             {area.children.map((child) => (
                                 <div
                                     key={child.id}

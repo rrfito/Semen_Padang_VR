@@ -1,8 +1,11 @@
 import React from "react";
 
-export default function WelcomeView({ onSelectExisting }) {
+export default function WelcomeView({ onSelectExisting, onStartTour }) {
     return (
-        <main className="flex-1 relative flex flex-col theme-canvas overflow-hidden group/canvas items-center justify-center font-sans">
+        <main
+            id="panel-quick-start"
+            className="flex-1 relative flex flex-col theme-canvas overflow-hidden group/canvas items-center justify-center font-sans"
+        >
             <div className="absolute inset-0 theme-canvas">
                 <svg
                     className="w-full h-full opacity-[0.03]"
@@ -47,6 +50,17 @@ export default function WelcomeView({ onSelectExisting }) {
                     Pilih area untuk mulai mengedit, atau buat lokasi baru untuk
                     mulai mengelola scene street view Anda.
                 </p>
+
+                {/* Tour Start Button */}
+                {onStartTour && (
+                    <button
+                        id="btn-start-tour"
+                        onClick={onStartTour}
+                        className="px-8 py-4 rounded-xl bg-gradient-to-r from-action-primary to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                    >
+                        Ayo Mulai
+                    </button>
+                )}
             </div>
         </main>
     );

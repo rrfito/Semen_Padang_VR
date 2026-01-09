@@ -502,7 +502,10 @@ export default function Sidebar({
     };
 
     return (
-        <aside className="w-80 flex flex-col border-r theme-border theme-sidebar z-10 font-sans">
+        <aside
+            id="sidebar-hierarchy"
+            className="w-80 flex flex-col border-r theme-border theme-sidebar z-10 font-sans"
+        >
             {/* User Provided Header (Search + Buttons) */}
             <div className="p-4 border-b theme-border space-y-3 shrink-0">
                 <div className="flex gap-2">
@@ -544,6 +547,7 @@ export default function Sidebar({
                 </div>
                 <div className="flex gap-2">
                     <button
+                        id="btn-add-root-area"
                         onClick={onCreateArea}
                         disabled={selection?.type === "scene"}
                         className="flex-1 theme-btn-action-primary"
@@ -560,6 +564,7 @@ export default function Sidebar({
                     </button>
                 </div>
                 <button
+                    id="btn-auto-link"
                     onClick={() => onAutoLink?.(selection)}
                     disabled={!selection || selection?.type === "scene"}
                     className="w-full theme-btn-action-primary"
@@ -601,7 +606,10 @@ export default function Sidebar({
             </div>
 
             {/* Content: Tree or Search Results */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+            <div
+                id="sidebar-area-tree"
+                className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1"
+            >
                 {searchQuery ? (
                     // SEARCH RESULTS MODE
                     searchResults.length > 0 ? (

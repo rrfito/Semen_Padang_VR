@@ -75,7 +75,10 @@ export default function CreateAreaModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="theme-modal max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div
+                id="modal-create-area"
+                className="theme-modal max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+            >
                 {/* Header */}
                 <div className="theme-modal-header flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
@@ -227,7 +230,10 @@ export default function CreateAreaModal({
                                     <label className="theme-form-label block">
                                         Jenis Area Ini
                                     </label>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div
+                                        id="select-area-type"
+                                        className="grid grid-cols-2 gap-3"
+                                    >
                                         <div
                                             onClick={() =>
                                                 setContentType("group")
@@ -296,6 +302,7 @@ export default function CreateAreaModal({
                                     <span className="text-red-500">*</span>
                                 </label>
                                 <input
+                                    id="input-area-name"
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
@@ -356,6 +363,7 @@ export default function CreateAreaModal({
                                 )}
                             </button>
                             <button
+                                id="btn-save-area"
                                 onClick={() => handleSubmit(false)}
                                 disabled={!name.trim() || isLoading}
                                 className="theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"

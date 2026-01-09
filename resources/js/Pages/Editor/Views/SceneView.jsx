@@ -280,8 +280,12 @@ export default function SceneView({
     };
 
     return (
-        <main className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas items-center justify-center h-full w-full">
+        <main
+            id="scene-view"
+            className="flex-1 relative flex flex-col theme-view-canvas overflow-hidden group/canvas items-center justify-center h-full w-full"
+        >
             <div
+                id="scene-canvas"
                 ref={panoRef}
                 className="absolute inset-0 z-0 cursor-move"
             ></div>
@@ -306,7 +310,10 @@ export default function SceneView({
                         </div>
 
                         {/* Action Buttons Row (Below Center) */}
-                        <div className="flex items-center gap-4">
+                        <div
+                            id="add-hotspot-buttons"
+                            className="flex items-center gap-4"
+                        >
                             {/* Button: Navigation */}
                             <button
                                 onClick={() => handleTriggerAdd("navigasi")}
@@ -421,7 +428,10 @@ export default function SceneView({
 
             {/* --- EDIT HOTSPOT PANEL --- */}
             {selectedHotspot && !isAdding && !isRepositioning && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 theme-card backdrop-blur-md rounded-xl shadow-2xl p-3">
+                <div
+                    id="panel-edit-hotspot"
+                    className="absolute top-4 left-1/2 -translate-x-1/2 z-30 theme-card backdrop-blur-md rounded-xl shadow-2xl p-3"
+                >
                     <div className="flex items-center gap-2 mb-2 pb-2 border-b theme-border">
                         <div
                             className={`size-8 rounded-full flex items-center justify-center ${
@@ -544,18 +554,19 @@ export default function SceneView({
 
                     {/* ADD HOTSPOT BUTTON */}
                     <button
+                        id="btn-add-hotspot"
                         onClick={() => setIsAdding(!isAdding)}
                         className={`h-10 flex items-center gap-2 px-3 rounded-lg transition-all font-medium text-sm ${
                             isAdding
                                 ? "bg-primary text-white"
                                 : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary"
                         }`}
-                        title="Tambah Tautan / Hotspot"
+                        title="Tambah  Link"
                     >
                         <span className="material-symbols-outlined text-[20px]">
                             add_location
                         </span>
-                        <span>Tambah Hotspot</span>
+                        <span>Tambah Link</span>
                     </button>
                 </div>
             </div>

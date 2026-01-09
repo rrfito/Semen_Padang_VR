@@ -37,7 +37,10 @@ export default function Header({
     };
 
     return (
-        <header className="h-16 shrink-0 flex items-center justify-between border-b theme-border px-6 theme-surface z-20 font-display">
+        <header
+            id="editor-header"
+            className="h-16 shrink-0 flex items-center justify-between border-b theme-border px-6 theme-surface z-20 font-display"
+        >
             {/* Logo Section */}
             <div className="flex items-center gap-4">
                 <img
@@ -69,7 +72,10 @@ export default function Header({
                 </Link>
 
                 {/* Breadcrumbs */}
-                <div className="flex items-center gap-2 px-4 py-2 theme-surface rounded-lg border theme-border">
+                <div
+                    id="header-nav"
+                    className="flex items-center gap-2 px-4 py-2 theme-surface rounded-lg border theme-border"
+                >
                     <span className="material-symbols-outlined theme-text-muted text-[20px]">
                         home
                     </span>
@@ -130,6 +136,7 @@ export default function Header({
 
                 {/* Review Changes Button */}
                 <button
+                    id="btn-review-changes"
                     onClick={onOpenReview}
                     className={`theme-btn-submit transition-all flex items-center gap-2 ${
                         pendingCount > 0
@@ -149,6 +156,7 @@ export default function Header({
 
                 {/* Theme Toggle Button */}
                 <button
+                    id="btn-theme-toggle"
                     onClick={toggleTheme}
                     className="size-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#2f455a] text-gray-600 dark:text-slate-300 transition-all border border-gray-200 dark:border-transparent"
                     title={
