@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\Area;
 use App\Models\Scene;
 use App\Models\Link;
+use App\Models\InfoSpot;
 use App\Models\Drafts\AreaDraft;
 use App\Models\Drafts\SceneDraft;
 use App\Models\Drafts\LinkDraft;
+use App\Models\Drafts\InfoSpotDraft;
 use App\Models\Drafts\DraftSyncState;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
@@ -26,14 +28,20 @@ class PublishService
             $this->verifyDraftIntegrity($rootDraft);
 
             // 2. Publish Content (Pass 1: Struct & Nodes)
-            $linksToProcess = [];
+            $linksToProcess = ['links' => [], 'infoSpots' => []];
             $this->publishNode($rootDraft, $linksToProcess);
 
             // 3. Publish Links (Pass 2: Connections)
             // Now that all scenes have Live IDs, we can safely link them.
-            foreach ($linksToProcess as $linkDraft) {
+            foreach ($linksToProcess['links'] as $linkDraft) {
                 $this->upsertLink($linkDraft);
             }
+
+            // 3b. Publish Info Spots (Pass 2)
+            foreach ($linksToProcess['infoSpots'] as $infoSpotDraft) {
+                $this->upsertInfoSpot($infoSpotDraft);
+            }
+
             // 4. Post-Publish Integrity Check
             $liveRoot = Area::find($rootDraft->published_id);
 
@@ -94,7 +102,15 @@ class PublishService
                 if ($link->marked_for_deletion) {
                     $this->forceDeleteNode($link);
                 } else {
-                    $linksToProcess[] = $link;
+                    $linksToProcess['links'][] = $link;
+                }
+            }
+            // Collect Info Spots for Pass 2
+            foreach ($draft->infoSpots as $infoSpot) {
+                if ($infoSpot->marked_for_deletion) {
+                    $this->forceDeleteNode($infoSpot);
+                } else {
+                    $linksToProcess['infoSpots'][] = $infoSpot;
                 }
             }
         } elseif ($draft instanceof LinkDraft) {
@@ -102,7 +118,13 @@ class PublishService
             if ($draft->marked_for_deletion) {
                 $this->forceDeleteNode($draft);
             } else {
-                $linksToProcess[] = $draft;
+                $linksToProcess['links'][] = $draft;
+            }
+        } elseif ($draft instanceof InfoSpotDraft) {
+            if ($draft->marked_for_deletion) {
+                $this->forceDeleteNode($draft);
+            } else {
+                $linksToProcess['infoSpots'][] = $draft;
             }
         }
     }
@@ -118,6 +140,8 @@ class PublishService
         } elseif ($draft instanceof SceneDraft) {
             foreach ($draft->links as $link)
                 $this->forceDeleteNode($link);
+            foreach ($draft->infoSpots as $infoSpot)
+                $this->forceDeleteNode($infoSpot);
         }
 
         // 2. Delete Self
@@ -135,6 +159,8 @@ class PublishService
                 $live = Scene::find($draft->published_id);
             elseif ($draft instanceof LinkDraft)
                 $live = Link::find($draft->published_id);
+            elseif ($draft instanceof InfoSpotDraft)
+                $live = InfoSpot::find($draft->published_id);
 
             if ($live) {
                 $live->delete(); // Triggers cascading DB deletes if config or Eloquent events
@@ -228,6 +254,32 @@ class PublishService
             $live = Link::create(array_merge($data, [
                 'source_scene_id' => $liveSource,
                 'target_scene_id' => $liveTarget
+            ]));
+            $draft->update(['published_id' => $live->id]);
+        }
+    }
+
+    private function upsertInfoSpot(InfoSpotDraft $draft)
+    {
+        $data = [
+            'title' => $draft->title,
+            'description' => $draft->description,
+            'yaw' => $draft->yaw,
+            'pitch' => $draft->pitch,
+            'updated_at' => $draft->updated_at,
+        ];
+
+        // Live Scene ID
+        $liveSceneId = $draft->scene->published_id;
+
+        if (!$liveSceneId)
+            return; // Warning?
+
+        if ($draft->published_id) {
+            InfoSpot::where('id', $draft->published_id)->update($data);
+        } else {
+            $live = InfoSpot::create(array_merge($data, [
+                'scene_id' => $liveSceneId
             ]));
             $draft->update(['published_id' => $live->id]);
         }

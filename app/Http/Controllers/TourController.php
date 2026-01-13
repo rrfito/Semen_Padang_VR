@@ -178,7 +178,7 @@ class TourController extends Controller
             ];
         });
 
-        $scene->load(['area.parent', 'outgoingLinks.targetScene.area']);
+        $scene->load(['area.parent', 'outgoingLinks.targetScene.area', 'infoSpots']);
 
         // Build Hierarchy (Bottom-Up)
         $hierarchy = [];
@@ -235,6 +235,14 @@ class TourController extends Controller
                         ? 'Masuk: ' . ($link->targetScene->area->name ?? '-')
                         : ($link->targetScene->name ?? 'Maju'),
                 ])->values(),
+
+            'info_spots' => $scene->infoSpots->map(fn($infoSpot) => [
+                'id' => $infoSpot->id,
+                'title' => $infoSpot->title,
+                'description' => $infoSpot->description,
+                'yaw' => (float) $infoSpot->yaw,
+                'pitch' => (float) $infoSpot->pitch,
+            ])->values(),
         ];
 
         return Inertia::render('Tour/Viewer', [

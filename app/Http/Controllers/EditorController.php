@@ -15,6 +15,7 @@ use App\Services\PublishService;
 use App\Models\Drafts\AreaDraft;
 use App\Models\Drafts\SceneDraft;
 use App\Models\Drafts\LinkDraft;
+use App\Models\Drafts\InfoSpotDraft;
 use App\Services\GeoService;
 use App\Services\AutoLinkService;
 use App\Services\SceneImageService;
@@ -398,6 +399,89 @@ class EditorController extends Controller
         ]);
     }
 
+    // ========================
+    // INFO SPOT MANAGEMENT
+    // ========================
+
+    public function createInfoSpot(Request $request, $sceneId)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'yaw' => 'required|numeric',
+            'pitch' => 'required|numeric',
+        ]);
+
+        $scene = SceneDraft::findOrFail($sceneId);
+
+        // Sanitize input to prevent XSS
+        $title = strip_tags($validated['title']);
+        $description = isset($validated['description']) ? strip_tags($validated['description']) : null;
+
+        $infoSpot = InfoSpotDraft::create([
+            'scene_id' => $scene->id,
+            'title' => $title,
+            'description' => $description,
+            'yaw' => $validated['yaw'],
+            'pitch' => $validated['pitch'],
+        ]);
+
+        $this->draftService->markDirty($infoSpot);
+
+        return response()->json([
+            'success' => true,
+            'scene' => $this->showScene($sceneId)->original
+        ]);
+    }
+
+    public function updateInfoSpot(Request $request, $sceneId, $infoSpotId)
+    {
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'yaw' => 'sometimes|numeric',
+            'pitch' => 'sometimes|numeric',
+        ]);
+
+        $infoSpot = InfoSpotDraft::where('scene_id', $sceneId)->findOrFail($infoSpotId);
+
+        // Sanitize if provided
+        if (isset($validated['title'])) {
+            $validated['title'] = strip_tags($validated['title']);
+        }
+        if (isset($validated['description'])) {
+            $validated['description'] = strip_tags($validated['description']);
+        }
+
+        $infoSpot->update($validated);
+        $this->draftService->markDirty($infoSpot);
+
+        return response()->json([
+            'success' => true,
+            'scene' => $this->showScene($sceneId)->original
+        ]);
+    }
+
+    public function deleteInfoSpot($sceneId, $infoSpotId)
+    {
+        $infoSpot = InfoSpotDraft::where('scene_id', $sceneId)->findOrFail($infoSpotId);
+
+        if ($infoSpot->published_id) {
+            // Mark for deletion (will be deleted on publish)
+            $infoSpot->update(['marked_for_deletion' => true]);
+        } else {
+            // New draft, just delete
+            $infoSpot->delete();
+        }
+
+        $this->draftService->markDirty($infoSpot);
+
+        return response()->json([
+            'success' => true,
+            'scene' => $this->showScene($sceneId)->original
+        ]);
+    }
+
     public function getPendingChanges()
     {
         $roots = AreaDraft::whereNull('parent_id')->get();
@@ -412,12 +496,13 @@ class EditorController extends Controller
             }
         }
 
-        // Calculate Summary
+        // Calculate Summary (include InfoSpot)
         $summary = [
-            'total_changes' => count($totalChanges['Area'] ?? []) + count($totalChanges['Scene'] ?? []) + count($totalChanges['Link'] ?? []),
+            'total_changes' => count($totalChanges['Area'] ?? []) + count($totalChanges['Scene'] ?? []) + count($totalChanges['Link'] ?? []) + count($totalChanges['InfoSpot'] ?? []),
             'areas_count' => count($totalChanges['Area'] ?? []),
             'scenes_count' => count($totalChanges['Scene'] ?? []),
             'links_count' => count($totalChanges['Link'] ?? []),
+            'info_spots_count' => count($totalChanges['InfoSpot'] ?? []),
             'oldest_change' => now(),
         ];
 
@@ -532,6 +617,10 @@ class EditorController extends Controller
             ->with(['targetScene'])
             ->get();
 
+        $infoSpots = InfoSpotDraft::where('scene_id', $id)
+            ->where('marked_for_deletion', false)
+            ->get();
+
         return response()->json([
             'id' => $scene->id,
             'name' => $scene->name,
@@ -549,6 +638,13 @@ class EditorController extends Controller
                 'type' => $l->type,
                 'distance' => $l->distance,
                 'target_name' => $l->targetScene->name ?? 'Unknown',
+            ]),
+            'info_spots' => $infoSpots->map(fn($i) => [
+                'id' => $i->id,
+                'title' => $i->title,
+                'description' => $i->description,
+                'yaw' => $i->yaw,
+                'pitch' => $i->pitch,
             ])
         ]);
     }

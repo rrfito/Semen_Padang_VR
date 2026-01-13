@@ -100,6 +100,11 @@ class Scene extends Model
         return $this->hasMany(Link::class, 'source_scene_id');
     }
 
+    public function infoSpots()
+    {
+        return $this->hasMany(InfoSpot::class, 'scene_id');
+    }
+
 
     protected $casts = [
         'heading' => 'double',

@@ -71,6 +71,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::patch('/scene/{sceneId}/link/{linkId}', [EditorController::class, 'updateLink'])->name('scene.link.update');
         Route::delete('/scene/{sceneId}/link/{linkId}', [EditorController::class, 'deleteLink'])->name('scene.link.delete');
 
+        // Info Spot Management
+        Route::post('/scene/{sceneId}/info-spot', [EditorController::class, 'createInfoSpot'])->name('scene.info-spot.create');
+        Route::patch('/scene/{sceneId}/info-spot/{infoSpotId}', [EditorController::class, 'updateInfoSpot'])->name('scene.info-spot.update');
+        Route::delete('/scene/{sceneId}/info-spot/{infoSpotId}', [EditorController::class, 'deleteInfoSpot'])->name('scene.info-spot.delete');
+
         // Publish Workflow
         Route::get('/pending-changes', [EditorController::class, 'getPendingChanges'])->name('pending-changes');
         Route::post('/publish-all', [EditorController::class, 'publishAll'])->name('publish-all');

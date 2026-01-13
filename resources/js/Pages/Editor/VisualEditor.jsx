@@ -18,6 +18,7 @@ import AutoLinkModal from "./Modals/AutoLinkModal";
 import CreateAreaModal from "./Modals/CreateAreaModal";
 import LinkTargetModal from "./Modals/LinkTargetModal";
 import PendingChangesModal from "./Modals/PendingChangesModal";
+import InfoSpotModal from "./Modals/InfoSpotModal";
 
 // Components
 import NotificationModal from "@/Components/Editor/NotificationModal";
@@ -121,6 +122,11 @@ export default function VisualEditor({
     const [linkTargetModal, setLinkTargetModal] = useState({
         isOpen: false,
         data: null,
+    });
+    const [infoSpotModal, setInfoSpotModal] = useState({
+        isOpen: false,
+        mode: "create", // "create" or "edit"
+        data: null, // { yaw, pitch } for create; { id, title, description, yaw, pitch } for edit
     });
 
     // Notification State
@@ -237,23 +243,20 @@ export default function VisualEditor({
         url.searchParams.set("focus", `${node.type}:${node.id}`);
         window.history.replaceState({}, "", url);
 
-        // If it's a scene, fetch details if not in cache
+        // If it's a scene, fetch details if not in cache or missing info_spots
         if (node.type === "scene") {
-            // If already in cache, keep cached version (may have newer data from edits)
-            // Only use pre-loaded hierarchy data or fetch if NOT in cache
-            if (!sceneCache[node.id]) {
-                if (node.links && node.image_url) {
-                    // Use pre-loaded data from hierarchy
-                    setSceneCache((prev) => ({
-                        ...prev,
-                        [node.id]: node,
-                    }));
-                } else {
-                    // Fetch from API
-                    fetchSceneDetails(node.id);
-                }
+            const cachedScene = sceneCache[node.id];
+            // Check if cache has complete data (including info_spots)
+            const hasCompleteData =
+                cachedScene &&
+                cachedScene.links &&
+                cachedScene.info_spots !== undefined;
+
+            if (!hasCompleteData) {
+                // Always fetch from API to get complete scene data with info_spots
+                fetchSceneDetails(node.id);
             }
-            // If in cache already, do nothing - use existing cached data
+            // If in cache with complete data, do nothing - use existing cached data
         }
     };
 
@@ -264,10 +267,16 @@ export default function VisualEditor({
             const response = await axios.get(
                 `/admin/visual-editor/api/scene/${sceneId}`
             );
-            if (response.data.success) {
+
+            // Handle both formats: { success, scene } or direct data { id, links, info_spots, ... }
+            const sceneData = response.data.success
+                ? response.data.scene
+                : response.data;
+
+            if (sceneData && sceneData.id) {
                 setSceneCache((prev) => ({
                     ...prev,
-                    [sceneId]: response.data.scene,
+                    [sceneId]: sceneData,
                 }));
             }
         } catch (error) {
@@ -285,10 +294,14 @@ export default function VisualEditor({
             const response = await axios.get(
                 `/admin/visual-editor/api/scene/${sceneId}`
             );
-            if (response.data.success) {
+            // Handle both formats: { success, scene } or direct data
+            const sceneData = response.data.success
+                ? response.data.scene
+                : response.data;
+            if (sceneData && sceneData.id) {
                 setSceneCache((prev) => ({
                     ...prev,
-                    [sceneId]: response.data.scene,
+                    [sceneId]: sceneData,
                 }));
                 // console.log("Scene refetched and cache updated");
             }
@@ -1077,6 +1090,9 @@ export default function VisualEditor({
                     onDeleteLink={handleDeleteLink}
                     onUpdateLink={handleUpdateLink}
                     onRefetchScene={() => handleRefetchScene(selection.id)}
+                    onAddInfoSpot={handleAddInfoSpot}
+                    onDeleteInfoSpot={handleDeleteInfoSpot}
+                    onUpdateInfoSpot={handleUpdateInfoSpot}
                 />
             );
         }
@@ -1166,6 +1182,146 @@ export default function VisualEditor({
             alert(
                 "Gagal memperbarui tautan: " +
                     (error.response?.data?.message || error.message)
+            );
+        }
+    };
+
+    // --- INFO SPOT HANDLERS ---
+    const handleAddInfoSpot = (coords) => {
+        // coords = { yaw, pitch } from SceneView
+        setInfoSpotModal({
+            isOpen: true,
+            mode: "create",
+            data: coords,
+        });
+    };
+
+    const handleConfirmInfoSpot = async (formData) => {
+        if (!selection || selection.type !== "scene") return;
+
+        const currentSceneId = selection.id;
+        const { yaw, pitch } = infoSpotModal.data;
+
+        const payload = {
+            title: formData.title,
+            description: formData.description,
+            yaw: yaw,
+            pitch: pitch || 0,
+        };
+
+        try {
+            let response;
+            if (infoSpotModal.mode === "create") {
+                response = await axios.post(
+                    `/admin/visual-editor/api/scene/${currentSceneId}/info-spot`,
+                    payload
+                );
+            } else {
+                // Edit mode
+                response = await axios.patch(
+                    `/admin/visual-editor/api/scene/${currentSceneId}/info-spot/${infoSpotModal.data.id}`,
+                    { title: formData.title, description: formData.description }
+                );
+            }
+
+            if (response.data.success) {
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                fetchPendingCount();
+            } else {
+                showNotification(
+                    "Gagal",
+                    response.data.message || "Gagal menyimpan info spot",
+                    "error"
+                );
+            }
+        } catch (error) {
+            console.error("Error saving info spot:", error);
+            showNotification(
+                "Gagal",
+                error.response?.data?.message || error.message,
+                "error"
+            );
+        } finally {
+            setInfoSpotModal({ isOpen: false, mode: "create", data: null });
+        }
+    };
+
+    const handleDeleteInfoSpot = async (infoSpotId) => {
+        if (!selection || selection.type !== "scene") return;
+
+        const currentSceneId = selection.id;
+
+        try {
+            const response = await axios.delete(
+                `/admin/visual-editor/api/scene/${currentSceneId}/info-spot/${infoSpotId}`
+            );
+
+            if (response.data.success) {
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                fetchPendingCount();
+            } else {
+                showNotification(
+                    "Gagal Menghapus",
+                    response.data.message,
+                    "error"
+                );
+            }
+        } catch (error) {
+            console.error("Error deleting info spot:", error);
+            showNotification(
+                "Gagal Menghapus",
+                error.response?.data?.message || error.message,
+                "error"
+            );
+        }
+    };
+
+    const handleUpdateInfoSpot = async (infoSpotId, updates) => {
+        if (!selection || selection.type !== "scene") return;
+
+        const currentSceneId = selection.id;
+
+        // Check if this is a request to open edit modal
+        if (updates._openModal) {
+            setInfoSpotModal({
+                isOpen: true,
+                mode: "edit",
+                data: { id: infoSpotId, ...updates },
+            });
+            return;
+        }
+
+        try {
+            const response = await axios.patch(
+                `/admin/visual-editor/api/scene/${currentSceneId}/info-spot/${infoSpotId}`,
+                updates
+            );
+
+            if (response.data.success) {
+                setSceneCache((prev) => ({
+                    ...prev,
+                    [response.data.scene.id]: response.data.scene,
+                }));
+                fetchPendingCount();
+            } else {
+                showNotification(
+                    "Gagal Memperbarui",
+                    response.data.message,
+                    "error"
+                );
+            }
+        } catch (error) {
+            console.error("Error updating info spot:", error);
+            showNotification(
+                "Gagal Memperbarui",
+                error.response?.data?.message || error.message,
+                "error"
             );
         }
     };
@@ -1336,6 +1492,24 @@ export default function VisualEditor({
                         // SPA Reload (Smoother than window.location.reload())
                         router.reload();
                     }}
+                />
+
+                {/* Info Spot Modal */}
+                <InfoSpotModal
+                    isOpen={infoSpotModal.isOpen}
+                    onClose={() =>
+                        setInfoSpotModal({
+                            isOpen: false,
+                            mode: "create",
+                            data: null,
+                        })
+                    }
+                    onConfirm={handleConfirmInfoSpot}
+                    initialData={
+                        infoSpotModal.mode === "edit"
+                            ? infoSpotModal.data
+                            : null
+                    }
                 />
             </div>
         </ThemeProvider>

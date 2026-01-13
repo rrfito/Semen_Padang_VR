@@ -5,6 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import Minimap from "@/Components/Tour/Minimap";
 import GestureHint from "@/Components/Tour/GestureHint";
 import { VIEWER_CONFIG } from "@/Config/ViewerConfig";
+import { createInfoSpotElement } from "@/Utils/InfoSpotUtils";
 
 export default function Viewer({ scene, initial_heading }) {
     const panoRef = useRef(null);
@@ -131,6 +132,18 @@ export default function Viewer({ scene, initial_heading }) {
             //     `Hotspot ${index} - Final position: yaw=${yaw}, pitch=${pitch}`
             // );
 
+            marzipanoScene.hotspotContainer().createHotspot(el, { yaw, pitch });
+        });
+
+        // 4. Render Info Spots
+        const infoSpotsList = Array.isArray(scene.info_spots)
+            ? scene.info_spots
+            : Object.values(scene.info_spots || {});
+
+        infoSpotsList.forEach((infoSpot) => {
+            const el = createInfoSpotElement(infoSpot);
+            const pitch = infoSpot.pitch || 0;
+            const yaw = infoSpot.yaw;
             marzipanoScene.hotspotContainer().createHotspot(el, { yaw, pitch });
         });
 

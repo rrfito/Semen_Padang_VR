@@ -40,6 +40,7 @@ PT Semen Padang requires a modern, digital way to showcase their extensive facto
 
 -   **360 Viewer:** Render equirectangular images using WebGL (Marzipano).
 -   **Hotspots:** Clickable arrows to move between scenes.
+-   **Info Spots:** Interactive icons that display a popup with title and description when clicked.
 -   **Map:** Interactive Leaflet map showing current location and available areas.
 -   **Sidebar:** Hierarchical list of areas for quick navigation.
 
@@ -49,6 +50,7 @@ PT Semen Padang requires a modern, digital way to showcase their extensive facto
 -   **Hierarchy Management:** Create/Edit/Delete Areas and Sub-Areas (Drag & Drop sorting).
 -   **Scene Management:** Upload images, set name, set initial heading.
 -   **Link Editor:** Draw connections between scenes visually or via dropdowns.
+-   **Info Spot Editor:** Add, edit, reposition, and delete informational hotspots within scenes.
 -   **Map Editor:** Set GPS coordinates for areas/scenes by clicking on the map.
 
 ### 6.3 Publish Workflow

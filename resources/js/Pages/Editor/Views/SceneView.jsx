@@ -10,16 +10,24 @@ export default function SceneView({
     onDeleteLink,
     onUpdateLink,
     onRefetchScene,
+    onAddInfoSpot,
+    onDeleteInfoSpot,
+    onUpdateInfoSpot,
 }) {
     const panoRef = useRef(null);
     const viewerRef = useRef(null);
     const currentSceneRef = useRef(null);
     const hotspotElementsRef = useRef([]);
+    const infoSpotElementsRef = useRef([]);
     // --- NEW STATE: Add Mode ---
     const [isAdding, setIsAdding] = useState(false);
+    const [isAddingInfoSpot, setIsAddingInfoSpot] = useState(false);
     // --- EDIT MODE STATE ---
     const [selectedHotspot, setSelectedHotspot] = useState(null);
+    const [selectedInfoSpot, setSelectedInfoSpot] = useState(null);
     const [isRepositioning, setIsRepositioning] = useState(false);
+    const [isRepositioningInfoSpot, setIsRepositioningInfoSpot] =
+        useState(false);
 
     useEffect(() => {
         if (!scene || !scene.image_url) {
@@ -145,6 +153,13 @@ export default function SceneView({
                         createHotspot(link);
                     });
                 }
+
+                // Also create info spots
+                if (scene.info_spots) {
+                    scene.info_spots.forEach((infoSpot) => {
+                        createInfoSpotHotspot(infoSpot);
+                    });
+                }
             } catch (err) {
                 console.error("Marzipano Error:", err);
                 if (err.stack) console.error(err.stack);
@@ -160,12 +175,13 @@ export default function SceneView({
                 viewerRef.current = null;
             }
             hotspotElementsRef.current = [];
+            infoSpotElementsRef.current = [];
         };
     }, [scene?.id]);
 
-    // Re-render hotspots when links change (for seamless hotspot creation)
+    // Re-render hotspots when links or info_spots change (for seamless hotspot creation)
     useEffect(() => {
-        if (!currentSceneRef.current || !scene?.links) return;
+        if (!currentSceneRef.current) return;
 
         const container = currentSceneRef.current.hotspotContainer?.();
         if (!container) return; // Scene not fully initialized yet
@@ -176,17 +192,22 @@ export default function SceneView({
             container.destroyHotspot(hotspot);
         });
         hotspotElementsRef.current = [];
+        infoSpotElementsRef.current = [];
 
-        // Re-create all hotspots
-        scene.links.forEach((link) => {
-            createHotspot(link);
-        });
+        // Re-create all hotspots (links)
+        if (scene?.links) {
+            scene.links.forEach((link) => {
+                createHotspot(link);
+            });
+        }
 
-        // console.log(
-        //     "SceneView: Hotspots re-rendered, count:",
-        //     scene.links.length
-        // );
-    }, [JSON.stringify(scene?.links)]); // Watch entire links array for any changes
+        // Re-create all info spots
+        if (scene?.info_spots) {
+            scene.info_spots.forEach((infoSpot) => {
+                createInfoSpotHotspot(infoSpot);
+            });
+        }
+    }, [JSON.stringify(scene?.links), JSON.stringify(scene?.info_spots)]); // Watch both arrays
 
     const createHotspot = (link) => {
         const wrapper = document.createElement("div");
@@ -257,6 +278,73 @@ export default function SceneView({
         }
     };
 
+    const createInfoSpotHotspot = (infoSpot) => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("info-hotspot-wrapper", "cursor-pointer");
+        wrapper.style.cssText =
+            "transition: none; display: flex; flex-direction: column; align-items: center;";
+
+        const icon = document.createElement("div");
+        // Center icon at coordinate: icon is 40px, offset by half
+        const iconSize = 40;
+        icon.style.cssText = `flex-shrink: 0; margin-left: -${
+            iconSize / 2
+        }px; margin-top: -${iconSize / 2}px;`;
+
+        // White info icon in circle (distinct from blue/purple navigation icons)
+        icon.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 15px rgba(100, 116, 139, 0.5), 0 0 0 3px rgba(255,255,255,0.3);"><svg viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>`;
+
+        const tooltip = document.createElement("div");
+        tooltip.innerText = infoSpot.title || "Info";
+        tooltip.classList.add(
+            "hotspot-tooltip",
+            "bg-black/70",
+            "text-white",
+            "text-xs",
+            "px-2",
+            "py-1",
+            "rounded",
+            "mt-1",
+            "opacity-0",
+            "transition-opacity",
+            "whitespace-nowrap"
+        );
+        wrapper.appendChild(icon);
+        wrapper.appendChild(tooltip);
+        wrapper.addEventListener("mouseenter", () =>
+            tooltip.classList.remove("opacity-0")
+        );
+        wrapper.addEventListener("mouseleave", () =>
+            tooltip.classList.add("opacity-0")
+        );
+        wrapper.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            if (confirm("Hapus info spot ini?")) {
+                onDeleteInfoSpot(infoSpot.id);
+            }
+        });
+
+        // Left-click to select info spot for editing
+        wrapper.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setSelectedInfoSpot(infoSpot);
+            setSelectedHotspot(null); // Deselect link hotspot
+            setIsAddingInfoSpot(false);
+            setIsAdding(false);
+        });
+
+        // Store wrapper reference
+        wrapper.dataset.infoSpotId = infoSpot.id;
+        infoSpotElementsRef.current.push(wrapper);
+
+        if (currentSceneRef.current) {
+            currentSceneRef.current.hotspotContainer().createHotspot(wrapper, {
+                yaw: infoSpot.yaw,
+                pitch: infoSpot.pitch || 0,
+            });
+        }
+    };
+
     // --- HANDLER: Trigger Add ---
     // --- HANDLER: Trigger Add ---
     const handleTriggerAdd = (type) => {
@@ -265,18 +353,20 @@ export default function SceneView({
         const yaw = view.yaw();
         const pitch = view.pitch();
 
-        // console.log(
-        //     "SceneView - Adding link with yaw:",
-        //     yaw,
-        //     "pitch:",
-        //     pitch,
-        //     "type:",
-        //     type
-        // );
-
         // Pass 'type' (navigasi | gateway) along with coords
         onAddLink({ yaw, pitch, type });
         setIsAdding(false); // Reset mode after adding
+    };
+
+    // --- HANDLER: Trigger Add Info Spot ---
+    const handleTriggerAddInfoSpot = () => {
+        if (!viewerRef.current) return;
+        const view = viewerRef.current.view();
+        const yaw = view.yaw();
+        const pitch = view.pitch();
+
+        // Return coords for parent to use with modal
+        return { yaw, pitch };
     };
 
     return (
@@ -540,14 +630,211 @@ export default function SceneView({
                 </div>
             )}
 
+            {/* --- ADD INFO SPOT OVERLAY --- */}
+            {isAddingInfoSpot && (
+                <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+
+                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200 flex flex-col items-center gap-6">
+                        {/* Center Icon */}
+                        <div className="relative z-20 flex items-center justify-center">
+                            <div className="size-14 rounded-full bg-slate-600/80 backdrop-blur-md border-[3px] border-white/50 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                                <span className="material-symbols-outlined text-3xl text-white font-bold drop-shadow-md">
+                                    info
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-4">
+                            {/* Confirm Info Spot */}
+                            <button
+                                onClick={() => {
+                                    const coords = handleTriggerAddInfoSpot();
+                                    if (coords && onAddInfoSpot) {
+                                        onAddInfoSpot(coords);
+                                    }
+                                    setIsAddingInfoSpot(false);
+                                }}
+                                className="bg-slate-600 hover:bg-slate-700 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center"
+                                title="Tambah Info Spot di posisi ini"
+                            >
+                                <span className="material-symbols-outlined text-xl">
+                                    check
+                                </span>
+                            </button>
+
+                            {/* Cancel */}
+                            <button
+                                onClick={() => setIsAddingInfoSpot(false)}
+                                className="bg-red-500/80 hover:bg-red-600 border-2 border-white/30 hover:border-white text-white size-12 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center"
+                                title="Batal"
+                            >
+                                <span className="material-symbols-outlined text-2xl">
+                                    close
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
+                        Sejajarkan tengah ke target, lalu tambah info
+                    </div>
+                </div>
+            )}
+
+            {/* --- EDIT INFO SPOT PANEL --- */}
+            {selectedInfoSpot &&
+                !isAddingInfoSpot &&
+                !isRepositioningInfoSpot && (
+                    <div
+                        id="panel-edit-info-spot"
+                        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 theme-card backdrop-blur-md rounded-xl shadow-2xl p-3"
+                    >
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b theme-border">
+                            <div className="size-8 rounded-full flex items-center justify-center bg-slate-500">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="white"
+                                    className="w-4 h-4"
+                                >
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold theme-text truncate">
+                                    {selectedInfoSpot.title}
+                                </p>
+                                <p className="text-xs theme-text-muted">
+                                    Info Spot
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedInfoSpot(null)}
+                                className="theme-text-muted hover:theme-text transition-colors p-1"
+                                title="Tutup"
+                            >
+                                <span className="material-symbols-outlined text-lg">
+                                    close
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            {/* Update Position */}
+                            <button
+                                onClick={() => setIsRepositioningInfoSpot(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-600 text-white"
+                                title="Masuk mode penempatan ulang"
+                            >
+                                <span className="material-symbols-outlined text-sm">
+                                    my_location
+                                </span>
+                                <span>Perbarui Posisi</span>
+                            </button>
+
+                            {/* Edit Info */}
+                            <button
+                                onClick={() => {
+                                    if (onUpdateInfoSpot) {
+                                        // Signal parent to open edit modal
+                                        onUpdateInfoSpot(selectedInfoSpot.id, {
+                                            _openModal: true,
+                                            ...selectedInfoSpot,
+                                        });
+                                    }
+                                }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors bg-indigo-500 hover:bg-indigo-600 text-white"
+                                title="Edit judul dan deskripsi"
+                            >
+                                <span className="material-symbols-outlined text-sm">
+                                    edit
+                                </span>
+                                <span>Edit</span>
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                                onClick={() => {
+                                    if (confirm("Hapus info spot ini?")) {
+                                        onDeleteInfoSpot(selectedInfoSpot.id);
+                                        setSelectedInfoSpot(null);
+                                    }
+                                }}
+                                className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors bg-red-500 hover:bg-red-600 text-white"
+                                title="Hapus info spot"
+                            >
+                                <span className="material-symbols-outlined text-sm">
+                                    delete
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+            {/* --- INFO SPOT REPOSITIONING MODE OVERLAY --- */}
+            {isRepositioningInfoSpot && selectedInfoSpot && (
+                <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
+
+                    <div className="relative pointer-events-auto animate-in fade-in zoom-in duration-200">
+                        <div className="relative z-20 flex items-center justify-center">
+                            <div className="size-14 rounded-full bg-slate-600/80 backdrop-blur-md border-[3px] border-white/50 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                                <span className="material-symbols-outlined text-3xl text-white font-bold drop-shadow-md">
+                                    my_location
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Confirm Button */}
+                        <button
+                            onClick={() => {
+                                if (!viewerRef.current) return;
+                                const view = viewerRef.current.view();
+                                onUpdateInfoSpot(selectedInfoSpot.id, {
+                                    yaw: view.yaw(),
+                                    pitch: view.pitch(),
+                                });
+                                setIsRepositioningInfoSpot(false);
+                                setSelectedInfoSpot(null);
+                            }}
+                            className="absolute bg-emerald-500 hover:bg-emerald-600 border-2 border-white/30 hover:border-white text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -top-[3.5rem]"
+                            title="Konfirmasi posisi baru"
+                        >
+                            <span className="material-symbols-outlined text-xl">
+                                check
+                            </span>
+                        </button>
+
+                        {/* Cancel Button */}
+                        <button
+                            onClick={() => setIsRepositioningInfoSpot(false)}
+                            className="absolute bg-red-500/80 hover:bg-red-600 border-2 border-white/30 text-white size-10 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center left-1/2 -translate-x-1/2 -bottom-[3.5rem]"
+                            title="Batalkan penempatan ulang"
+                        >
+                            <span className="material-symbols-outlined text-xl">
+                                close
+                            </span>
+                        </button>
+                    </div>
+
+                    <div className="absolute bottom-1/4 text-white font-bold text-sm bg-black/50 px-3 py-1 rounded backdrop-blur-sm pointer-events-none">
+                        Gerakkan kamera ke posisi baru, lalu konfirmasi
+                    </div>
+                </div>
+            )}
+
             {/* Floating Toolbar */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
                 <div className="flex items-center gap-1 p-1.5 theme-toolbar">
                     <ToolbarButton
                         icon="near_me"
                         title="Pilih alat"
-                        active={!isAdding}
-                        onClick={() => setIsAdding(false)}
+                        active={!isAdding && !isAddingInfoSpot}
+                        onClick={() => {
+                            setIsAdding(false);
+                            setIsAddingInfoSpot(false);
+                        }}
                     />
 
                     <div className="w-px h-6 theme-divider mx-1"></div>
@@ -555,18 +842,41 @@ export default function SceneView({
                     {/* ADD HOTSPOT BUTTON */}
                     <button
                         id="btn-add-hotspot"
-                        onClick={() => setIsAdding(!isAdding)}
+                        onClick={() => {
+                            setIsAdding(!isAdding);
+                            setIsAddingInfoSpot(false);
+                        }}
                         className={`h-10 flex items-center gap-2 px-3 rounded-lg transition-all font-medium text-sm ${
                             isAdding
                                 ? "bg-primary text-white"
                                 : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-primary"
                         }`}
-                        title="Tambah  Link"
+                        title="Tambah Link"
                     >
                         <span className="material-symbols-outlined text-[20px]">
                             add_location
                         </span>
                         <span>Tambah Link</span>
+                    </button>
+
+                    {/* ADD INFO SPOT BUTTON */}
+                    <button
+                        id="btn-add-info-spot"
+                        onClick={() => {
+                            setIsAddingInfoSpot(!isAddingInfoSpot);
+                            setIsAdding(false);
+                        }}
+                        className={`h-10 flex items-center gap-2 px-3 rounded-lg transition-all font-medium text-sm ${
+                            isAddingInfoSpot
+                                ? "bg-slate-600 text-white"
+                                : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-slate-600"
+                        }`}
+                        title="Tambah Info Spot"
+                    >
+                        <span className="material-symbols-outlined text-[20px]">
+                            info
+                        </span>
+                        <span>Tambah Info</span>
                     </button>
                 </div>
             </div>

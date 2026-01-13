@@ -37,9 +37,19 @@ Represents navigation between scenes.
 -   `type` (string): 'navigasi' or 'gateway'.
 -   `yaw`, `pitch` (double): Position of the hotspot arrow in 3D space.
 
+### `info_spots`
+
+Represents informational hotspots in a scene.
+
+-   `id` (PK)
+-   `scene_id` (FK -> scenes)
+-   `title` (string): Title of the info spot.
+-   `description` (text): Detailed description/content.
+-   `yaw`, `pitch` (double): Position of the info icon in 3D space.
+
 ## 3. Draft Tables (Admin/Editor)
 
-### `area_drafts` / `scene_drafts` / `link_drafts`
+### `area_drafts` / `scene_drafts` / `link_drafts` / `info_spot_drafts`
 
 Mirrors of the live tables but with additional columns for sync logic:
 
@@ -61,7 +71,10 @@ erDiagram
     AREA ||--o{ SCENE : has
     SCENE ||--o{ LINK : source
     SCENE ||--o{ LINK : target
+    SCENE ||--o{ INFO_SPOT : has
 
     AREA_DRAFT }|..|| AREA : mirrors
     SCENE_DRAFT }|..|| SCENE : mirrors
+    LINK_DRAFT }|..|| LINK : mirrors
+    INFO_SPOT_DRAFT }|..|| INFO_SPOT : mirrors
 ```

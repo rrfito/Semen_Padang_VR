@@ -52,4 +52,9 @@ class SceneDraft extends Model
     {
         return $this->hasMany(LinkDraft::class, 'target_scene_id');
     }
+
+    public function infoSpots()
+    {
+        return $this->hasMany(InfoSpotDraft::class, 'scene_id');
+    }
 }

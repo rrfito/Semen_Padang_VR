@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\Area;
 use App\Models\Scene;
 use App\Models\Link;
+use App\Models\InfoSpot;
 use App\Models\Drafts\AreaDraft;
 use App\Models\Drafts\SceneDraft;
 use App\Models\Drafts\LinkDraft;
+use App\Models\Drafts\InfoSpotDraft;
 use App\Models\Drafts\DraftSyncState;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -274,9 +276,9 @@ class DraftService
 
     /**
      * Mark the draft tree as dirty (modified).
-     * Should be called whenever a draft item (Area/Scene/Link) is created, updated, or deleted.
+     * Should be called whenever a draft item (Area/Scene/Link/InfoSpot) is created, updated, or deleted.
      */
-    public function markDirty(AreaDraft|SceneDraft|LinkDraft $node)
+    public function markDirty(AreaDraft|SceneDraft|LinkDraft|InfoSpotDraft $node)
     {
         // 1. Find Root Draft Area
         $root = $this->findRootDraft($node);
@@ -332,6 +334,12 @@ class DraftService
             if (!$node->relationLoaded('sourceScene'))
                 $node->load('sourceScene.area');
             return $this->findRootDraft($node->sourceScene?->area);
+        }
+
+        if ($node instanceof InfoSpotDraft) {
+            if (!$node->relationLoaded('scene'))
+                $node->load('scene.area');
+            return $this->findRootDraft($node->scene?->area);
         }
 
         return null;
@@ -413,7 +421,8 @@ class DraftService
         $ids = [
             'Area' => [],
             'Scene' => [],
-            'Link' => []
+            'Link' => [],
+            'InfoSpot' => []
         ];
 
         $collect = function ($node) use (&$ids, &$collect) {
@@ -424,6 +433,8 @@ class DraftService
                     $ids['Scene'][] = $node->published_id;
                 elseif ($node instanceof LinkDraft)
                     $ids['Link'][] = $node->published_id;
+                elseif ($node instanceof InfoSpotDraft)
+                    $ids['InfoSpot'][] = $node->published_id;
             }
 
             if ($node instanceof AreaDraft) {
@@ -435,6 +446,8 @@ class DraftService
             if ($node instanceof SceneDraft) {
                 foreach ($node->links as $link)
                     $collect($link);
+                foreach ($node->infoSpots as $infoSpot)
+                    $collect($infoSpot);
             }
         };
 
@@ -445,6 +458,7 @@ class DraftService
             'Area' => Area::whereIn('id', $ids['Area'])->get()->keyBy('id'),
             'Scene' => Scene::whereIn('id', $ids['Scene'])->get()->keyBy('id'),
             'Link' => Link::whereIn('id', $ids['Link'])->get()->keyBy('id'),
+            'InfoSpot' => InfoSpot::whereIn('id', $ids['InfoSpot'])->get()->keyBy('id'),
         ];
 
         return $this->formatDiffForFrontend($this->calculateDiff($root, $liveContext));
@@ -479,6 +493,13 @@ class DraftService
                 if ($linkDiff)
                     $changes[] = $linkDiff;
             }
+
+            // Compare Info Spots
+            foreach ($scene->infoSpots as $infoSpot) {
+                $infoSpotDiff = $this->compareSingleNode($infoSpot, 'InfoSpot', $liveContext);
+                if ($infoSpotDiff)
+                    $changes[] = $infoSpotDiff;
+            }
         }
 
         return $changes;
@@ -489,6 +510,8 @@ class DraftService
         if ($type === 'Link') {
             $draft->loadMissing(['sourceScene', 'targetScene']);
             $name = ($draft->sourceScene->name ?? '?') . " -> " . ($draft->targetScene->name ?? '?');
+        } elseif ($type === 'InfoSpot') {
+            $name = $draft->title ?? 'Info Spot';
         } else {
             $name = $draft->name;
         }
@@ -568,6 +591,8 @@ class DraftService
             $attributes = ['name', 'heading', 'can_be_gateway', 'lat', 'lng'];
         elseif ($type === 'Link')
             $attributes = ['yaw', 'pitch', 'type', 'distance'];
+        elseif ($type === 'InfoSpot')
+            $attributes = ['title', 'description', 'yaw', 'pitch'];
 
         foreach ($attributes as $attr) {
             $draftVal = $draft->$attr;
@@ -616,6 +641,7 @@ class DraftService
             'Area' => $grouped->get('Area', collect())->sortByDesc('timestamp')->values()->all(),
             'Scene' => $grouped->get('Scene', collect())->sortByDesc('timestamp')->values()->all(),
             'Link' => $grouped->get('Link', collect())->sortByDesc('timestamp')->values()->all(),
+            'InfoSpot' => $grouped->get('InfoSpot', collect())->sortByDesc('timestamp')->values()->all(),
         ];
 
         // Remove empty keys
@@ -629,6 +655,7 @@ class DraftService
                 'areas_count' => count($changes['Area'] ?? []),
                 'scenes_count' => count($changes['Scene'] ?? []),
                 'links_count' => count($changes['Link'] ?? []),
+                'info_spots_count' => count($changes['InfoSpot'] ?? []),
                 'oldest_change' => 'Now' // Calculating oldest is tricky with diffs
             ],
             'changes' => $changes
