@@ -154,6 +154,20 @@ export default function Header({
                     </span>
                 </button>
 
+                {/* Guide Button */}
+                <button
+                    id="btn-guide"
+                    onClick={() =>
+                        window.open(route("admin.manual-book"), "_blank")
+                    }
+                    className="size-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#2f455a] text-gray-600 dark:text-slate-300 transition-all border border-gray-200 dark:border-transparent"
+                    title="Buka Panduan"
+                >
+                    <span className="material-symbols-outlined text-[20px]">
+                        menu_book
+                    </span>
+                </button>
+
                 {/* Theme Toggle Button */}
                 <button
                     id="btn-theme-toggle"

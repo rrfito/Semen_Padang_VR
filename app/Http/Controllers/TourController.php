@@ -23,7 +23,7 @@ class TourController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Data Menu Sidebar (Hierarki 3 Level)
+
         $menuQuery = Area::whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
@@ -42,7 +42,7 @@ class TourController extends Controller
                 'scenes' => fn($q) => $q->select('id', 'area_id', 'name', 'image_path', 'location')->orderBy('created_at')->orderBy('id')
             ]);
 
-        // 2. Data Marker Peta (Leaf Areas Only + Containers with locations)
+
         $areaQuery = Area::query()
             ->orderBy('priority')
             ->orderBy('name')
@@ -50,7 +50,6 @@ class TourController extends Controller
             ->accessibleBy($user)
             ->with([
                 'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
-                // Eager load hierarchy for recursive collector
                 'children' => fn($q) => $q->visible()->accessibleBy($user)->with([
                     'scenes' => fn($q) => $q->orderBy('created_at')->orderBy('id')->select('id', 'area_id', 'name', 'image_path', 'location'),
                     'children' => fn($q2) => $q2->visible()->accessibleBy($user)->with([
@@ -61,11 +60,7 @@ class TourController extends Controller
 
         $markers = $areaQuery->get()->map(function ($area) {
             $firstScene = $area->scenes->first();
-
-            // GPS Fallback
             $loc = $this->areaService->getEffectiveLocation($area, $firstScene);
-
-            // Exclude if no valid GPS
             if ($loc['lat'] == 0 && $loc['lng'] == 0) {
                 return null;
             }
@@ -83,10 +78,7 @@ class TourController extends Controller
                 'first_scene_id' => $firstScene ? $firstScene->id : null,
                 'type' => 'area',
 
-                // For container areas: collect all child scenes for path display
                 'all_child_scenes' => $area->is_container ? $this->areaService->collectAllChildScenes($area) : [],
-
-                // For leaf areas: direct scenes list WITH GPS coordinates
                 'scenes' => (!$area->is_container || $area->level === 3) ? $area->scenes->map(function ($scene) use ($area) {
                     $locationData = $scene->location_array;
                     return [
@@ -99,7 +91,7 @@ class TourController extends Controller
                 })->toArray() : [],
             ];
         })
-            ->filter() // Remove nulls
+            ->filter()
             ->values();
 
         return Inertia::render('Tour/Index', [
@@ -114,8 +106,6 @@ class TourController extends Controller
     {
         $user = Auth::user();
         $isPegawai = $user && ($user->role === 'pegawai' || $user->role === 'admin');
-
-        // 1. Reuse Menu Query Logic (Same as Index)
         $menuQuery = Area::whereNull('parent_id')
             ->orderBy('priority', 'asc')
             ->orderBy('name', 'asc')
@@ -131,8 +121,6 @@ class TourController extends Controller
                 'scenes' => fn($q) => $q->select('id', 'area_id')->orderBy('created_at')->orderBy('id')
             ]);
 
-
-        // 2. Reuse Area Query Logic (Same as Index but filterNotNull GPS logic handled in Map)
         $areaQuery = Area::query()
             ->whereNotNull('lat')
             ->whereNotNull('lng')
@@ -152,8 +140,6 @@ class TourController extends Controller
 
         $markers = $areaQuery->get()->map(function ($area) {
             $firstScene = $area->scenes->first();
-            // Note: In 'show', we originally filtered areas whereNotNull lat/lng in query
-            // So we take direct lat/lng
             $lat = (float) $area->lat;
             $lng = (float) $area->lng;
 
@@ -179,8 +165,6 @@ class TourController extends Controller
         });
 
         $scene->load(['area.parent', 'outgoingLinks.targetScene.area', 'infoSpots']);
-
-        // Build Hierarchy (Bottom-Up)
         $hierarchy = [];
         $tempArea = $scene->area;
         while ($tempArea) {
@@ -204,8 +188,6 @@ class TourController extends Controller
                 ->filter(function ($link) use ($isPegawai) {
                     if (is_null($link->target_scene_id) || !$link->targetScene)
                         return false;
-
-                    // 1. Check is_hidden (applies to ALL users, even pegawai)
                     $area = $link->targetScene->area;
                     while ($area) {
                         if ($area->is_hidden)
@@ -213,7 +195,7 @@ class TourController extends Controller
                         $area = $area->parent;
                     }
 
-                    // 2. Check is_restricted (only for non-pegawai)
+
                     if (!$isPegawai) {
                         $area = $link->targetScene->area;
                         while ($area) {

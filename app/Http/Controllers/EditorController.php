@@ -44,15 +44,13 @@ class EditorController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Initialize Drafts (Sync Check logic)
-        // Ensure all Live Roots have Draft Counterparts
+
         $liveRoots = Area::whereNull('parent_id')->get();
         foreach ($liveRoots as $liveRoot) {
             $this->draftService->initDrafts($liveRoot);
         }
 
-        // 2. Load Draft Hierarchy
-        // We load full tree: Roots -> Children -> Scenes
+
         $roots = AreaDraft::whereNull('parent_id')
             ->where('marked_for_deletion', false)
             ->with([
@@ -67,7 +65,7 @@ class EditorController extends Controller
 
         $hierarchy = $roots->map(fn($root) => $this->formatAreaDraftNode($root));
 
-        // 3. Get Modified Item IDs for UI Status Labels
+
         $modifiedNodes = [
             'areas' => [],
             'scenes' => []
@@ -75,9 +73,7 @@ class EditorController extends Controller
 
         foreach ($roots as $root) {
             $changesResponse = $this->draftService->getPendingChanges($root);
-            $changes = $changesResponse['changes'] ?? []; // Access inner array if formatted
-            // Note: formatDiffForFrontend keys are 'Area', 'Scene', 'Link'
-            // The content of each is a list of change objects with ['id' => draftId, 'event' => 'updated'|'created'|'deleted']
+            $changes = $changesResponse['changes'] ?? [];
 
             if (isset($changes['Area'])) {
                 foreach ($changes['Area'] as $change) {
@@ -98,11 +94,10 @@ class EditorController extends Controller
         return Inertia::render('Editor/VisualEditor', [
             'hierarchy' => $hierarchy,
             'focusedAreaId' => $request->query('focus'),
-            'modifiedNodes' => $modifiedNodes, // Pass to frontend
+            'modifiedNodes' => $modifiedNodes,
         ]);
     }
 
-    // Helper: Recursive format
     private function formatAreaDraftNode(AreaDraft $draft)
     {
         return [
@@ -117,7 +112,7 @@ class EditorController extends Controller
             'is_hidden' => (bool) $draft->is_hidden,
             'priority' => $draft->priority,
             'parent_id' => $draft->parent_id,
-            'status' => 'draft', // Identify as draft
+            'status' => 'draft',
             'marked_for_deletion' => (bool) $draft->marked_for_deletion,
             'lat' => $draft->lat,
             'lng' => $draft->lng,
@@ -133,7 +128,7 @@ class EditorController extends Controller
                     'name' => $scene->name,
                     'type' => 'scene',
                     'path' => asset('storage/' . $scene->image_path),
-                    'image_url' => asset('storage/' . $scene->image_path), // Added for consistency
+                    'image_url' => asset('storage/' . $scene->image_path),
                     'marked_for_deletion' => (bool) $scene->marked_for_deletion,
                     'can_be_gateway' => (bool) $scene->can_be_gateway,
                     'heading' => $scene->heading ?? 0,
@@ -146,7 +141,7 @@ class EditorController extends Controller
                         'target_name' => $link->targetScene->name ?? 'Unknown Scene',
                         'yaw' => $link->yaw,
                         'pitch' => $link->pitch,
-                        'type' => $link->type, // 'navigasi' or 'gateway'
+                        'type' => $link->type,
                     ])->values(),
                 ])->values(),
             'scenes_count' => $draft->scenes->filter(fn($s) => !$s->marked_for_deletion)->count(),
@@ -165,7 +160,7 @@ class EditorController extends Controller
         ]);
 
         $parentId = $validated['parent_id'] ?? null;
-        $level = 1; // Default to Level 1 (Root)
+        $level = 1;
         if ($parentId) {
             $parent = AreaDraft::find($parentId);
             if ($parent)
@@ -179,7 +174,7 @@ class EditorController extends Controller
             'level' => $request->level ?? $level,
             'is_container' => $validated['is_container'] ?? false,
             'priority' => $validated['priority'] ?? 0,
-            'published_id' => null, // Is New
+            'published_id' => null,
         ]);
 
         $this->draftService->markDirty($area);
@@ -220,11 +215,9 @@ class EditorController extends Controller
     {
         $area = AreaDraft::with(['children', 'scenes'])->findOrFail($id);
 
-        // Recursive count helper
         $count = ['areas' => 0, 'scenes' => 0];
         $this->countImpact($area, $count);
 
-        // Subtract 1 from areas (the area itself)
         $count['areas'] = max(0, $count['areas'] - 1);
 
         return response()->json($count);
@@ -251,7 +244,7 @@ class EditorController extends Controller
                 'name' => $scene->name,
                 'type' => 'scene',
                 'is_restricted' => (bool) $scene->can_be_gateway,
-                'can_be_gateway' => (bool) $scene->can_be_gateway, // Explicitly needed by frontend
+                'can_be_gateway' => (bool) $scene->can_be_gateway,
                 'path' => asset('storage/' . $scene->image_path),
                 'marked_for_deletion' => (bool) $scene->marked_for_deletion,
             ])
@@ -269,7 +262,6 @@ class EditorController extends Controller
 
         DB::beginTransaction();
         try {
-            // Delegate logic to Service
             $uploadedScenes = $this->sceneImageService->processUploads($request->file('images'), $areaId);
 
             DB::commit();
@@ -283,7 +275,7 @@ class EditorController extends Controller
                     'name' => $scene->name,
                     'type' => 'scene',
                     'is_restricted' => (bool) $scene->can_be_gateway,
-                    'can_be_gateway' => (bool) $scene->can_be_gateway, // Explicitly needed by frontend
+                    'can_be_gateway' => (bool) $scene->can_be_gateway,
                     'path' => asset('storage/' . $scene->image_path),
                     'image_url' => asset('storage/' . $scene->image_path),
                     'marked_for_deletion' => (bool) $scene->marked_for_deletion,
@@ -291,12 +283,11 @@ class EditorController extends Controller
                     'pitch' => $scene->pitch ?? 0,
                     'lat' => $scene->lat,
                     'lng' => $scene->lng,
-                    'links' => [], // New scenes have no links
+                    'links' => [],
                 ])
             ]);
 
-            // Mark root as dirty (since scenes added)
-            // (Assumes service created SceneDrafts)
+
             if (!empty($uploadedScenes)) {
                 $this->draftService->markDirty($uploadedScenes[0]);
             }
@@ -346,7 +337,7 @@ class EditorController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot link to self'], 400);
         }
 
-        // Calculate Distance if possible
+
         $distance = 0;
         if ($source->lat && $source->lng && $target->lat && $target->lng) {
             $distance = $this->geoService->calculateDistance($source->lat, $source->lng, $target->lat, $target->lng);
@@ -365,14 +356,14 @@ class EditorController extends Controller
 
         return response()->json([
             'success' => true,
-            'scene' => $this->showScene($sceneId)->original // Reuse showScene to return full packet
+            'scene' => $this->showScene($sceneId)->original
         ]);
     }
 
     public function updateLink(Request $request, $sceneId, $linkId)
     {
         $link = LinkDraft::where('source_scene_id', $sceneId)->findOrFail($linkId);
-        $link->update($request->only(['yaw', 'pitch', 'type'])); // Removed distance update from manual edit
+        $link->update($request->only(['yaw', 'pitch', 'type']));
         $this->draftService->markDirty($link);
 
         return response()->json([
@@ -399,9 +390,7 @@ class EditorController extends Controller
         ]);
     }
 
-    // ========================
-    // INFO SPOT MANAGEMENT
-    // ========================
+
 
     public function createInfoSpot(Request $request, $sceneId)
     {
@@ -414,7 +403,7 @@ class EditorController extends Controller
 
         $scene = SceneDraft::findOrFail($sceneId);
 
-        // Sanitize input to prevent XSS
+
         $title = strip_tags($validated['title']);
         $description = isset($validated['description']) ? strip_tags($validated['description']) : null;
 
@@ -445,7 +434,7 @@ class EditorController extends Controller
 
         $infoSpot = InfoSpotDraft::where('scene_id', $sceneId)->findOrFail($infoSpotId);
 
-        // Sanitize if provided
+
         if (isset($validated['title'])) {
             $validated['title'] = strip_tags($validated['title']);
         }
@@ -467,10 +456,8 @@ class EditorController extends Controller
         $infoSpot = InfoSpotDraft::where('scene_id', $sceneId)->findOrFail($infoSpotId);
 
         if ($infoSpot->published_id) {
-            // Mark for deletion (will be deleted on publish)
             $infoSpot->update(['marked_for_deletion' => true]);
         } else {
-            // New draft, just delete
             $infoSpot->delete();
         }
 
@@ -496,7 +483,7 @@ class EditorController extends Controller
             }
         }
 
-        // Calculate Summary (include InfoSpot)
+
         $summary = [
             'total_changes' => count($totalChanges['Area'] ?? []) + count($totalChanges['Scene'] ?? []) + count($totalChanges['Link'] ?? []) + count($totalChanges['InfoSpot'] ?? []),
             'areas_count' => count($totalChanges['Area'] ?? []),
@@ -514,11 +501,7 @@ class EditorController extends Controller
 
     public function discardDrafts($rootDraftId)
     {
-        // OLD: Discard single root
-        // $root = AreaDraft::whereNull('parent_id')->findOrFail($rootDraftId);
-        // $this->draftService->discardDrafts($root);
 
-        // NEW: Discard ALL drafts (Reset World)
         $this->draftService->discardAllDrafts();
 
         return response()->json(['success' => true]);
@@ -557,8 +540,6 @@ class EditorController extends Controller
         try {
             if ($type === 'area') {
                 $item = AreaDraft::findOrFail($id);
-                // Get siblings ordered by priority (asc)
-                // Filter out marked_for_deletion to keep clean list
                 $siblings = AreaDraft::where('parent_id', $item->parent_id)
                     ->where('marked_for_deletion', false)
                     ->where('id', '!=', $item->id)
@@ -569,19 +550,15 @@ class EditorController extends Controller
                 $siblings = SceneDraft::where('area_id', $item->area_id)
                     ->where('marked_for_deletion', false)
                     ->where('id', '!=', $item->id)
-                    ->orderBy('priority') // Assume scene drafts also have priority or we use ID order if missing
+                    ->orderBy('priority')
                     ->get();
             } else {
                 return response()->json(['error' => 'Invalid type'], 400);
             }
 
-            // Insert item at new index within the collection
-            $siblings->splice($newIndex, 0, [$item]);
 
-            // Reassign priority
+            $siblings->splice($newIndex, 0, [$item]);
             foreach ($siblings as $index => $sibling) {
-                // Determine priority value (e.g. increments of 10)
-                // Using input loop index is simplest.
                 $sibling->priority = ($index + 1) * 10;
                 $sibling->save();
             }
@@ -599,7 +576,7 @@ class EditorController extends Controller
         $areaId = $request->input('area_id');
         $replaceExisting = $request->boolean('replace_existing');
         $previewOnly = $request->boolean('preview_only');
-        $radius = $request->input('radius', 50); // Default 50m
+        $radius = $request->input('radius', 50);
 
         try {
             $stats = $this->autoLinkService->execute($areaId, $replaceExisting, $previewOnly, $radius);
@@ -646,6 +623,20 @@ class EditorController extends Controller
                 'yaw' => $i->yaw,
                 'pitch' => $i->pitch,
             ])
+        ]);
+    }
+
+
+    public function showManualBook()
+    {
+        $path = base_path('docs/manual book.pdf');
+
+        if (!file_exists($path)) {
+            abort(404, 'Manual book tidak ditemukan.');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
         ]);
     }
 }

@@ -16,7 +16,7 @@ class UserManagementController extends Controller
         $search = $request->input('search');
         $sortField = $request->input('sort_field', 'name');
         $sortDirection = $request->input('sort_direction', 'asc');
-        $status = $request->input('status', 'active'); // Default to active users
+        $status = $request->input('status', 'active');
 
         $users = User::query()
             ->where('status', $status)
@@ -65,7 +65,7 @@ class UserManagementController extends Controller
 
     public function approve(Request $request, User $user)
     {
-        // Approve and optionally update role if sent
+
         $data = $request->validate([
             'role' => 'nullable|in:admin,pegawai,pro',
         ]);
@@ -83,7 +83,7 @@ class UserManagementController extends Controller
     public function reject(User $user)
     {
         $user->update(['status' => 'rejected']);
-        // OR $user->delete(); if hard delete is preferred
+
 
         return back()->with('success', 'User request rejected.');
     }

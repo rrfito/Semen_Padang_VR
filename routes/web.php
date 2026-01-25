@@ -50,6 +50,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Main Global Route
     Route::get('/visual-editor', [EditorController::class, 'index'])->name('admin.editor.index');
 
+    // Manual Book PDF Route
+    Route::get('/manual-book', [EditorController::class, 'showManualBook'])->name('admin.manual-book');
+
 
     // API Routes for Editor
     Route::prefix('visual-editor/api')->middleware('auth')->name('admin.editor.')->group(function () {

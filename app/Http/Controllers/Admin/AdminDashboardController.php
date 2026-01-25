@@ -25,16 +25,14 @@ class AdminDashboardController extends Controller
 
     public function index()
     {
-        // 1. General Statistics (Live Data)
+
         $stats = [
             'totalAreas' => Area::count(),
             'totalScenes' => Scene::count(),
             'totalLinks' => Link::count(),
         ];
 
-        // 2. Draft Status (Pending Changes)
-        // STRATEGY: Do not rely solely on 'draft_sync_states' table which might be desynced.
-        // Instead, check ALL Draft Roots for actual diffs.
+
         $allRoots = AreaDraft::whereNull('parent_id')->get();
 
         $diffCounts = [
@@ -44,11 +42,10 @@ class AdminDashboardController extends Controller
         ];
 
         foreach ($allRoots as $root) {
-            // Calculate Diff for every root
-            // This ensures we catch changes even if SyncState is missing or stuck on 'synced'
+
             $changes = $this->draftService->getPendingChanges($root);
 
-            // Sum up changes
+
             $diffCounts['areas'] += $changes['summary']['areas_count'] ?? 0;
             $diffCounts['scenes'] += $changes['summary']['scenes_count'] ?? 0;
             $diffCounts['links'] += $changes['summary']['links_count'] ?? 0;
@@ -60,17 +57,17 @@ class AdminDashboardController extends Controller
             'areaCount' => $diffCounts['areas'],
             'sceneCount' => $diffCounts['scenes'],
             'linkCount' => $diffCounts['links'],
-            'isSynced' => $totalPending === 0, // True Source of Truth
+            'isSynced' => $totalPending === 0,
             'lastEdited' => $this->getLastDraftEditTime(),
         ];
 
-        // 3. Restricted Areas
+
         $restrictedAreas = Area::where('is_restricted', true)
             ->select('id', 'name', 'description')
             ->orderBy('name')
             ->get()
             ->map(function ($area) {
-                // Get draft ID for Editor navigation
+
                 $draft = AreaDraft::where('published_id', $area->id)->first();
                 return [
                     'id' => $area->id,
@@ -80,13 +77,13 @@ class AdminDashboardController extends Controller
                 ];
             });
 
-        // 4. Hidden Areas
+
         $hiddenAreas = Area::where('is_hidden', true)
             ->select('id', 'name', 'description')
             ->orderBy('name')
             ->get()
             ->map(function ($area) {
-                // Get draft ID for Editor navigation
+
                 $draft = AreaDraft::where('published_id', $area->id)->first();
                 return [
                     'id' => $area->id,
@@ -96,7 +93,7 @@ class AdminDashboardController extends Controller
                 ];
             });
 
-        // Calculate Integrity Metrics (Read-Only Diagnostic)
+
         $integrityStats = [
             'orphanScenes' => \App\Models\Scene::doesntHave('outgoingLinks')
                 ->orWhereDoesntHave('area')
@@ -108,7 +105,7 @@ class AdminDashboardController extends Controller
         return Inertia::render('Admin/AdminDashboard', [
             'stats' => $stats,
             'draftStats' => $draftStats,
-            'integrityStats' => $integrityStats, // New Integrity Data
+            'integrityStats' => $integrityStats,
             'restrictedAreas' => $restrictedAreas,
             'hiddenAreas' => $hiddenAreas,
         ]);

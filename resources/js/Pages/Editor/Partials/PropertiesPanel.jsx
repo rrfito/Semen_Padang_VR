@@ -334,8 +334,8 @@ export default function PropertiesPanel({
                     </div>
                 )}
 
-                {/* 3. GPS Location - ONLY for Areas */}
-                {selection.type === "area" && (
+                {/* 3. GPS Location - ONLY for Root Areas (Level 1) */}
+                {selection.type === "area" && activeNode.level === 1 && (
                     <div className="space-y-3 pt-4 border-t theme-border">
                         <SectionHeader>Lokasi Area</SectionHeader>
                         <div className="grid grid-cols-2 gap-3">
@@ -783,22 +783,20 @@ export default function PropertiesPanel({
                 variant="danger"
             />
 
-            {/* Map Picker Modal - For Scene GPS Location */}
-            {selection.type === "scene" && (
-                <MapPickerModal
-                    isOpen={showMapPicker}
-                    onClose={() => setShowMapPicker(false)}
-                    initialLat={activeNode.lat || -0.9492}
-                    initialLng={activeNode.lng || 100.3705}
-                    onConfirm={(coords) => {
-                        // Send both lat and lng together in one update
-                        onUpdate(selection.id, selection.type, {
-                            lat: coords.lat,
-                            lng: coords.lng,
-                        });
-                    }}
-                />
-            )}
+            {/* Map Picker Modal - For Area and Scene GPS Location */}
+            <MapPickerModal
+                isOpen={showMapPicker}
+                onClose={() => setShowMapPicker(false)}
+                initialLat={activeNode.lat || -0.953566091006568}
+                initialLng={activeNode.lng || 100.46790061740707}
+                onConfirm={(coords) => {
+                    // Send both lat and lng together in one update
+                    onUpdate(selection.id, selection.type, {
+                        lat: coords.lat,
+                        lng: coords.lng,
+                    });
+                }}
+            />
         </aside>
     );
 }
