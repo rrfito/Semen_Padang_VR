@@ -60,7 +60,9 @@ export default function Header({ title = "Street View Admin" }) {
                             {user.name}
                         </p>
                         <p className="theme-text-secondary text-xs font-normal leading-normal mt-1">
-                            Administrator
+                            {user.role === "super_admin"
+                                ? "Super Administrator"
+                                : "Administrator"}
                         </p>
                     </div>
                     <div

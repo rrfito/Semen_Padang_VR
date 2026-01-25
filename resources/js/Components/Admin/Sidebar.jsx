@@ -2,7 +2,8 @@ import React from "react";
 import { Link, usePage } from "@inertiajs/react";
 
 export default function Sidebar() {
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const user = props.auth?.user;
 
     return (
         <aside className="flex w-64 flex-col border-r theme-border theme-surface flex-shrink-0 font-display transition-all duration-300 h-full">
@@ -97,7 +98,7 @@ export default function Sidebar() {
                                     <span
                                         className={`material-symbols-outlined ${
                                             route().current(
-                                                "admin.user-management"
+                                                "admin.user-management",
                                             )
                                                 ? "text-action-primary"
                                                 : ""
@@ -109,6 +110,35 @@ export default function Sidebar() {
                                         Pengguna
                                     </p>
                                 </Link>
+
+                                {/* Area Management Link - Super Admin Only */}
+                                {user?.role === "super_admin" && (
+                                    <Link
+                                        href={route("admin.area-management")}
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
+                                            route().current(
+                                                "admin.area-management",
+                                            )
+                                                ? "theme-sidebar-item-active"
+                                                : "theme-sidebar-item border-l-2 border-l-transparent"
+                                        }`}
+                                    >
+                                        <span
+                                            className={`material-symbols-outlined ${
+                                                route().current(
+                                                    "admin.area-management",
+                                                )
+                                                    ? "text-action-primary"
+                                                    : ""
+                                            }`}
+                                        >
+                                            domain
+                                        </span>
+                                        <p className="text-sm font-medium leading-normal">
+                                            Kepemilikan Area
+                                        </p>
+                                    </Link>
+                                )}
                             </nav>
                         </div>
                     </div>

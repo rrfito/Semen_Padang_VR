@@ -1,15 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, router, Link } from "@inertiajs/react";
+import { Head, router, Link, usePage } from "@inertiajs/react";
 
 export default function UserManagement({ users, filters }) {
+    const { props } = usePage();
+    const currentUser = props.auth?.user;
+
     const [search, setSearch] = useState(filters?.search || "");
     const [sortField, setSortField] = useState(filters?.sort_field || "name");
     const [sortDirection, setSortDirection] = useState(
-        filters?.sort_direction || "asc"
+        filters?.sort_direction || "asc",
     );
     // Add status state for tabs
     const [status, setStatus] = useState(filters?.status || "active");
+
+    // State for owned areas modal
+    const [showAreasModal, setShowAreasModal] = useState(false);
+    const [selectedUserAreas, setSelectedUserAreas] = useState(null);
+
+    // State for transfer super-admin modal
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [transferTargetUser, setTransferTargetUser] = useState(null);
+    const [transferring, setTransferring] = useState(false);
 
     const isFirstRun = useRef(true);
 
@@ -30,7 +42,7 @@ export default function UserManagement({ users, filters }) {
                     sort_direction: sortDirection,
                     status: status, // Include status in query
                 },
-                { preserveState: true, replace: true }
+                { preserveState: true, replace: true },
             );
         }, 300); // 300ms delay
 
@@ -55,11 +67,44 @@ export default function UserManagement({ users, filters }) {
         setSearch(""); // Reset search on tab change
     };
 
-    const handleRoleChange = (userId, newRole) => {
+    const handleRoleChange = (
+        userId,
+        newRole,
+        userName,
+        ownedAreasCount = 0,
+    ) => {
+        // Intercept super_admin selection - show transfer modal instead
+        if (newRole === "super_admin") {
+            setTransferTargetUser({
+                id: userId,
+                name: userName,
+                owned_areas_count: ownedAreasCount,
+            });
+            setShowTransferModal(true);
+            return;
+        }
+
         router.put(
             route("admin.users.update-role", userId),
             { role: newRole },
-            { preserveScroll: true }
+            { preserveScroll: true },
+        );
+    };
+
+    const handleTransferSuperAdmin = () => {
+        if (!transferTargetUser) return;
+        setTransferring(true);
+
+        router.post(
+            route("admin.transfer-super-admin", transferTargetUser.id),
+            {},
+            {
+                onFinish: () => {
+                    setTransferring(false);
+                    setShowTransferModal(false);
+                    setTransferTargetUser(null);
+                },
+            },
         );
     };
 
@@ -68,7 +113,7 @@ export default function UserManagement({ users, filters }) {
             router.post(
                 route("admin.users.approve", userId),
                 { role: role },
-                { preserveScroll: true }
+                { preserveScroll: true },
             );
         }
     };
@@ -78,13 +123,15 @@ export default function UserManagement({ users, filters }) {
             router.post(
                 route("admin.users.reject", userId),
                 {},
-                { preserveScroll: true }
+                { preserveScroll: true },
             );
         }
     };
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
+            case "super_admin":
+                return "bg-amber-500/10 text-amber-500 border-amber-500/20";
             case "admin":
                 return "bg-purple-500/10 text-purple-500 border-purple-500/20";
             case "pegawai":
@@ -217,6 +264,12 @@ export default function UserManagement({ users, filters }) {
                                             : "Terdaftar Pada"}
                                     </th>
 
+                                    {status === "active" && (
+                                        <th className="p-4 text-xs font-semibold uppercase tracking-wider theme-text-secondary text-center">
+                                            Kepemilikan Area
+                                        </th>
+                                    )}
+
                                     {status === "pending" && (
                                         <th className="p-4 text-xs font-semibold uppercase tracking-wider theme-text-secondary text-right">
                                             Aksi
@@ -254,13 +307,24 @@ export default function UserManagement({ users, filters }) {
                                                         onChange={(e) =>
                                                             handleRoleChange(
                                                                 user.id,
-                                                                e.target.value
+                                                                e.target.value,
+                                                                user.name,
+                                                                user.owned_areas_count,
                                                             )
                                                         }
                                                         className={`appearance-none cursor-pointer pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border transition-all focus:ring-2 focus:ring-primary/20 focus:outline-none ${getRoleBadgeColor(
-                                                            user.role
+                                                            user.role,
                                                         )} bg-transparent`}
                                                     >
+                                                        {currentUser?.role ===
+                                                            "super_admin" && (
+                                                            <option
+                                                                value="super_admin"
+                                                                className="text-gray-900 dark:text-gray-100 bg-white dark:bg-[#111a22]"
+                                                            >
+                                                                Super Admin
+                                                            </option>
+                                                        )}
                                                         <option
                                                             value="admin"
                                                             className="text-gray-900 dark:text-gray-100 bg-white dark:bg-[#111a22]"
@@ -288,11 +352,12 @@ export default function UserManagement({ users, filters }) {
                                                         onChange={(e) => {
                                                             // Force update to refresh class (simple hack or use state)
                                                             e.target.className = `appearance-none cursor-pointer pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border theme-border bg-white dark:bg-[#111a22] transition-all focus:ring-2 focus:ring-primary/20 focus:outline-none ${getRoleBadgeColor(
-                                                                e.target.value
+                                                                e.target.value,
                                                             )}`;
+                                                            // For pending users, we don't need transfer warnings yet as they are not admins yet
                                                         }}
                                                         className={`appearance-none cursor-pointer pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border transition-all focus:ring-2 focus:ring-primary/20 focus:outline-none ${getRoleBadgeColor(
-                                                            "pegawai"
+                                                            "pegawai",
                                                         )} bg-transparent`}
                                                     >
                                                         <option
@@ -327,6 +392,40 @@ export default function UserManagement({ users, filters }) {
                                             </div>
                                         </td>
 
+                                        {status === "active" && (
+                                            <td className="p-4 text-center">
+                                                {user.role === "admin" ? (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedUserAreas(
+                                                                {
+                                                                    name: user.name,
+                                                                    areas:
+                                                                        user.owned_areas ||
+                                                                        [],
+                                                                },
+                                                            );
+                                                            setShowAreasModal(
+                                                                true,
+                                                            );
+                                                        }}
+                                                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 mx-auto theme-text"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[14px]">
+                                                            visibility
+                                                        </span>
+                                                        {user.owned_areas_count ||
+                                                            0}{" "}
+                                                        area
+                                                    </button>
+                                                ) : (
+                                                    <span className="theme-text-secondary text-xs">
+                                                        -
+                                                    </span>
+                                                )}
+                                            </td>
+                                        )}
+
                                         {status === "pending" && (
                                             <td className="p-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
@@ -335,8 +434,8 @@ export default function UserManagement({ users, filters }) {
                                                             approveUser(
                                                                 user.id,
                                                                 document.getElementById(
-                                                                    `role-${user.id}`
-                                                                ).value
+                                                                    `role-${user.id}`,
+                                                                ).value,
                                                             )
                                                         }
                                                         className="px-3 py-1.5 bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
@@ -425,6 +524,195 @@ export default function UserManagement({ users, filters }) {
                     </div>
                 </div>
             </div>
+
+            {/* Owned Areas Modal */}
+            {showAreasModal && selectedUserAreas && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="theme-modal w-full max-w-md overflow-hidden">
+                        <div className="theme-modal-header flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg font-bold theme-text">
+                                    Kepemilikan Area
+                                </h3>
+                                <p className="text-sm theme-text-secondary mt-1">
+                                    {selectedUserAreas.name}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowAreasModal(false);
+                                    setSelectedUserAreas(null);
+                                }}
+                                className="theme-text-subtle hover:text-action-primary"
+                            >
+                                <span className="material-symbols-outlined">
+                                    close
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className="p-4 max-h-[300px] overflow-y-auto">
+                            {selectedUserAreas.areas.length === 0 ? (
+                                <div className="text-center py-8 theme-text-secondary">
+                                    <span className="material-symbols-outlined text-4xl opacity-30 mb-2 block">
+                                        folder_off
+                                    </span>
+                                    <p className="text-sm">
+                                        Belum memiliki area
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {selectedUserAreas.areas.map((area) => (
+                                        <div
+                                            key={area.id}
+                                            className="flex items-center gap-3 p-3 rounded-lg theme-surface border theme-border"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                                <span className="material-symbols-outlined text-amber-500 text-[18px]">
+                                                    domain
+                                                </span>
+                                            </div>
+                                            <span className="theme-text font-medium text-sm">
+                                                {area.name}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="theme-modal-footer flex justify-end">
+                            <button
+                                onClick={() => {
+                                    setShowAreasModal(false);
+                                    setSelectedUserAreas(null);
+                                }}
+                                className="theme-btn-secondary"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Transfer Super Admin Modal */}
+            {showTransferModal && transferTargetUser && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                    <div className="theme-modal w-full max-w-md overflow-hidden border-2 border-amber-500/50">
+                        <div className="theme-modal-header flex justify-between items-center bg-amber-500/10">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-amber-500">
+                                    warning
+                                </span>
+                                <div>
+                                    <h3 className="text-lg font-bold theme-text text-amber-500">
+                                        Transfer Peran Super Admin
+                                    </h3>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowTransferModal(false);
+                                    setTransferTargetUser(null);
+                                }}
+                                className="theme-text-subtle hover:text-action-primary"
+                            >
+                                <span className="material-symbols-outlined">
+                                    close
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            <p className="theme-text mb-4 leading-relaxed">
+                                Hanya boleh ada <strong>1 Super Admin</strong>{" "}
+                                dalam sistem.
+                            </p>
+                            <p className="theme-text-secondary mb-6 leading-relaxed">
+                                Jika Anda melanjutkan, peran Super Admin akan
+                                dipindahkan ke{" "}
+                                <strong className="theme-text-primary px-1 rounded bg-primary/10">
+                                    {transferTargetUser.name}
+                                </strong>{" "}
+                                dan peran Anda akan berubah menjadi{" "}
+                                <strong>Admin</strong>.
+                            </p>
+
+                            {/* Area Transfer Warning */}
+                            {transferTargetUser.owned_areas_count > 0 && (
+                                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg flex gap-3 text-sm text-blue-600 dark:text-blue-400 mb-4">
+                                    <span className="material-symbols-outlined shrink-0 text-[18px] mt-0.5">
+                                        swap_horiz
+                                    </span>
+                                    <div>
+                                        <p className="font-bold mb-1">
+                                            Pemindahan Aset Area
+                                        </p>
+                                        <p>
+                                            Pengguna ini memiliki{" "}
+                                            <strong>
+                                                {
+                                                    transferTargetUser.owned_areas_count
+                                                }{" "}
+                                                area
+                                            </strong>
+                                            . Area-area tersebut akan
+                                            dipindahkan kepemilikannya menjadi
+                                            milik Anda.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex gap-3 text-sm text-amber-600 dark:text-amber-400">
+                                <span className="material-symbols-outlined shrink-0 text-[18px] mt-0.5">
+                                    info
+                                </span>
+                                <p>
+                                    Anda akan otomatis logout setelah transfer
+                                    berhasil.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="theme-modal-footer flex justify-end gap-3 bg-slate-50/50 dark:bg-[#1b2631]/50">
+                            <button
+                                onClick={() => {
+                                    setShowTransferModal(false);
+                                    setTransferTargetUser(null);
+                                }}
+                                className="theme-btn-secondary"
+                                disabled={transferring}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleTransferSuperAdmin}
+                                disabled={transferring}
+                                className="theme-btn-primary bg-amber-500 hover:bg-amber-600 border-amber-500 text-white disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {transferring ? (
+                                    <>
+                                        <span className="material-symbols-outlined animate-spin text-[18px]">
+                                            progress_activity
+                                        </span>
+                                        Memproses...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-[18px]">
+                                            swap_horiz
+                                        </span>
+                                        Transfer & Logout
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }

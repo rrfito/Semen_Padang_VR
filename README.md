@@ -19,15 +19,15 @@
 
 ## 📋 Daftar Isi
 
--   [Tentang Aplikasi](#-tentang-aplikasi)
--   [Fitur Utama](#-fitur-utama)
--   [Tech Stack](#️-tech-stack)
--   [Arsitektur Sistem](#-arsitektur-sistem)
--   [Arsitektur Database](#️-arsitektur-database)
--   [Struktur Project](#-struktur-project)
--   [Instalasi](#-instalasi)
--   [Penggunaan](#-penggunaan)
--   [API Routes](#️-api-routes)
+- [Tentang Aplikasi](#-tentang-aplikasi)
+- [Fitur Utama](#-fitur-utama)
+- [Tech Stack](#️-tech-stack)
+- [Arsitektur Sistem](#-arsitektur-sistem)
+- [Arsitektur Database](#️-arsitektur-database)
+- [Struktur Project](#-struktur-project)
+- [Instalasi](#-instalasi)
+- [Penggunaan](#-penggunaan)
+- [API Routes](#️-api-routes)
 
 ---
 
@@ -35,12 +35,12 @@
 
 **Semen Padang Virtual Tour** adalah aplikasi web interaktif yang memungkinkan pengguna untuk menjelajahi area PT Semen Padang secara virtual melalui gambar panorama 360°. Aplikasi ini menggabungkan:
 
--   **Peta Interaktif** - Navigasi lokasi berbasis Leaflet dengan marker dinamis dan layer control
--   **360° Viewer** - Pengalaman imersif menggunakan Marzipano dengan hotspot navigasi
--   **Hierarchical Areas** - Struktur area bertingkat (Level 1 → Level 2 → Level 3+)
--   **Visual Editor** - Admin panel berbasis React untuk manajemen konten
--   **Draft & Publish Workflow** - Sistem review perubahan sebelum dipublikasikan
--   **Auto-Linking** - Sistem navigasi otomatis antar scene berdasarkan GPS proximity
+- **Peta Interaktif** - Navigasi lokasi berbasis Leaflet dengan marker dinamis dan layer control
+- **360° Viewer** - Pengalaman imersif menggunakan Marzipano dengan hotspot navigasi
+- **Hierarchical Areas** - Struktur area bertingkat (Level 1 → Level 2 → Level 3+)
+- **Visual Editor** - Admin panel berbasis React untuk manajemen konten
+- **Draft & Publish Workflow** - Sistem review perubahan sebelum dipublikasikan
+- **Auto-Linking** - Sistem navigasi otomatis antar scene berdasarkan GPS proximity
 
 ---
 
@@ -50,25 +50,25 @@
 
 #### Dashboard Peta
 
--   Peta interaktif dengan layer control (Satellite/Street/Terrain)
--   Sidebar hierarkis untuk navigasi area dengan status labels
--   Marker dinamis dengan warna berbeda per level area
--   Zoom dinamis berdasarkan level konten yang dipilih
--   Gesture hints untuk panduan interaksi
+- Peta interaktif dengan layer control (Satellite/Street/Terrain)
+- Sidebar hierarkis untuk navigasi area dengan status labels
+- Marker dinamis dengan warna berbeda per level area
+- Zoom dinamis berdasarkan level konten yang dipilih
+- Gesture hints untuk panduan interaksi
 
 #### 360° Panorama Viewer
 
--   Panorama 360° menggunakan Marzipano
--   Hotspot navigasi antar scene (tipe navigasi & portal)
--   Minimap lokasi saat ini terintegrasi
--   Heading preservation untuk orientasi yang akurat
--   Informasi lokasi bertingkat (Level 1 → Level 2 → Level 3)
+- Panorama 360° menggunakan Marzipano
+- Hotspot navigasi antar scene (tipe navigasi & portal)
+- Minimap lokasi saat ini terintegrasi
+- Heading preservation untuk orientasi yang akurat
+- Informasi lokasi bertingkat (Level 1 → Level 2 → Level 3)
 
 #### Interactive Guided Tour
 
--   Tour panduan interaktif menggunakan Driver.js
--   Langkah-langkah step-by-step untuk pengguna baru
--   Highlight elemen UI dengan penjelasan
+- Tour panduan interaktif menggunakan Driver.js
+- Langkah-langkah step-by-step untuk pengguna baru
+- Highlight elemen UI dengan penjelasan
 
 ---
 
@@ -76,25 +76,25 @@
 
 #### Area Management
 
--   Create, Read, Update, Delete (CRUD) untuk Areas
--   Struktur hierarki multi-level dengan drag & drop reordering
--   Support untuk `is_restricted` (area terbatas) dan `is_hidden` (area tersembunyi)
--   GPS coordinate picker via interactive map modal
--   Kalkulasi deletion impact sebelum penghapusan
+- Create, Read, Update, Delete (CRUD) untuk Areas
+- Struktur hierarki multi-level dengan drag & drop reordering
+- Support untuk `is_restricted` (area terbatas) dan `is_hidden` (area tersembunyi)
+- GPS coordinate picker via interactive map modal
+- Kalkulasi deletion impact sebelum penghapusan
 
 #### Scene Management
 
--   Bulk image upload dengan ekstraksi metadata GPS otomatis
--   Scene viewer terintegrasi langsung di editor
--   Pengaturan default heading, pitch, dan FOV
--   Scene reordering dalam area
+- Bulk image upload dengan ekstraksi metadata GPS otomatis
+- Scene viewer terintegrasi langsung di editor
+- Pengaturan default heading, pitch, dan FOV
+- Scene reordering dalam area
 
 #### Hotspot/Link Editor
 
--   Visual link editor dengan real-time preview
--   Tipe link: `navigasi` (dalam area) dan `portal` (antar area)
--   Koordinat yaw/pitch untuk posisi hotspot
--   Auto-linking berdasarkan proximity GPS (PostGIS)
+- Visual link editor dengan real-time preview
+- Tipe link: `navigasi` (dalam area) dan `portal` (antar area)
+- Koordinat yaw/pitch untuk posisi hotspot
+- Auto-linking berdasarkan proximity GPS (PostGIS)
 
 #### Draft & Publish Workflow
 
@@ -111,10 +111,10 @@
 
 #### Authentication & Authorization
 
--   Role-based access control (Admin, User, Pending)
--   User approval workflow untuk registrasi baru
--   Admin dapat approve/reject pending users
--   Live role switching dengan dropdown di admin panel
+- Role-based access control (Admin, User, Pending)
+- User approval workflow untuk registrasi baru
+- Admin dapat approve/reject pending users
+- Live role switching dengan dropdown di admin panel
 
 #### User Roles
 
@@ -342,32 +342,32 @@ erDiagram
 
 #### 📁 **Areas** (Hierarchical Structure)
 
--   Mendukung struktur parent-child untuk grouping multi-level
--   Koordinat `lat/lng` untuk marker di peta
--   `is_restricted`: Area yang memerlukan izin khusus
--   `is_hidden`: Area yang tidak ditampilkan di public tour
--   `priority`: Urutan tampilan dalam level yang sama
+- Mendukung struktur parent-child untuk grouping multi-level
+- Koordinat `lat/lng` untuk marker di peta
+- `is_restricted`: Area yang memerlukan izin khusus
+- `is_hidden`: Area yang tidak ditampilkan di public tour
+- `priority`: Urutan tampilan dalam level yang sama
 
 #### 🖼️ **Scenes**
 
--   Menyimpan gambar panorama 360°
--   **PostGIS `location`** untuk pencarian nearest-neighbor
--   `heading`, `pitch` untuk orientasi default viewer
--   `hfov` (horizontal field of view) untuk zoom level
--   `sort_order` untuk urutan tampilan dalam area
+- Menyimpan gambar panorama 360°
+- **PostGIS `location`** untuk pencarian nearest-neighbor
+- `heading`, `pitch` untuk orientasi default viewer
+- `hfov` (horizontal field of view) untuk zoom level
+- `sort_order` untuk urutan tampilan dalam area
 
 #### 🔗 **Links**
 
--   Koneksi scene-to-scene
--   **Type `navigasi`**: Link navigasi dalam area yang sama
--   **Type `portal`**: Link ke area lain (cross-area navigation)
--   `yaw`, `pitch` menentukan posisi hotspot di viewer
+- Koneksi scene-to-scene
+- **Type `navigasi`**: Link navigasi dalam area yang sama
+- **Type `portal`**: Link ke area lain (cross-area navigation)
+- `yaw`, `pitch` menentukan posisi hotspot di viewer
 
 #### 📝 **Draft Tables**
 
--   Mirror structure dari live tables dengan tambahan `is_deleted` flag
--   `live_id`: Referensi ke record live untuk tracking perubahan
--   `draft_sync_states`: Tracking checksum untuk detect changes
+- Mirror structure dari live tables dengan tambahan `is_deleted` flag
+- `live_id`: Referensi ke record live untuk tracking perubahan
+- `draft_sync_states`: Tracking checksum untuk detect changes
 
 ---
 
@@ -481,89 +481,111 @@ semen-padang-vr/
 
 ## 🚀 Instalasi
 
-### Prerequisites
+Panduan ini berasumsi Anda telah menerima file project dalam bentuk **ZIP** dan sudah mengekstraknya di komputer lokal Anda.
 
--   PHP >= 8.2 dengan extensions: `pdo_pgsql`, `gd`, `exif`
--   Composer
--   Node.js >= 18
--   PostgreSQL dengan extension PostGIS
--   npm atau yarn
+### Prerequisites (Prasyarat)
+
+Pastikan komputer Anda sudah terinstall:
+
+- **PHP >= 8.2** (pastikan ekstensi `pdo_pgsql`, `gd`, `exif` aktif)
+- **Composer** (untuk install dependency PHP)
+- **Node.js >= 18** (untuk install dependency Frontend)
+- **PostgreSQL** (dengan ekstensi **PostGIS** aktif)
 
 ### Langkah Instalasi
 
-```bash
-# 1. Clone repository
-git clone <repository-url>
-cd semen-padang-vr
+Ikuti langkah-langkah berikut secara berurutan:
 
-# 2. Install PHP dependencies
+#### 1. Masuk ke Folder Project
+
+Buka terminal (Command Prompt/PowerShell) dan arahkan ke folder hasil ekstrak project.
+
+```bash
+cd path/to/semen-padang-vr
+```
+
+#### 2. Install Dependencies
+
+Install library yang dibutuhkan untuk Backend (Laravel) dan Frontend (React).
+
+```bash
+# Install PHP dependencies
 composer install
 
-# 3. Install Node dependencies
+# Install Node dependencies
 npm install
+```
 
-# 4. Copy environment file
-cp .env.example .env
+#### 3. Konfigurasi Environment (.env)
 
-# 5. Generate application key
-php artisan key:generate
+File `.env` sudah disertakan dalam paket ini. Namun, Anda **WAJIB** menyesuaikannya dengan database lokal Anda.
 
-# 6. Konfigurasi database di .env
-# Pastikan menggunakan PostgreSQL dengan PostGIS
+1.  Buka file `.env` dengan text editor (VS Code, Notepad, dll).
+2.  Cari bagian konfigurasi database (baris 11-16) dan sesuaikan:
+
+```ini
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=semen_padang_vr
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_DATABASE=semen_padang_vr  # Pastikan database ini sudah dibuat di PostgreSQL Anda
+DB_USERNAME=postgres         # GANTI dengan username PostgreSQL lokal Anda
+DB_PASSWORD=password_lokal   # GANTI dengan password PostgreSQL lokal Anda
+```
 
-# 7. Jalankan migrasi database
+> **Catatan:** Password di sini harus sesuai dengan password database di komputer Anda sendiri.
+
+3.  (Opsional) Generate Application Key baru untuk keamanan:
+
+```bash
+php artisan key:generate
+```
+
+#### 4. Setup Database
+
+Pastikan Anda sudah membuat database kosong bernama `semen_padang_vr` (atau sesuai nama di file .env) di PostgreSQL.
+Lalu, jalankan migrasi untuk membuat tabel-tabel yang diperlukan:
+
+```bash
 php artisan migrate
+```
 
-# 8. Create storage link
+#### 5. Setup Storage Link
+
+Agar gambar panorama bisa diakses oleh publik, jalankan perintah ini:
+
+```bash
 php artisan storage:link
+```
 
-# 9. Build assets (development)
+#### 6. Menjalankan Aplikasi
+
+Aplikasi ini membutuhkan **3 Terminal** yang berjalan bersamaan agar semua fitur (termasuk upload gambar background) berfungsi.
+
+Buka 3 tab terminal/CMD terpisah di folder project ini:
+
+**Terminal 1 (Frontend Build & Watch):**
+
+```bash
 npm run dev
+```
 
-# 10. Jalankan server
+**Terminal 2 (Backend Server):**
+
+```bash
 php artisan serve
 ```
 
-### Menjalankan Queue Worker
-
-Untuk background image processing dan auto-linking:
+**Terminal 3 (Background Worker - WAJIB!):**
+Tanpa ini, proses upload gambar dan auto-linking **TIDAK AKAN JALAN**.
 
 ```bash
 php artisan queue:work
 ```
 
-### Development Mode
+### Akses Aplikasi
 
-Untuk development dengan hot-reload, jalankan di terminal terpisah:
-
-```bash
-# Terminal 1: Vite dev server
-npm run dev
-
-# Terminal 2: Laravel server
-php artisan serve
-
-# Terminal 3: Queue worker
-php artisan queue:work
-```
-
-### Production Build
-
-```bash
-# Build optimized assets
-npm run build
-
-# Optimize Laravel
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+Buka browser dan kunjungi:
+`http://127.0.0.1:8000`
 
 ---
 

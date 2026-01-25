@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Drafts\AreaDraft;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Inertia\Inertia;
 
 class UserManagementController extends Controller
 {
@@ -20,6 +22,8 @@ class UserManagementController extends Controller
 
         $users = User::query()
             ->where('status', $status)
+            ->where('users.id', '!=', Auth::id()) // Exclude current user
+            ->where('role', '!=', 'super_admin') // Exclude super admin
             ->leftJoin('sessions', 'users.id', '=', 'sessions.user_id')
             ->select('users.*', DB::raw('MAX(sessions.last_activity) as last_activity'))
             ->groupBy('users.id')
@@ -33,6 +37,11 @@ class UserManagementController extends Controller
             ->paginate(10)
             ->withQueryString()
             ->through(function ($user) {
+                $ownedAreas = AreaDraft::where('created_by', $user->id)
+                    ->whereNull('parent_id')
+                    ->where('marked_for_deletion', false)
+                    ->get(['id', 'name']);
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -43,6 +52,8 @@ class UserManagementController extends Controller
                     'last_activity' => $user->last_activity
                         ? Carbon::createFromTimestamp($user->last_activity)->locale('id')->diffForHumans()
                         : 'Tidak pernah aktif',
+                    'owned_areas' => $ownedAreas->map(fn($a) => ['id' => $a->id, 'name' => $a->name]),
+                    'owned_areas_count' => $ownedAreas->count(),
                 ];
             });
 
@@ -61,6 +72,41 @@ class UserManagementController extends Controller
         $user->update(['role' => $validated['role']]);
 
         return back()->with('success', 'User role updated successfully.');
+    }
+
+    public function transferSuperAdmin(User $user)
+    {
+        $currentUser = Auth::user();
+
+
+        if (!$currentUser->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat melakukan transfer.');
+        }
+
+
+        if ($user->id === $currentUser->id) {
+            abort(400, 'Tidak dapat transfer ke diri sendiri.');
+        }
+
+
+        DB::transaction(function () use ($currentUser, $user) {
+
+            AreaDraft::where('created_by', $user->id)
+                ->update(['created_by' => $currentUser->id]);
+
+
+            User::where('id', $currentUser->id)->update(['role' => 'admin']);
+
+
+            $user->update(['role' => 'super_admin']);
+        });
+
+
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Transfer Super Admin berhasil. Silakan login kembali.');
     }
 
     public function approve(Request $request, User $user)
@@ -88,3 +134,4 @@ class UserManagementController extends Controller
         return back()->with('success', 'User request rejected.');
     }
 }
+
