@@ -8,6 +8,7 @@ use App\Models\Scene;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Jobs\ProcessSceneImage;
 
 use App\Services\DraftService;
@@ -44,24 +45,33 @@ class EditorController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user();
 
         $liveRoots = Area::whereNull('parent_id')->get();
         foreach ($liveRoots as $liveRoot) {
             $this->draftService->initDrafts($liveRoot);
         }
 
-
-        $roots = AreaDraft::whereNull('parent_id')
+        // Build query - super-admin sees all, regular admin sees owned + unassigned
+        $query = AreaDraft::whereNull('parent_id')
             ->where('marked_for_deletion', false)
             ->with([
                 'children.children',
                 'scenes.links.targetScene',
                 'children.scenes.links.targetScene',
-                'children.children.scenes.links.targetScene'
-            ])
-            ->orderBy('priority')
-            ->orderBy('name')
-            ->get();
+                'children.children.scenes.links.targetScene',
+                'creator'
+            ]);
+
+        // Filter by ownership for non-super-admin
+        if (!$user->isSuperAdmin()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                    ->orWhereNull('created_by');
+            });
+        }
+
+        $roots = $query->orderBy('priority')->orderBy('name')->get();
 
         $hierarchy = $roots->map(fn($root) => $this->formatAreaDraftNode($root));
 
@@ -100,6 +110,8 @@ class EditorController extends Controller
 
     private function formatAreaDraftNode(AreaDraft $draft)
     {
+        $user = Auth::user();
+
         return [
             'id' => $draft->id,
             'published_id' => $draft->published_id,
@@ -116,6 +128,11 @@ class EditorController extends Controller
             'marked_for_deletion' => (bool) $draft->marked_for_deletion,
             'lat' => $draft->lat,
             'lng' => $draft->lng,
+            'created_by' => $draft->created_by,
+            // Only show owner name for super-admin (regular admins only see their own areas)
+            'creator_name' => ($user && $user->isSuperAdmin() && $draft->level === 1)
+                ? ($draft->creator->name ?? null)
+                : null,
             'children' => $draft->children
                 ->filter(fn($c) => !$c->marked_for_deletion)
                 ->map(fn($child) => $this->formatAreaDraftNode($child))
@@ -150,6 +167,8 @@ class EditorController extends Controller
 
     public function createSubArea(Request $request)
     {
+        $this->authorize('create', AreaDraft::class);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -161,10 +180,18 @@ class EditorController extends Controller
 
         $parentId = $validated['parent_id'] ?? null;
         $level = 1;
+        $createdBy = null;
+
         if ($parentId) {
             $parent = AreaDraft::find($parentId);
-            if ($parent)
+            if ($parent) {
                 $level = $parent->level + 1;
+                // Authorize: must have access to parent
+                $this->authorize('update', $parent);
+            }
+        } else {
+            // Creating root area (level 1) - set current user as owner
+            $createdBy = Auth::id();
         }
 
         $area = AreaDraft::create([
@@ -175,6 +202,7 @@ class EditorController extends Controller
             'is_container' => $validated['is_container'] ?? false,
             'priority' => $validated['priority'] ?? 0,
             'published_id' => null,
+            'created_by' => $createdBy,
         ]);
 
         $this->draftService->markDirty($area);
@@ -189,6 +217,11 @@ class EditorController extends Controller
     public function updateArea(Request $request, $id)
     {
         $area = AreaDraft::findOrFail($id);
+
+        // Authorization: check ownership via root area
+        $rootArea = $area->getRootArea();
+        $this->authorize('update', $rootArea);
+
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
@@ -206,6 +239,11 @@ class EditorController extends Controller
     public function destroyArea($id)
     {
         $area = AreaDraft::findOrFail($id);
+
+        // Authorization: check delete permission via root area
+        $rootArea = $area->getRootArea();
+        $this->authorize('delete', $rootArea);
+
         $this->draftService->markForDeletion($area);
         $this->draftService->markDirty($area);
         return response()->json(['success' => true]);
@@ -471,7 +509,19 @@ class EditorController extends Controller
 
     public function getPendingChanges()
     {
-        $roots = AreaDraft::whereNull('parent_id')->get();
+        $user = Auth::user();
+
+        // Build query - super-admin sees all, regular admin sees owned + unassigned
+        $query = AreaDraft::whereNull('parent_id');
+
+        if (!$user->isSuperAdmin()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                    ->orWhereNull('created_by');
+            });
+        }
+
+        $roots = $query->get();
         $totalChanges = [];
 
         foreach ($roots as $root) {
@@ -482,7 +532,6 @@ class EditorController extends Controller
                 $totalChanges[$type] = array_merge($totalChanges[$type], $items);
             }
         }
-
 
         $summary = [
             'total_changes' => count($totalChanges['Area'] ?? []) + count($totalChanges['Scene'] ?? []) + count($totalChanges['Link'] ?? []) + count($totalChanges['InfoSpot'] ?? []),
@@ -624,6 +673,26 @@ class EditorController extends Controller
                 'pitch' => $i->pitch,
             ])
         ]);
+    }
+
+    /**
+     * Get all gateway-eligible scenes (no ownership filter).
+     * Used by LinkTargetModal for cross-owner gateway linking.
+     */
+    public function getGatewayScenes()
+    {
+        $scenes = SceneDraft::whereHas('area', fn($q) => $q->where('marked_for_deletion', false))
+            ->where('marked_for_deletion', false)
+            ->where('can_be_gateway', true)
+            ->with(['area:id,name'])
+            ->orderBy('name')
+            ->get(['id', 'name', 'area_id']);
+
+        return response()->json($scenes->map(fn($s) => [
+            'id' => $s->id,
+            'name' => $s->name,
+            'area_name' => $s->area->name ?? 'Unknown',
+        ]));
     }
 
 

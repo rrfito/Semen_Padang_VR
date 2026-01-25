@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function LinkTargetModal({
     isOpen,
@@ -12,6 +13,7 @@ export default function LinkTargetModal({
 }) {
     const [targets, setTargets] = useState([]);
     const [selectedTarget, setSelectedTarget] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && hierarchy) {
@@ -20,7 +22,7 @@ export default function LinkTargetModal({
         }
     }, [isOpen, mode, currentAreaId, currentSceneId, hierarchy]);
 
-    const deriveTargets = () => {
+    const deriveTargets = async () => {
         let candidates = [];
 
         // First, find the current scene's parent area if currentAreaId is not provided
@@ -29,69 +31,47 @@ export default function LinkTargetModal({
             effectiveAreaId = findParentAreaId(hierarchy, currentSceneId);
         }
 
-        // console.log("LinkTargetModal deriveTargets:", {
-        //     mode,
-        //     currentSceneId,
-        //     currentAreaId,
-        //     effectiveAreaId,
-        //     excludedTargetIds,
-        //     hierarchyLength: hierarchy?.length,
-        // });
-
         if (mode === "navigasi") {
             // Find current area in hierarchy and list its scenes (excluding current AND excluded targets)
             const area = findAreaById(hierarchy, effectiveAreaId);
-            // console.log("Found area for navigasi:", area);
 
             if (area && area.scenes) {
                 candidates = area.scenes
                     .filter(
                         (scene) =>
                             scene.id !== currentSceneId &&
-                            !excludedTargetIds.includes(scene.id)
+                            !excludedTargetIds.includes(scene.id),
                     )
                     .map((s) => ({ id: s.id, name: s.name, type: "scene" }));
             }
+            setTargets(candidates);
         } else if (mode === "gateway") {
-            // Portal: List SCENES from OTHER areas where can_be_gateway = true
-            const collectGatewayScenes = (nodes, excludeAreaId) => {
-                let acc = [];
-                nodes.forEach((node) => {
-                    if (node.type === "area") {
-                        // Collect gateway scenes from this area (if it's not the current area)
-                        if (node.id !== excludeAreaId && node.scenes) {
-                            const gatewayScenes = node.scenes
-                                .filter(
-                                    (s) =>
-                                        s.can_be_gateway === true &&
-                                        !excludedTargetIds.includes(s.id)
-                                )
-                                .map((s) => ({
-                                    id: s.id,
-                                    name: `${s.name} (${node.name})`, // Include area name for clarity
-                                    type: "scene",
-                                    areaName: node.name,
-                                }));
-                            acc = acc.concat(gatewayScenes);
-                        }
-                        // Recurse into children
-                        if (node.children) {
-                            acc = acc.concat(
-                                collectGatewayScenes(
-                                    node.children,
-                                    excludeAreaId
-                                )
-                            );
-                        }
-                    }
-                });
-                return acc;
-            };
-            candidates = collectGatewayScenes(hierarchy || [], effectiveAreaId);
+            // Fetch ALL gateway scenes from API (no ownership filter)
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    "/admin/visual-editor/api/gateway-scenes",
+                );
+                candidates = response.data
+                    .filter(
+                        (s) =>
+                            s.id !== currentSceneId &&
+                            !excludedTargetIds.includes(s.id),
+                    )
+                    .map((s) => ({
+                        id: s.id,
+                        name: `${s.name} (${s.area_name})`,
+                        type: "scene",
+                        areaName: s.area_name,
+                    }));
+                setTargets(candidates);
+            } catch (error) {
+                console.error("Failed to fetch gateway scenes:", error);
+                setTargets([]);
+            } finally {
+                setLoading(false);
+            }
         }
-
-        // console.log("Derived candidates:", candidates);
-        setTargets(candidates);
     };
 
     // Helper: Find parent area ID for a given scene
@@ -151,7 +131,12 @@ export default function LinkTargetModal({
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-2">
-                    {targets.length === 0 ? (
+                    {loading ? (
+                        <div className="p-8 text-center theme-text-muted flex flex-col items-center gap-3">
+                            <div className="w-6 h-6 border-2 border-white/30 border-t-primary rounded-full animate-spin"></div>
+                            <span>Memuat scene gerbang...</span>
+                        </div>
+                    ) : targets.length === 0 ? (
                         <div className="p-8 text-center theme-text-muted">
                             {mode === "navigasi"
                                 ? "Tidak ada scene lain di area ini."

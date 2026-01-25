@@ -85,6 +85,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::post('/discard-all/{rootDraftId}', [EditorController::class, 'discardDrafts'])->name('discard-all');
         Route::post('/autolink/execute', [EditorController::class, 'autoLinkExecute'])->name('autolink.execute');
         Route::post('/{type}/{id}/reorder', [EditorController::class, 'reorderNode'])->name('reorder');
+
+        // Gateway Scenes (no ownership filter - for cross-owner linking)
+        Route::get('/gateway-scenes', [EditorController::class, 'getGatewayScenes'])->name('gateway-scenes');
     });
 
     // LEGACY REDIRECT: /admin/editor/{area} -> /admin/visual-editor?focus=area:{id}

@@ -196,7 +196,7 @@ export default function PropertiesPanel({
             if (n.scenes) {
                 // Filter scenes that are marked for deletion
                 const validScenes = n.scenes.filter(
-                    (s) => !s.marked_for_deletion
+                    (s) => !s.marked_for_deletion,
                 );
                 count.scenes += validScenes.length;
             }
@@ -256,20 +256,22 @@ export default function PropertiesPanel({
                         selection.type === "scene"
                             ? "bg-purple-500 text-white"
                             : activeNode.level === 1
-                            ? "bg-amber-500 text-white"
-                            : activeNode.level === 2 && activeNode.is_container
-                            ? "bg-blue-500 text-white"
-                            : "bg-teal-500 text-white"
+                              ? "bg-amber-500 text-white"
+                              : activeNode.level === 2 &&
+                                  activeNode.is_container
+                                ? "bg-blue-500 text-white"
+                                : "bg-teal-500 text-white"
                     }`}
                 >
                     <span className="material-symbols-outlined text-xl">
                         {selection.type === "scene"
                             ? "360"
                             : activeNode.level === 1
-                            ? "domain"
-                            : activeNode.level === 2 && activeNode.is_container
-                            ? "layers"
-                            : "meeting_room"}
+                              ? "domain"
+                              : activeNode.level === 2 &&
+                                  activeNode.is_container
+                                ? "layers"
+                                : "meeting_room"}
                     </span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -350,7 +352,7 @@ export default function PropertiesPanel({
                                     onChange={(e) =>
                                         handleChange(
                                             "lat",
-                                            parseFloat(e.target.value) || 0
+                                            parseFloat(e.target.value) || 0,
                                         )
                                     }
                                     placeholder="0.0000"
@@ -367,7 +369,7 @@ export default function PropertiesPanel({
                                     onChange={(e) =>
                                         handleChange(
                                             "lng",
-                                            parseFloat(e.target.value) || 0
+                                            parseFloat(e.target.value) || 0,
                                         )
                                     }
                                     placeholder="0.0000"
@@ -386,6 +388,30 @@ export default function PropertiesPanel({
                         </button>
                     </div>
                 )}
+
+                {/* 4. Ownership Display - ONLY for Level 1 Areas when super-admin */}
+                {selection.type === "area" &&
+                    activeNode.level === 1 &&
+                    activeNode.creator_name && (
+                        <div className="space-y-2 pt-4 border-t theme-border">
+                            <SectionHeader>Pemilik Area</SectionHeader>
+                            <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-slate-800/50 rounded-lg border theme-border-subtle">
+                                <div className="size-8 flex items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+                                    <span className="material-symbols-outlined text-[18px]">
+                                        person
+                                    </span>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold theme-text">
+                                        @{activeNode.creator_name}
+                                    </p>
+                                    <p className="text-[10px] theme-text-muted uppercase tracking-wide">
+                                        Kreator & Pemilik
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 {/* ========== SCENE-SPECIFIC PROPERTIES ========== */}
                 {selection.type === "scene" && (
@@ -407,7 +433,7 @@ export default function PropertiesPanel({
                                         onChange={(e) =>
                                             handleChange(
                                                 "lat",
-                                                parseFloat(e.target.value) || 0
+                                                parseFloat(e.target.value) || 0,
                                             )
                                         }
                                         placeholder="0.0000"
@@ -424,7 +450,7 @@ export default function PropertiesPanel({
                                         onChange={(e) =>
                                             handleChange(
                                                 "lng",
-                                                parseFloat(e.target.value) || 0
+                                                parseFloat(e.target.value) || 0,
                                             )
                                         }
                                         placeholder="0.0000"
@@ -456,7 +482,7 @@ export default function PropertiesPanel({
                                         onChange={(e) =>
                                             handleChange(
                                                 "can_be_gateway",
-                                                e.target.checked
+                                                e.target.checked,
                                             )
                                         }
                                         className="sr-only peer"
@@ -570,7 +596,7 @@ export default function PropertiesPanel({
                                     onChange={(e) =>
                                         handleChange(
                                             "is_restricted",
-                                            e.target.checked
+                                            e.target.checked,
                                         )
                                     }
                                 />
@@ -611,7 +637,7 @@ export default function PropertiesPanel({
                                     onChange={(e) =>
                                         handleChange(
                                             "is_hidden",
-                                            e.target.checked
+                                            e.target.checked,
                                         )
                                     }
                                 />
@@ -752,7 +778,7 @@ export default function PropertiesPanel({
                                                                 </span>
                                                                 {name}
                                                             </li>
-                                                        )
+                                                        ),
                                                     )}
                                                 </ul>
                                             </div>

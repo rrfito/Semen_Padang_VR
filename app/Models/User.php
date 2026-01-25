@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Drafts\AreaDraft;
 
 
 class User extends Authenticatable
@@ -21,7 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // 3. TAMBAHKAN INI (Agar bisa simpan role admin/pegawai)
+        'role',
         'status',
     ];
 
@@ -48,5 +49,27 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Check if user has super_admin role.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
 
+    /**
+     * Check if user has admin or super_admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin']);
+    }
+
+    /**
+     * Get all area drafts owned by this user.
+     */
+    public function ownedAreaDrafts()
+    {
+        return $this->hasMany(AreaDraft::class, 'created_by');
+    }
 }

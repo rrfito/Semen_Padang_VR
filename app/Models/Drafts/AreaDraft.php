@@ -3,7 +3,7 @@
 namespace App\Models\Drafts;
 
 use App\Models\Area;
-use App\Models\User; // Assuming User exists
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +24,8 @@ class AreaDraft extends Model
         'lng',
         'is_restricted',
         'is_hidden',
-        'marked_for_deletion'
+        'marked_for_deletion',
+        'created_by',
     ];
 
     protected $casts = [
@@ -62,5 +63,50 @@ class AreaDraft extends Model
     public function syncState()
     {
         return $this->hasOne(DraftSyncState::class, 'root_draft_id');
+    }
+
+    /**
+     * Get the user who created/owns this area draft.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Check if this area is owned by the given user.
+     * Returns true if:
+     * - User is super_admin (full access)
+     * - Area has no owner (legacy/unassigned)
+     * - User is the owner
+     */
+    public function isOwnedBy(User $user): bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->created_by === null) {
+            return true; // Unassigned area - anyone can edit
+        }
+
+        return $this->created_by === $user->id;
+    }
+
+    /**
+     * Get the root area (Level 1 ancestor) for ownership checks.
+     */
+    public function getRootArea(): ?AreaDraft
+    {
+        if ($this->level === 1 || $this->parent_id === null) {
+            return $this;
+        }
+
+        $parent = $this->parent;
+        while ($parent && $parent->parent_id !== null) {
+            $parent = $parent->parent;
+        }
+
+        return $parent ?? $this;
     }
 }
