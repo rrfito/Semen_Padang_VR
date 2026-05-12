@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@semenpadang.co.id',
             'password' => bcrypt('password'),
             'role' => 'admin',
+            'status' => 'active',
         ]);
 
         User::factory()->create([
