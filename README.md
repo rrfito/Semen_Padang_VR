@@ -232,182 +232,20 @@ sudo chmod -R 775 /var/www/semen-padang-vr/bootstrap/cache
 
 Berikut adalah diagram-diagram arsitektur dan alur kerja aplikasi untuk memberikan gambaran menyeluruh terhadap sistem Semen Padang Virtual Tour:
 
-<details>
+<details open>
 <summary><b>1. Flowchart Sistem Terintegrasi</b></summary>
 
-Diagram ini menunjukkan alur interaksi pengguna (Guest, Pegawai, Admin) secara keseluruhan dari mulai membuka aplikasi hingga eksplorasi peta dan manajemen CMS.
+![Flowchart](docs/erd.png)
 
-```mermaid
-flowchart TD
-    Start([Mulai]) --> BukaApp[Buka Aplikasi]
-    BukaApp --> CekLogin{Login?}
-
-    %% ========================================
-    %% GUEST PATH (Tidak Login)
-    %% ========================================
-    CekLogin -- Tidak --> GuestDash[Buka Halaman Utama]
-    GuestDash --> LoadPublik[Memuat Area Publik]
-    LoadPublik --> InteraksiPeta[Interaksi dengan Peta]
-
-    InteraksiPeta --> CekMarkerGuest{Marker Dipilih?}
-    CekMarkerGuest -- Tidak --> EksplorasiGuest[Eksplorasi Peta]
-    EksplorasiGuest --> Selesai([Selesai])
-
-    CekMarkerGuest -- Ya --> InfoGuest[Lihat Informasi Area]
-    InfoGuest --> CekTourGuest{Masuk Virtual Tour?}
-    CekTourGuest -- Tidak --> EksplorasiGuest
-
-    CekTourGuest -- Ya --> ViewerGuest[Buka 360 Viewer]
-    ViewerGuest --> CekHotspotGuest{Hotspot Dipilih?}
-    CekHotspotGuest -- Ya --> PindahSceneGuest[Pindah Scene]
-    PindahSceneGuest --> ViewerGuest
-
-    CekHotspotGuest -- Tidak --> CekInfoSpotGuest{Info Spot Dipilih?}
-    CekInfoSpotGuest -- Ya --> TampilInfoGuest[Tampilkan Informasi]
-    TampilInfoGuest --> ViewerGuest
-    CekInfoSpotGuest -- Tidak --> CekKembaliGuest{Kembali ke Peta?}
-    CekKembaliGuest -- Ya --> GuestDash
-    CekKembaliGuest -- Tidak --> ViewerGuest
-
-    %% ========================================
-    %% LOGIN PROCESS
-    %% ========================================
-    CekLogin -- Ya --> HalamanLogin[Buka Halaman Login]
-    HalamanLogin --> InputKredensial[Input Email dan Password]
-    InputKredensial --> CekValid{Data Valid?}
-
-    CekValid -- Tidak --> TampilError[Tampilkan Pesan Kesalahan]
-    TampilError --> HalamanLogin
-
-    CekValid -- Ya --> CekRole{Role Admin?}
-
-    %% ========================================
-    %% ADMIN PATH
-    %% ========================================
-    CekRole -- Ya --> AdminDash[Masuk Admin Dashboard]
-    AdminDash --> CekMenuUM{Menu User Management?}
-
-    CekMenuUM -- Ya --> ListUser[Lihat Daftar User]
-    ListUser --> CekPending{Ada User Pending?}
-    CekPending -- Tidak --> AdminDash
-    CekPending -- Ya --> ProsesApproval[[Proses Approval User]]
-    ProsesApproval --> AdminDash
-
-    CekMenuUM -- Tidak --> CekMenuVE{Menu Visual Editor?}
-    CekMenuVE -- Tidak --> CekPreview{Preview Tour?}
-    CekPreview -- Ya --> TourAdmin[Buka Virtual Tour sebagai Admin]
-    TourAdmin --> AdminDash
-    CekPreview -- Tidak --> AdminDash
-
-    CekMenuVE -- Ya --> BukaEditor[Buka CMS Editor]
-    BukaEditor --> CekAksiTambah{Tambah Data?}
-
-    CekAksiTambah -- Ya --> ProsesTambah[[Proses Tambah Data]]
-    ProsesTambah --> SimpanDraft[Simpan ke Draft]
-
-    CekAksiTambah -- Tidak --> CekAksiEdit{Edit Data?}
-    CekAksiEdit -- Ya --> ProsesEdit[[Proses Edit Data]]
-    ProsesEdit --> SimpanDraft
-
-    CekAksiEdit -- Tidak --> CekAksiHapus{Hapus Data?}
-    CekAksiHapus -- Ya --> ProsesHapus[[Proses Hapus Data]]
-    ProsesHapus --> SimpanDraft
-
-    CekAksiHapus -- Tidak --> CekAksiLink{Edit Hotspot?}
-    CekAksiLink -- Ya --> ProsesLink[[Proses Kelola Hotspot]]
-    ProsesLink --> SimpanDraft
-    CekAksiLink -- Tidak --> BukaEditor
-
-    SimpanDraft --> CekReview{Review Perubahan?}
-    CekReview -- Tidak --> BukaEditor
-    CekReview -- Ya --> LihatDiff[Lihat Pending Changes]
-    LihatDiff --> CekPublish{Publikasikan?}
-    CekPublish -- Tidak --> BukaEditor
-    CekPublish -- Ya --> ProsesPublish[[Proses Publikasi]]
-    ProsesPublish --> AdminDash
-
-    %% ========================================
-    %% PEGAWAI PATH
-    %% ========================================
-    CekRole -- Tidak --> CekStatusAkun{Status Akun Aktif?}
-    CekStatusAkun -- Tidak --> HalamanPending[Tampilkan Halaman Menunggu]
-    HalamanPending --> Selesai
-
-    CekStatusAkun -- Ya --> PegawaiDash[Masuk Dashboard Pegawai]
-    PegawaiDash --> LoadSemuaArea[Memuat Seluruh Area]
-    LoadSemuaArea --> InteraksiPetaPegawai[Interaksi dengan Peta]
-
-    InteraksiPetaPegawai --> CekMarkerPegawai{Marker Dipilih?}
-    CekMarkerPegawai -- Tidak --> EksplorasiPegawai[Eksplorasi Peta]
-    EksplorasiPegawai --> CekLogoutPegawai{Logout?}
-    CekLogoutPegawai -- Ya --> HalamanLogin
-    CekLogoutPegawai -- Tidak --> PegawaiDash
-
-    CekMarkerPegawai -- Ya --> InfoPegawai[Lihat Informasi Area]
-    InfoPegawai --> CekTourPegawai{Masuk Virtual Tour?}
-    CekTourPegawai -- Tidak --> EksplorasiPegawai
-
-    CekTourPegawai -- Ya --> ViewerPegawai[Buka 360 Viewer]
-    ViewerPegawai --> CekHotspotPegawai{Hotspot Dipilih?}
-    CekHotspotPegawai -- Ya --> PindahScenePegawai[Pindah Scene]
-    PindahScenePegawai --> ViewerPegawai
-
-    CekHotspotPegawai -- Tidak --> CekInfoSpotPegawai{Info Spot Dipilih?}
-    CekInfoSpotPegawai -- Ya --> TampilInfoPegawai[Tampilkan Informasi]
-    TampilInfoPegawai --> ViewerPegawai
-    CekInfoSpotPegawai -- Tidak --> CekKembaliPegawai{Kembali ke Peta?}
-    CekKembaliPegawai -- Ya --> PegawaiDash
-    CekKembaliPegawai -- Tidak --> ViewerPegawai
-```
 </details>
 
-<details>
+<details open>
 <summary><b>2. Use Case Diagram</b></summary>
 
 Diagram ini memperlihatkan pemisahan akses fitur berdasarkan peran/role (Guest, Pegawai, Admin, Super Admin).
 
-```mermaid
-usecaseDiagram
-    actor Guest as "Guest (Public)"
-    actor Pegawai as "Pegawai"
-    actor Admin as "Admin"
-    actor SuperAdmin as "Super Admin"
+![Use Case Diagram](docs/Use%20case%20diagram.png)
 
-    Guest <|-- Pegawai
-    Pegawai <|-- Admin
-    Admin <|-- SuperAdmin
-
-    package "Semen Padang Virtual Tour" {
-        usecase "Melihat Peta Area Publik" as UC1
-        usecase "Eksplorasi Panorama 360" as UC2
-        usecase "Melihat InfoSpot" as UC3
-        usecase "Melihat Area Terbatas (Restricted)" as UC4
-
-        usecase "Login ke Sistem" as UC5
-        usecase "Mengelola Draft Area" as UC6
-        usecase "Mengunggah Scene 360" as UC7
-        usecase "Membuat Link / Hotspot" as UC8
-        usecase "Melihat Pending Changes (Preview)" as UC9
-        
-        usecase "Mem-publish Perubahan" as UC10
-        usecase "Manajemen Pengguna (Approve/Reject)" as UC11
-    }
-
-    Guest --> UC1
-    Guest --> UC2
-    Guest --> UC3
-
-    Pegawai --> UC4
-    Pegawai --> UC5
-
-    Admin --> UC6
-    Admin --> UC7
-    Admin --> UC8
-    Admin --> UC9
-
-    SuperAdmin --> UC10
-    SuperAdmin --> UC11
-```
 </details>
 
 <details>
