@@ -291,7 +291,7 @@ Menjabarkan proses `[[Jalankan Eksplorasi Virtual Tour]]` saat pengguna berinter
 
 ```mermaid
 flowchart TD
-    Start([Mulai Sub-proses]) --> AmbilData[Ambil Data Area dan Scene]
+    Start([Mulai]) --> AmbilData[Ambil Data Area dan Scene]
     AmbilData --> AksesDB[(Database Live)]
     AksesDB --> TampilPeta[/Tampilkan Peta Interaktif/]
 
@@ -299,7 +299,7 @@ flowchart TD
     AksiPeta --> CekMarker{Marker Dipilih?}
 
     CekMarker -- Tidak --> CekKeluar{Keluar Aplikasi?}
-    CekKeluar -- Ya --> EndTur([Selesai Sub-proses])
+    CekKeluar -- Ya --> EndTur([Selesai])
     CekKeluar -- Tidak --> TampilPeta
 
     CekMarker -- Ya --> TampilInfo[/Tampilkan Info Area/]
@@ -329,7 +329,7 @@ Menjabarkan proses `[[Jalankan Manajemen Editor]]` saat Admin mengelola konten d
 
 ```mermaid
 flowchart TD
-    Start([Mulai Sub-proses]) --> TampilMenu[/Tampilkan Menu CMS/]
+    Start([Mulai]) --> TampilMenu[/Tampilkan Menu CMS/]
     TampilMenu --> PilihAksi[/Input Pilihan Menu/]
     PilihAksi --> CekTambah{Tambah Data?}
 
@@ -349,7 +349,7 @@ flowchart TD
     CekLink -- Tidak --> CekPublish{Publish Perubahan?}
     CekPublish -- Tidak --> CekKeluar{Keluar Editor?}
     CekKeluar -- Tidak --> TampilMenu
-    CekKeluar -- Ya --> EndAdmin([Selesai Sub-proses])
+    CekKeluar -- Ya --> EndAdmin([Selesai])
 
     CekPublish -- Ya --> Verifikasi[Validasi Checksum Data]
     Verifikasi --> CekValid{Data Valid?}
