@@ -21,12 +21,12 @@
 
 **Semen Padang Virtual Tour** adalah aplikasi web interaktif yang memungkinkan pengguna untuk menjelajahi area PT Semen Padang secara virtual melalui gambar panorama 360°. Aplikasi ini menggabungkan:
 
-- **Peta Interaktif** - Navigasi lokasi berbasis Leaflet dengan penanda dinamis dan kontrol *layer*.
-- **360° Viewer** - Pengalaman imersif menggunakan Marzipano dengan navigasi *hotspot*.
+- **Peta Interaktif** - Navigasi lokasi berbasis Leaflet dengan penanda dinamis dan kontrol _layer_.
+- **360° Viewer** - Pengalaman imersif menggunakan Marzipano dengan navigasi _hotspot_.
 - **Hierarchical Areas** - Struktur area bertingkat (Level 1 → Level 2 → Level 3+).
 - **Visual Editor** - Panel admin berbasis React untuk kemudahan manajemen konten.
-- **Draft & Publish Workflow** - Sistem peninjauan (*review*) perubahan sebelum dipublikasikan.
-- **Auto-Linking** - Sistem navigasi otomatis antar *scene* berdasarkan kedekatan jarak GPS.
+- **Draft & Publish Workflow** - Sistem peninjauan (_review_) perubahan sebelum dipublikasikan.
+- **Auto-Linking** - Sistem navigasi otomatis antar _scene_ berdasarkan kedekatan jarak GPS.
 
 ---
 
@@ -118,14 +118,14 @@ php artisan storage:link
 
 Buka **3 terminal terpisah** dan jalankan perintah berikut secara bersamaan:
 
-| Terminal | Perintah                 | Fungsi                   |
-| -------- | ------------------------ | ------------------------ |
-| **1**    | `npm run dev`            | Menjalankan Frontend server (Vite) |
+| Terminal | Perintah                 | Fungsi                               |
+| -------- | ------------------------ | ------------------------------------ |
+| **1**    | `npm run dev`            | Menjalankan Frontend server (Vite)   |
 | **2**    | `php artisan serve`      | Menjalankan Backend server (Laravel) |
-| **3**    | `php artisan queue:work` | Memproses background job (Queue) |
+| **3**    | `php artisan queue:work` | Memproses background job (Queue)     |
 
 > [!IMPORTANT]
-> **Terminal 3 WAJIB DIJALANKAN!** Tanpa adanya *queue worker*, proses *upload* gambar panorama tidak akan berfungsi karena sistem memproses gambar di *background*.
+> **Terminal 3 WAJIB DIJALANKAN!** Tanpa adanya _queue worker_, proses _upload_ gambar panorama tidak akan berfungsi karena sistem memproses gambar di _background_.
 
 ### 7. Akses Aplikasi
 
@@ -137,7 +137,7 @@ Buka browser dan kunjungi: **http://127.0.0.1:8000**
 
 ### 1. Konfigurasi Environment
 
-Edit `.env` dan sesuaikan untuk environment *production*:
+Edit `.env` dan sesuaikan untuk environment _production_:
 
 ```ini
 APP_ENV=production
@@ -167,7 +167,7 @@ composer install --optimize-autoloader --no-dev
 
 ### 3. Konfigurasi Nginx
 
-Contoh konfigurasi *virtual host* Nginx:
+Contoh konfigurasi _virtual host_ Nginx:
 
 ```nginx
 server {
@@ -218,7 +218,7 @@ sudo supervisorctl start semen-padang-worker:*
 
 ### 5. Set Permissions (Hak Akses)
 
-Berikan hak akses yang sesuai untuk folder *storage* dan *cache*:
+Berikan hak akses yang sesuai untuk folder _storage_ dan _cache_:
 
 ```bash
 sudo chown -R www-data:www-data /var/www/semen-padang-vr
@@ -232,14 +232,141 @@ sudo chmod -R 775 /var/www/semen-padang-vr/bootstrap/cache
 
 Berikut adalah diagram-diagram arsitektur dan alur kerja aplikasi untuk memberikan gambaran menyeluruh terhadap sistem Semen Padang Virtual Tour:
 
-<details open>
-<summary><b>1. Flowchart Sistem Terintegrasi</b></summary>
+<details>
+<summary><b>1. Flowchart Sistem Terintegrasi (ISO 5807 Compliant)</b></summary>
 
-![Flowchart](docs/erd.png)
+**Informasi Dokumen:**
+
+- **Judul:** Alur Kerja Sistem Semen Padang Virtual Tour
+- **Pembuat:** Tim Pengembang
+- **Versi:** 2.0 (ISO 5807 Standardized)
+
+**Legenda Simbol (Berdasarkan ISO 5807):**
+
+- `([ Oval ])` = Terminator (Awal/Akhir)
+- `[ Persegi Panjang ]` = Process (Instruksi/Pemrosesan Data)
+- `{ Belah Ketupat }` = Decision (Percabangan Ya/Tidak)
+- `[/ Jajar Genjang /]` = Input/Output (Input user atau tampilan ke layar)
+- `[( Silinder )]` = Database (Penyimpanan data)
+- `[[ Persegi dgn Garis Vertikal ]]` = Predefined Process (Sub-rutin)
+
+---
+
+### 1.1 Flowchart Navigasi & Login Utama
+
+Menunjukkan alur penentuan hak akses pengguna saat pertama kali membuka aplikasi.
+
+```mermaid
+flowchart TD
+    Start([Mulai]) --> TampilUtama[/Tampilkan Halaman Utama/]
+    TampilUtama --> CekLogin{Pilih Login?}
+
+    CekLogin -- Tidak --> PanggilTur[[Jalankan Eksplorasi Virtual Tour]]
+    PanggilTur --> EndUtama([Selesai])
+
+    CekLogin -- Ya --> TampilLogin[/Tampilkan Form Login/]
+    TampilLogin --> InputKredensial[/Input Email dan Password/]
+    InputKredensial --> Validasi{Data Valid?}
+
+    Validasi -- Tidak --> TampilError[/Tampilkan Pesan Error/]
+    TampilError --> TampilLogin
+
+    Validasi -- Ya --> CekRole{Role Admin?}
+
+    CekRole -- Tidak --> CekAktif{Status Aktif?}
+    CekAktif -- Tidak --> TampilPending[/Tampilkan Halaman Menunggu/]
+    TampilPending --> EndUtama
+    CekAktif -- Ya --> TampilDashPegawai[/Tampilkan Dashboard Pegawai/]
+    TampilDashPegawai --> PanggilTurPegawai[[Jalankan Eksplorasi Virtual Tour]]
+    PanggilTurPegawai --> EndUtama
+
+    CekRole -- Ya --> TampilDashAdmin[/Tampilkan Dashboard Admin/]
+    TampilDashAdmin --> PanggilManajemen[[Jalankan Manajemen Editor]]
+    PanggilManajemen --> EndUtama
+```
+
+### 1.2 Flowchart Eksplorasi Virtual Tour (Guest & Pegawai)
+
+Menjabarkan proses `[[Jalankan Eksplorasi Virtual Tour]]` saat pengguna berinteraksi dengan peta dan panorama 360.
+
+```mermaid
+flowchart TD
+    Start([Mulai Sub-proses]) --> AmbilData[Ambil Data Area dan Scene]
+    AmbilData --> AksesDB[(Database Live)]
+    AksesDB --> TampilPeta[/Tampilkan Peta Interaktif/]
+
+    TampilPeta --> AksiPeta[/Input Interaksi Peta/]
+    AksiPeta --> CekMarker{Marker Dipilih?}
+
+    CekMarker -- Tidak --> CekKeluar{Keluar Aplikasi?}
+    CekKeluar -- Ya --> EndTur([Selesai Sub-proses])
+    CekKeluar -- Tidak --> TampilPeta
+
+    CekMarker -- Ya --> TampilInfo[/Tampilkan Info Area/]
+    TampilInfo --> CekMasuk{Masuk Viewer 360?}
+
+    CekMasuk -- Tidak --> TampilPeta
+    CekMasuk -- Ya --> MuatScene[Ambil Data Panorama 360]
+    MuatScene --> Tampil360[/Tampilkan 360 Viewer/]
+
+    Tampil360 --> Aksi360[/Input Interaksi 360/]
+    Aksi360 --> CekHotspot{Hotspot Dipilih?}
+
+    CekHotspot -- Ya --> MuatScene
+    CekHotspot -- Tidak --> CekInfoSpot{Info Spot Dipilih?}
+
+    CekInfoSpot -- Ya --> TampilInfoSpot[/Tampilkan Teks Informasi/]
+    TampilInfoSpot --> Tampil360
+
+    CekInfoSpot -- Tidak --> CekKembali{Kembali ke Peta?}
+    CekKembali -- Tidak --> Tampil360
+    CekKembali -- Ya --> TampilPeta
+```
+
+### 1.3 Flowchart Manajemen CMS (Admin & Super Admin)
+
+Menjabarkan proses `[[Jalankan Manajemen Editor]]` saat Admin mengelola konten draf hingga dipublikasikan.
+
+```mermaid
+flowchart TD
+    Start([Mulai Sub-proses]) --> TampilMenu[/Tampilkan Menu CMS/]
+    TampilMenu --> PilihAksi[/Input Pilihan Menu/]
+    PilihAksi --> CekTambah{Tambah Data?}
+
+    CekTambah -- Ya --> TampilForm[/Tampilkan Form Tambah/]
+    TampilForm --> InputData[/Input Metadata dan File/]
+    InputData --> SimpanData[Proses Penyimpanan Data]
+    SimpanData --> SimpanDB1[(Tabel Draft)]
+    SimpanDB1 --> TampilMenu
+
+    CekTambah -- Tidak --> CekLink{Kelola Hotspot?}
+    CekLink -- Ya --> PilihSumber[/Pilih Scene Sumber/]
+    PilihSumber --> PilihTarget[/Pilih Scene Tujuan/]
+    PilihTarget --> BuatRelasi[Kalkulasi Koordinat Hotspot]
+    BuatRelasi --> SimpanDB2[(Tabel Link Draft)]
+    SimpanDB2 --> TampilMenu
+
+    CekLink -- Tidak --> CekPublish{Publish Perubahan?}
+    CekPublish -- Tidak --> CekKeluar{Keluar Editor?}
+    CekKeluar -- Tidak --> TampilMenu
+    CekKeluar -- Ya --> EndAdmin([Selesai Sub-proses])
+
+    CekPublish -- Ya --> Verifikasi[Validasi Checksum Data]
+    Verifikasi --> CekValid{Data Valid?}
+
+    CekValid -- Tidak --> TampilErrorSync[/Tampilkan Error Stale Data/]
+    TampilErrorSync --> TampilMenu
+
+    CekValid -- Ya --> SalinData[Pindahkan Data Draft ke Live]
+    SalinData --> SimpanDBLive[(Tabel Live)]
+    SimpanDBLive --> HapusDraft[Bersihkan Workspace Draft]
+    HapusDraft --> TampilSukses[/Tampilkan Notifikasi Sukses/]
+    TampilSukses --> EndAdmin
+```
 
 </details>
 
-<details open>
+<details>
 <summary><b>2. Use Case Diagram</b></summary>
 
 Diagram ini memperlihatkan pemisahan akses fitur berdasarkan peran/role (Guest, Pegawai, Admin, Super Admin).
@@ -251,7 +378,7 @@ Diagram ini memperlihatkan pemisahan akses fitur berdasarkan peran/role (Guest, 
 <details>
 <summary><b>3. Class Diagram (Arsitektur MVC & Service)</b></summary>
 
-Diagram ini menunjukkan bagaimana pemisahan *Live Models* dan *Draft Models* dikelola menggunakan *Service Class* dalam pola MVC (*Model-View-Controller*).
+Diagram ini menunjukkan bagaimana pemisahan _Live Models_ dan _Draft Models_ dikelola menggunakan _Service Class_ dalam pola MVC (_Model-View-Controller_).
 
 ```mermaid
 classDiagram
@@ -305,12 +432,13 @@ classDiagram
     DraftService ..> AreaDraft : creates/updates
     PublishService ..> Area : creates/updates dari Draft
 ```
+
 </details>
 
 <details>
 <summary><b>4. Sequence Diagram (Publishing Workflow)</b></summary>
 
-Diagram sekuens ini menggambarkan proses kompleks sistem ketika Super Admin melakukan *Publish* dari *Draft* (Bayangan) ke *Live* (Publik).
+Diagram sekuens ini menggambarkan proses kompleks sistem ketika Super Admin melakukan _Publish_ dari _Draft_ (Bayangan) ke _Live_ (Publik).
 
 ```mermaid
 sequenceDiagram
@@ -324,11 +452,11 @@ sequenceDiagram
     EditorController->>DraftService: getPendingChanges()
     DraftService-->>EditorController: list of dirty drafts
     EditorController->>PublishService: publish(rootDraft)
-    
+
     activate PublishService
     PublishService->>Database: BEGIN TRANSACTION
     PublishService->>Database: Verifikasi Checksum Live vs Draft
-    
+
     alt Checksum Mismatch (Stale)
         PublishService->>Database: ROLLBACK
         PublishService-->>EditorController: Error (Stale Data)
@@ -343,12 +471,13 @@ sequenceDiagram
     end
     deactivate PublishService
 ```
+
 </details>
 
 <details>
 <summary><b>5. Activity Diagram (Upload Scene & Auto-Linking)</b></summary>
 
-Diagram aktivitas ini menggambarkan proses di balik layar (*background queue*) saat Admin mengunggah gambar 360°.
+Diagram aktivitas ini menggambarkan proses di balik layar (_background queue_) saat Admin mengunggah gambar 360°.
 
 ```mermaid
 stateDiagram-v2
@@ -356,13 +485,13 @@ stateDiagram-v2
     ValidasiFile --> EkstrakEXIF: Validasi Ekstensi & Ukuran
     EkstrakEXIF --> SimpanDraft: Ambil Lat/Lng GPS via GeoService
     SimpanDraft --> BackgroundJob: Simpan Data ke SceneDraft
-    
+
     state BackgroundJob {
         [*] --> ProsesImage
         ProsesImage --> GenerateTiles: Konversi ke Marzipano Tiles
         GenerateTiles --> [*]
     }
-    
+
     BackgroundJob --> AutoLink: Job Queue Selesai
     AutoLink --> HitungJarak: AutoLinkService mencari SceneDraft terdekat
     HitungJarak --> BuatLink: Jika jarak < radius, buat LinkDraft otomatis
@@ -370,18 +499,29 @@ stateDiagram-v2
 ```
 </details>
 
+<details open>
+<summary><b>6. Entity Relationship Diagram (ERD)</b></summary>
+
+Diagram ini memperlihatkan struktur database, relasi antar tabel (termasuk skema Live dan Draft), serta tipe data yang digunakan dalam sistem Semen Padang Virtual Tour.
+
+![Entity Relationship Diagram](docs/erd.png)
+
+</details>
+
 ---
 
 ## 🔐 Pengaturan Akun Admin
 
-Setelah registrasi user pertama kali di aplikasi, ubah perannya menjadi *Super Admin* melalui database:
+Setelah registrasi user pertama kali di aplikasi, ubah perannya menjadi _Super Admin_ melalui database:
 
 **Via SQL:**
+
 ```sql
 UPDATE users SET role = 'super_admin', status = 'active' WHERE id = 1;
 ```
 
 **Atau via Laravel Tinker:**
+
 ```bash
 php artisan tinker
 >>> \App\Models\User::find(1)->update(['role' => 'super_admin', 'status' => 'active']);
@@ -391,13 +531,13 @@ php artisan tinker
 
 ## 🔧 Pemecahan Masalah (Troubleshooting)
 
-| Masalah                       | Solusi                                     |
-| ----------------------------- | ------------------------------------------ |
-| **Gambar tidak muncul**       | Jalankan `php artisan storage:link` untuk membuat symbolic link folder penyimpanan. |
-| **Upload gambar tidak jalan** | Pastikan *queue worker* (`php artisan queue:work`) sedang berjalan. |
-| **Error "could not find driver"** | Install ekstensi `php-pgsql` dan *restart* service PHP-FPM Anda. |
-| **PostGIS function not found** | Jalankan `CREATE EXTENSION postgis;` di database Anda. |
-| **Vite manifest not found**   | Jalankan `npm run build` untuk mem-build aset frontend (atau `npm run dev` di lokal). |
+| Masalah                           | Solusi                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| **Gambar tidak muncul**           | Jalankan `php artisan storage:link` untuk membuat symbolic link folder penyimpanan.   |
+| **Upload gambar tidak jalan**     | Pastikan _queue worker_ (`php artisan queue:work`) sedang berjalan.                   |
+| **Error "could not find driver"** | Install ekstensi `php-pgsql` dan _restart_ service PHP-FPM Anda.                      |
+| **PostGIS function not found**    | Jalankan `CREATE EXTENSION postgis;` di database Anda.                                |
+| **Vite manifest not found**       | Jalankan `npm run build` untuk mem-build aset frontend (atau `npm run dev` di lokal). |
 
 ---
 
